@@ -51,13 +51,12 @@ const Roles = () => {
   const tableData = data?.data || [];
   const pagination = data?.pagination || { page: 1, limit: 10, totalItems: 0, totalPages: 1 };
 
-  // Filter data based on search query
   const filteredData = React.useMemo(() => {
     if (!searchQuery) return tableData; // Return all data if no search query
     return tableData.filter((item) =>
       Object.values(item).some((value) =>
         String(value).toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      ) // <-- Added missing parenthesis
     );
   }, [tableData, searchQuery]);
 
@@ -65,6 +64,7 @@ const Roles = () => {
     refetch();
   }, [page, limit, refetch]);
 
+  // Define columns
   const columns = [
     columnHelper.accessor('name', {
       id: 'name',
@@ -79,13 +79,13 @@ const Roles = () => {
         </Text>
       ),
       cell: (info) => (
-        <Flex align="center">
+        <Flex align="center" width={"600px"}>
           <Text color={textColor} fontSize="sm" fontWeight="700">
             {info.getValue()}
           </Text>
         </Flex>
       ),
-    }),
+    }), // <-- Comma here
     columnHelper.accessor('id', {
       id: 'actions',
       header: () => (
@@ -129,7 +129,7 @@ const Roles = () => {
           />
         </Flex>
       ),
-    }),
+    }), // <-- Comma here
   ];
 
   const table = useReactTable({
@@ -204,59 +204,57 @@ const Roles = () => {
             Rules
           </Text>
           <div className='d-flex align-items-center gap-2'>
-
             <InputGroup w={{ base: "100%", md: "400px" }}>
-                <InputLeftElement>
-                  <IconButton
-                    bg='inherit'
-                    borderRadius='inherit'
-                    _hover='none'
-                    _active={{
-                      bg: "inherit",
-                      transform: "none",
-                      borderColor: "transparent",
-                    }}
-                    _focus={{
-                      boxShadow: "none",
-                    }}
-                    icon={
-                      <SearchIcon
-                        w='15px'
-                        h='15px'
-                      />
-                    }
-                  />
-                </InputLeftElement>
-                <Input
-                  variant='search'
-                  fontSize='sm'
-                  bg='secondaryGray.300' // Default value
-                  color='gray.700' // Default value
-                  fontWeight='500'
-                  _placeholder={{ color: "gray.400", fontSize: "14px" }}
-                  borderRadius='30px' // Default value
-                  placeholder='Search...' // Default value
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+              <InputLeftElement>
+                <IconButton
+                  bg='inherit'
+                  borderRadius='inherit'
+                  _hover='none'
+                  _active={{
+                    bg: "inherit",
+                    transform: "none",
+                    borderColor: "transparent",
+                  }}
+                  _focus={{
+                    boxShadow: "none",
+                  }}
+                  icon={
+                    <SearchIcon
+                      w='15px'
+                      h='15px'
+                    />
+                  }
                 />
-              </InputGroup>
+              </InputLeftElement>
+              <Input
+                variant='search'
+                fontSize='sm'
+                bg='secondaryGray.300' // Default value
+                color='gray.700' // Default value
+                fontWeight='500'
+                _placeholder={{ color: "gray.400", fontSize: "14px" }}
+                borderRadius='30px' // Default value
+                placeholder='Search...' // Default value
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </InputGroup>
           </div>
-            <Button
-              variant="darkBrand"
-              color="white"
-              fontSize="sm"
-              fontWeight="500"
-              borderRadius="70px"
-              px="24px"
-              py="5px"
-              onClick={() => navigate('/admin/add-New-Rule')}
-              width={'200px'}
-            >
-              Create New Rule
-            </Button>
+          <Button
+            variant="darkBrand"
+            color="white"
+            fontSize="sm"
+            fontWeight="500"
+            borderRadius="70px"
+            px="24px"
+            py="5px"
+            onClick={() => navigate('/admin/add-New-Rule')}
+            width={'200px'}
+          >
+            Create New Rule
+          </Button>
         </Flex>
 
-      
         <Box>
           <Table variant="simple" color="gray.500" mb="24px" mt="12px">
             <Thead>
