@@ -85,6 +85,7 @@ import Appointments from 'views/admin/appointments/Appointments';
 import PharmacyRequests from 'views/admin/pharmacy/PharmacyRequests';
 import EditCategory from 'views/admin/category/EditCategory';
 import EditBrand from 'views/admin/brand/EditBrand';
+import EditType from 'views/admin/productType/EditType';
 
 
 const routes = [
@@ -363,6 +364,22 @@ const routes = [
     path: '/add-product-types',
     icon: <Icon as={MdCategory} width="20px" height="20px" color="inherit" />,
     component: <AddType />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Product Types',
+    layout: '/admin',
+    path: '/add-product-types',
+    icon: <Icon as={MdCategory} width="20px" height="20px" color="inherit" />,
+    component: <AddType />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Product Types',
+    layout: '/admin',
+    path: '/edit-product-type/:id',
+    icon: <Icon as={MdCategory} width="20px" height="20px" color="inherit" />,
+    component: <EditType />,
     showInSidebar: false,
   },
   {

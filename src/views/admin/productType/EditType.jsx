@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -8,16 +8,29 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddTypeMutation } from "api/typeSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { useGetTypeQuery, useUpdateTypeMutation } from "api/typeSlice";
 import Swal from "sweetalert2";
 
-const AddType = () => {
-  const [enName, setEnName] = useState(""); // State for English name
-  const [arName, setArName] = useState(""); // State for Arabic name
-  const [addType, { isLoading }] = useAddTypeMutation(); // Mutation hook for adding a product type
-  const textColor = useColorModeValue("secondaryGray.900", "white");
+const EditType = () => {
+  const { id } = useParams(); // Get the product type ID from the URL
+  const { data: typeResponse, isLoading: isFetching, isError: fetchError } = useGetTypeQuery(id); // Fetch the product type data
+  const [updateType, { isLoading: isUpdating }] = useUpdateTypeMutation(); // Mutation hook for updating a product type
   const navigate = useNavigate();
+
+  // State for form fields
+  const [enName, setEnName] = useState("");
+  const [arName, setArName] = useState("");
+
+  const textColor = useColorModeValue("secondaryGray.900", "white");
+
+  // Populate the form with the existing data when the component mounts
+  useEffect(() => {
+    if (typeResponse?.data) {
+      setEnName(typeResponse.data.name); // Set the English name
+      setArName(typeResponse.data.translations.find((t) => t.languageId === "ar")?.name || ""); // Set the Arabic name
+    }
+  }, [typeResponse]);
 
   // Handle form submission
   const handleSend = async () => {
@@ -27,22 +40,26 @@ const AddType = () => {
     }
 
     const payload = {
-      name: enName, // English name
+     
+      name: enName, // Updated English name
       isActive: true, // Default to true
       translations: [
-        { languageId: "ar", name: arName }, // Arabic translation
+        { languageId: "ar", name: arName }, // Updated Arabic translation
       ],
     };
 
     try {
-      const response = await addType(payload).unwrap(); // Send data to the API
-      Swal.fire("Success!", "Product type added successfully.", "success");
+      const response = await updateType({id, type: payload}).unwrap(); // Send data to the API
+      Swal.fire("Success!", "Product type updated successfully.", "success");
       navigate("/admin/product-types"); // Redirect to the product types page
     } catch (error) {
-      console.error("Failed to add product type:", error);
-      Swal.fire("Error!", "Failed to add product type.", "error");
+      console.error("Failed to update product type:", error);
+      Swal.fire("Error!", "Failed to update product type.", "error");
     }
   };
+
+  if (isFetching) return <Text>Loading...</Text>;
+  if (fetchError) return <Text>Error loading product type data.</Text>;
 
   return (
     <div className="container add-admin-container w-100">
@@ -55,7 +72,7 @@ const AddType = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New Product Type
+            Edit Product Type
           </Text>
           <Button
             type="button"
@@ -113,9 +130,9 @@ const AddType = () => {
               px="24px"
               py="5px"
               onClick={handleSend}
-              isLoading={isLoading}
+              isLoading={isUpdating}
             >
-              Save
+              Save Changes
             </Button>
           </Flex>
         </form>
@@ -124,4 +141,4 @@ const AddType = () => {
   );
 };
 
-export default AddType;
+export default EditType;
