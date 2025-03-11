@@ -84,6 +84,7 @@ import Orders from 'views/admin/orders/Orders';
 import Appointments from 'views/admin/appointments/Appointments';
 import PharmacyRequests from 'views/admin/pharmacy/PharmacyRequests';
 import EditCategory from 'views/admin/category/EditCategory';
+import EditBrand from 'views/admin/brand/EditBrand';
 
 
 const routes = [
@@ -382,6 +383,16 @@ const routes = [
       <Icon as={TbBrandAdonisJs} width="20px" height="20px" color="inherit" />
     ),
     component: <AddBrand />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Brands',
+    layout: '/admin',
+    path: '/edit-brand/:id',
+    icon: (
+      <Icon as={TbBrandAdonisJs} width="20px" height="20px" color="inherit" />
+    ),
+    component: <EditBrand />,
     showInSidebar: false,
   },
   {

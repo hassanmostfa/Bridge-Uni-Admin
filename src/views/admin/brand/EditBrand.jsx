@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -10,19 +10,33 @@ import {
 } from "@chakra-ui/react";
 import { FaUpload } from "react-icons/fa6";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddBrandMutation } from "api/brandSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { useGetBrandQuery, useUpdateBrandMutation } from "api/brandSlice";
 import Swal from "sweetalert2";
 
-const AddBrand = () => {
-  const [enName, setEnName] = useState(""); // State for English name
-  const [arName, setArName] = useState(""); // State for Arabic name
-  const [image, setImage] = useState(null); // State for image file
-  const [isDragging, setIsDragging] = useState(false); // State for drag-and-drop
-  const [addBrand, { isLoading }] = useAddBrandMutation(); // Mutation hook for adding a brand
+const EditBrand = () => {
+  const { id } = useParams(); // Get the brand ID from the URL
+  const { data: brandResponse, isLoading: isFetching, isError: fetchError } = useGetBrandQuery(id); // Fetch the brand data
+  const [updateBrand, { isLoading: isUpdating }] = useUpdateBrandMutation(); // Mutation hook for updating a brand
+  const navigate = useNavigate();
+
+  // State for form fields
+  const [enName, setEnName] = useState("");
+  const [arName, setArName] = useState("");
+  const [image, setImage] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
-  const navigate = useNavigate();
+
+  // Populate the form with the existing data when the component mounts
+  useEffect(() => {
+    if (brandResponse?.data) {
+      setEnName(brandResponse.data.name); // Set the English name
+      setArName(brandResponse.data.translations.find((t) => t.languageId === "ar")?.name || ""); // Set the Arabic name
+      // Set the image if it exists (you may need to fetch the image URL from the API)
+    }
+  }, [brandResponse]);
 
   // Handle image upload
   const handleImageUpload = (files) => {
@@ -56,43 +70,48 @@ const AddBrand = () => {
 
   // Handle cancel action
   const handleCancel = () => {
-    setEnName("");
-    setArName("");
-    setImage(null);
+    navigate("/admin/brands"); // Navigate back to the brands list
   };
 
   // Handle form submission
   const handleSend = async () => {
-    if (!enName || !arName || !image) {
+    if (!enName || !arName) {
       Swal.fire("Error!", "Please fill all required fields.", "error");
       return;
     }
 
-    // Convert the image file to a base64 string
-    const reader = new FileReader();
-    reader.readAsDataURL(image);
-    reader.onloadend = async () => {
-      const base64Image = reader.result.split(",")[1]; // Remove the data URL prefix
-
-      const payload = {
-        name: enName, // English name
-        imageKey: base64Image, // Send the image as a base64 string
-        isActive: true, // Default to true
-        translations: [
-          { languageId: "ar", name: arName }, // Arabic translation
-        ],
-      };
-
-      try {
-        const response = await addBrand(payload).unwrap(); // Send data to the API
-        Swal.fire("Success!", "Brand added successfully.", "success");
-        navigate("/admin/brands"); // Redirect to the brands page
-      } catch (error) {
-        console.error("Failed to add brand:", error);
-        Swal.fire("Error!", "Failed to add brand.", "error");
-      }
+    const payload = {
+      id, // Include the brand ID for updating
+      name: enName, // English name
+      imageKey: image ? await convertImageToBase64(image) : brandResponse.data.imageKey, // Use existing image if no new image is uploaded
+      isActive: true, // Default to true
+      translations: [
+        { languageId: "ar", name: arName }, // Arabic translation
+      ],
     };
+
+    try {
+      const response = await updateBrand({ id, brand: payload }).unwrap(); // Send data to the API
+      Swal.fire("Success!", "Brand updated successfully.", "success");
+      navigate("/admin/brands"); // Redirect to the brands page
+    } catch (error) {
+      console.error("Failed to update brand:", error);
+      Swal.fire("Error!", "Failed to update brand.", "error");
+    }
   };
+
+  // Convert image file to base64
+  const convertImageToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  if (isFetching) return <Text>Loading...</Text>;
+  if (fetchError) return <Text>Error loading brand data.</Text>;
 
   return (
     <div className="container add-admin-container w-100">
@@ -105,7 +124,7 @@ const AddBrand = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New Brand
+            Edit Brand
           </Text>
           <Button
             type="button"
@@ -188,7 +207,7 @@ const AddBrand = () => {
                 onChange={handleFileInputChange}
               />
             </Button>
-            {image && (
+            {image ? (
               <Box
                 mt={4}
                 display={"flex"}
@@ -203,7 +222,22 @@ const AddBrand = () => {
                   borderRadius="md"
                 />
               </Box>
-            )}
+            ) : brandResponse?.data?.imageKey ? (
+              <Box
+                mt={4}
+                display={"flex"}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <img
+                  src={brandResponse.data.imageKey}
+                  alt="Brand Image"
+                  width={80}
+                  height={80}
+                  borderRadius="md"
+                />
+              </Box>
+            ) : null}
           </Box>
 
           {/* Action Buttons */}
@@ -220,9 +254,9 @@ const AddBrand = () => {
               px="24px"
               py="5px"
               onClick={handleSend}
-              isLoading={isLoading}
+              isLoading={isUpdating}
             >
-              Save
+              Save Changes
             </Button>
           </Flex>
         </form>
@@ -231,4 +265,4 @@ const AddBrand = () => {
   );
 };
 
-export default AddBrand;
+export default EditBrand;

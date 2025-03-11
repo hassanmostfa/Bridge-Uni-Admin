@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
+import { BrandApi } from "api/brandSlice";
 import { CategoryApi } from "api/categorySlice";
 import { pharmacyApi } from "api/pharmacySlice";
 import { roleApi } from "api/roleSlice";
@@ -12,7 +13,9 @@ export const store = configureStore({
     [apiService.reducerPath]: apiService.reducer,
     [roleApi.reducerPath]: roleApi.reducer,
     [pharmacyApi.reducerPath]: pharmacyApi.reducer,
-    [CategoryApi.reducerPath]:CategoryApi.reducer
+    [CategoryApi.reducerPath]:CategoryApi.reducer,
+    [BrandApi.reducerPath]:BrandApi.reducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -20,6 +23,7 @@ export const store = configureStore({
       roleApi.middleware,
       pharmacyApi.middleware,
       CategoryApi.middleware,
+      BrandApi.middleware,
     ),
 });
 
