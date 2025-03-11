@@ -83,6 +83,7 @@ import EditPharmacy from 'views/admin/pharmacy/EditPharmacy';
 import Orders from 'views/admin/orders/Orders';
 import Appointments from 'views/admin/appointments/Appointments';
 import PharmacyRequests from 'views/admin/pharmacy/PharmacyRequests';
+import EditCategory from 'views/admin/category/EditCategory';
 
 
 const routes = [
@@ -286,6 +287,21 @@ const routes = [
       />
     ),
     component: <AddCategory />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Categories',
+    layout: '/admin',
+    path: '/edit-category/:id',
+    icon: (
+      <Icon
+        as={BiSolidCategoryAlt}
+        width="20px"
+        height="20px"
+        color="inherit"
+      />
+    ),
+    component: <EditCategory />,
     showInSidebar: false,
   },
   {

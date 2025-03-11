@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -14,20 +14,40 @@ import {
 } from "@chakra-ui/react";
 import { FaUpload } from "react-icons/fa6";
 import { IoMdArrowBack, IoIosArrowDown } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddCategoryMutation } from "api/categorySlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { useGetCategoriesQuery, useUpdateCategoryMutation } from "api/categorySlice";
 import Swal from "sweetalert2";
 
-const AddCategory = () => {
-  const [enName, setEnName] = useState(""); // State for English name
-  const [arName, setArName] = useState(""); // State for Arabic name
-  const [image, setImage] = useState(null); // State for image file
-  const [isDragging, setIsDragging] = useState(false); // State for drag-and-drop
-  const [selectedCategoryType, setSelectedCategoryType] = useState("Select Category Type"); // State for category type
-  const [addCategory, { isLoading }] = useAddCategoryMutation(); // Mutation hook for adding a category
+const EditCategory = () => {
+  const { id } = useParams(); // Get the category ID from the URL
+  const { data: categoriesResponse } = useGetCategoriesQuery(); // Fetch all categories
+  const [updateCategory, { isLoading }] = useUpdateCategoryMutation(); // Mutation hook for updating a category
+  const navigate = useNavigate();
+
+  // State for form fields
+  const [enName, setEnName] = useState("");
+  const [arName, setArName] = useState("");
+  const [image, setImage] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedCategoryType, setSelectedCategoryType] = useState("Select Category Type");
+
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
-  const navigate = useNavigate();
+
+  // Find the category to edit based on the ID
+  const categoryToEdit = categoriesResponse?.data?.data.find(
+    (category) => category.id === id
+  );
+
+  // Populate the form with the existing data when the component mounts
+  useEffect(() => {
+    if (categoryToEdit) {
+      setEnName(categoryToEdit.translations.find((t) => t.languageId === "en")?.name || "");
+      setArName(categoryToEdit.translations.find((t) => t.languageId === "ar")?.name || "");
+      setSelectedCategoryType(categoryToEdit.categoryType || "Select Category Type");
+      // Set the image if it exists (you may need to fetch the image URL from the API)
+    }
+  }, [categoryToEdit]);
 
   // Handle image upload
   const handleImageUpload = (files) => {
@@ -61,10 +81,7 @@ const AddCategory = () => {
 
   // Handle cancel action
   const handleCancel = () => {
-    setEnName("");
-    setArName("");
-    setImage(null);
-    setSelectedCategoryType("Select Category Type");
+    navigate("/admin/categories"); // Navigate back to the categories list
   };
 
   // Handle category type selection
@@ -74,35 +91,39 @@ const AddCategory = () => {
 
   // Handle form submission
   const handleSend = async () => {
-    if (!enName || !arName || !image || selectedCategoryType === "Select Category Type") {
+    if (!enName || !arName || !selectedCategoryType) {
       Swal.fire("Error!", "Please fill all required fields.", "error");
       return;
     }
 
-    // Convert the image file to a base64 string
-    const reader = new FileReader();
-    reader.readAsDataURL(image);
-    reader.onloadend = async () => {
-      const base64Image = reader.result.split(",")[1]; // Remove the data URL prefix
-
-      const payload = {
-        image: base64Image, // Send the image as a base64 string
-        translations: [
-          { languageId: "en", name: enName }, // English translation
-          { languageId: "ar", name: arName }, // Arabic translation
-        ],
-        // categoryType: selectedCategoryType, // Include the category type
-      };
-
-      try {
-        const response = await addCategory(payload).unwrap(); // Send data to the API
-        Swal.fire("Success!", "Category added successfully.", "success");
-        navigate("/admin/categories"); // Redirect to the categories page
-      } catch (error) {
-        console.error("Failed to add category:", error);
-        Swal.fire("Error!", "Failed to add category.", "error");
-      }
+    const payload = {
+    
+      image: image ? await convertImageToBase64(image) : categoryToEdit.image, // Use existing image if no new image is uploaded
+      translations: [
+        { languageId: "en", name: enName },
+        { languageId: "ar", name: arName },
+      ],
+      // categoryType: selectedCategoryType,
     };
+
+    try {
+      const response = await updateCategory({ id, category: payload }).unwrap(); // Send data to the API
+      Swal.fire("Success!", "Category updated successfully.", "success");
+      navigate("/admin/categories"); // Redirect to the categories page
+    } catch (error) {
+      console.error("Failed to update category:", error);
+      Swal.fire("Error!", "Failed to update category.", "error");
+    }
+  };
+
+  // Convert image file to base64
+  const convertImageToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   return (
@@ -116,7 +137,7 @@ const AddCategory = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New Category
+            Edit Category
           </Text>
           <Button
             type="button"
@@ -242,7 +263,7 @@ const AddCategory = () => {
                 onChange={handleFileInputChange}
               />
             </Button>
-            {image && (
+            {image ? (
               <Box
                 mt={4}
                 display={"flex"}
@@ -257,7 +278,22 @@ const AddCategory = () => {
                   borderRadius="md"
                 />
               </Box>
-            )}
+            ) : categoryToEdit?.image ? (
+              <Box
+                mt={4}
+                display={"flex"}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <img
+                  src={categoryToEdit.image}
+                  alt="Category Image"
+                  width={80}
+                  height={80}
+                  borderRadius="md"
+                />
+              </Box>
+            ) : null}
           </Box>
 
           {/* Action Buttons */}
@@ -276,7 +312,7 @@ const AddCategory = () => {
               onClick={handleSend}
               isLoading={isLoading}
             >
-              Save
+              Save Changes
             </Button>
           </Flex>
         </form>
@@ -285,4 +321,4 @@ const AddCategory = () => {
   );
 };
 
-export default AddCategory;
+export default EditCategory;
