@@ -86,6 +86,7 @@ import PharmacyRequests from 'views/admin/pharmacy/PharmacyRequests';
 import EditCategory from 'views/admin/category/EditCategory';
 import EditBrand from 'views/admin/brand/EditBrand';
 import EditType from 'views/admin/productType/EditType';
+import EditVariant from 'views/admin/variants/EditVariant';
 
 
 const routes = [
@@ -334,6 +335,13 @@ const routes = [
     layout: '/admin',
     path: '/add-variant',
     component: <AddVariant />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Variants',
+    layout: '/admin',
+    path: '/edit-variant/:id',
+    component: <EditVariant />,
     showInSidebar: false,
   },
   {

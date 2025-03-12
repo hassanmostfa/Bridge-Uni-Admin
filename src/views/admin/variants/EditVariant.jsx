@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -10,21 +10,60 @@ import {
   RadioGroup,
   Radio,
   Stack,
+  Spinner,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddVarientMutation } from "api/varientSlice";
+import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
+import { useGetVarientQuery, useUpdateVarientMutation } from "api/varientSlice";
 
-const AddVariant = () => {
+const EditVariant = () => {
+  const { id } = useParams(); // Get the variant ID from the URL
+  const { data: response, isLoading: isFetching, error: fetchError } = useGetVarientQuery(id); // Fetch existing variant data
+  const [updateVariant, { isLoading: isUpdating, error: updateError }] = useUpdateVarientMutation(); // Update mutation
+
   const [variantAr, setVariantAr] = useState("");
   const [variantEn, setVariantEn] = useState("");
   const [attributesCount, setAttributesCount] = useState(0);
   const [attributes, setAttributes] = useState([]);
   const [inputType, setInputType] = useState("dropdown"); // State for radio input selection
-  const [createVariant, { isLoading }] = useAddVarientMutation();
+
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const navigate = useNavigate();
+
+  // Populate form fields with existing data when variantData is fetched
+  useEffect(() => {
+    if (response?.data) {
+      const variantData = response.data;
+      setVariantEn(variantData.name);
+      setVariantAr(variantData.translations.find((t) => t.languageId === "ar")?.name || "");
+      setInputType(variantData.optionType.toLowerCase());
+      setAttributesCount(variantData.attributes.length);
+      setAttributes(
+        variantData.attributes.map((attr) => ({
+          id: attr.id, // Include the attribute ID for updates
+          enName: attr.value,
+          arName: attr.translations.find((t) => t.languageId === "ar")?.value || "",
+          options: attr.options || "", // Handle options if they exist
+        }))
+      );
+    }
+  }, [response]);
+
+  // Handle fetch errors
+  useEffect(() => {
+    if (fetchError) {
+      Swal.fire("Error!", "Failed to fetch variant data.", "error");
+      navigate("/admin/variants"); // Redirect to the variants list page
+    }
+  }, [fetchError, navigate]);
+
+  // Handle update errors
+  useEffect(() => {
+    if (updateError) {
+      Swal.fire("Error!", "Failed to update variant.", "error");
+    }
+  }, [updateError]);
 
   const handleAttributeChange = (index, field, value) => {
     const updatedAttributes = [...attributes];
@@ -38,17 +77,43 @@ const AddVariant = () => {
   const handleAttributesCountChange = (e) => {
     const count = parseInt(e.target.value, 10) || 0;
     setAttributesCount(count);
-    setAttributes(new Array(count).fill({ enName: "", arName: "" }));
+    setAttributes(new Array(count).fill({ enName: "", arName: "", options: "" }));
+  };
+
+  const validateForm = () => {
+    if (!variantEn || !variantAr) {
+      Swal.fire("Error!", "Variant names in English and Arabic are required.", "error");
+      return false;
+    }
+
+    for (let i = 0; i < attributes.length; i++) {
+      if (!attributes[i].enName || !attributes[i].arName) {
+        Swal.fire("Error!", `Attribute ${i + 1} names in English and Arabic are required.`, "error");
+        return false;
+      }
+
+      if (inputType !== "text" && !attributes[i].options) {
+        Swal.fire("Error!", `Attribute ${i + 1} options are required for ${inputType}.`, "error");
+        return false;
+      }
+    }
+
+    return true;
   };
 
   const handleSave = async () => {
-    const variantData = {
+    if (!validateForm()) return;
+
+    const updatedVariantData = {
+       // Include the variant ID for updating
       name: variantEn, // Use the English name as the main name
       optionType: inputType.toUpperCase(), // Convert to uppercase (e.g., "RADIO" or "DROPDOWN")
       numberOfAttributes: attributes.length,
       isActive: true, // Assuming the variant is active by default
       attributes: attributes.map((attr) => ({
+        id: attr.id, // Include the attribute ID for updates
         value: attr.enName, // Use the English name as the value
+        options: inputType !== "text" ? attr.options : null, // Include options if not text input
         translations: [
           {
             languageId: "ar",
@@ -63,16 +128,24 @@ const AddVariant = () => {
         },
       ],
     };
-  
+
     try {
-      const response = await createVariant(variantData).unwrap(); // Send data to the API
-      Swal.fire("Success!", "Variant added successfully.", "success");
+      const response = await updateVariant({id,varient:updatedVariantData}).unwrap(); // Send data to the API
+      Swal.fire("Success!", "Variant updated successfully.", "success");
       navigate("/admin/variants");
     } catch (error) {
-      console.error("Failed to add brand:", error);
-      Swal.fire("Error!", "Failed to add brand.", "error");
+      console.error("Failed to update variant:", error);
+      Swal.fire("Error!", "Failed to update variant.", "error");
     }
   };
+
+  if (isFetching) {
+    return (
+      <Flex justify="center" align="center" height="100vh">
+        <Spinner size="xl" />
+      </Flex>
+    ); // Show loading state while fetching data
+  }
 
   return (
     <div className="container add-admin-container w-100">
@@ -85,7 +158,7 @@ const AddVariant = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New Variant
+            Edit Variant
           </Text>
           <Button
             type="button"
@@ -142,6 +215,7 @@ const AddVariant = () => {
               <Stack direction="row">
                 <Radio value="dropdown">Dropdown</Radio>
                 <Radio value="radio">Radio</Radio>
+                <Radio value="text">Text</Radio>
               </Stack>
             </RadioGroup>
           </Box>
@@ -154,6 +228,7 @@ const AddVariant = () => {
             <Input
               type="number"
               placeholder="Enter number of attributes"
+              value={attributesCount}
               onChange={handleAttributesCountChange}
               min={0}
               mt={2}
@@ -210,33 +285,19 @@ const AddVariant = () => {
               </SimpleGrid>
 
               {/* Conditional Input Based on Selected Input Type */}
-              {inputType === "dropdown" && (
+              {inputType !== "text" && (
                 <Box mt={4}>
                   <Text color={textColor} fontSize="sm" fontWeight="700">
-                    Dropdown Options <span className="text-danger">*</span>
+                    {inputType === "dropdown" ? "Dropdown Options" : "Radio Options"} <span className="text-danger">*</span>
                   </Text>
                   <Input
                     type="text"
-                    placeholder="Enter dropdown options (comma-separated)"
+                    placeholder={`Enter ${inputType} options (comma-separated)`}
+                    value={attr.options || ""}
                     onChange={(e) =>
                       handleAttributeChange(index, "options", e.target.value)
                     }
-                    mt={2}
-                  />
-                </Box>
-              )}
-
-              {inputType === "radio" && (
-                <Box mt={4}>
-                  <Text color={textColor} fontSize="sm" fontWeight="700">
-                    Radio Options <span className="text-danger">*</span>
-                  </Text>
-                  <Input
-                    type="text"
-                    placeholder="Enter radio options (comma-separated)"
-                    onChange={(e) =>
-                      handleAttributeChange(index, "options", e.target.value)
-                    }
+                    required
                     mt={2}
                   />
                 </Box>
@@ -255,8 +316,10 @@ const AddVariant = () => {
               px="24px"
               py="5px"
               onClick={handleSave}
+              isLoading={isUpdating}
+              isDisabled={isFetching || isUpdating}
             >
-              Save
+              Save Changes
             </Button>
           </Flex>
         </form>
@@ -265,4 +328,4 @@ const AddVariant = () => {
   );
 };
 
-export default AddVariant;
+export default EditVariant;

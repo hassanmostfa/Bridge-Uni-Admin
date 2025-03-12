@@ -169,7 +169,7 @@ const Variants = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
-            onClick={() => navigate(`/admin/variant-attributes/${info.getValue()}`)} // View attributes action
+            onClick={() => navigate(`/admin/edit-variant/${info.getValue()}`)} // View attributes action
           />
         </Flex>
       ),
