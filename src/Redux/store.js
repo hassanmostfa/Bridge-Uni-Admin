@@ -6,6 +6,7 @@ import { pharmacyApi } from "api/pharmacySlice";
 import { roleApi } from "api/roleSlice";
 import { TypeApi } from "api/typeSlice";
 import { apiService } from "api/userSlice";
+import { VarientApi } from "api/varientSlice";
 
 // import { userApi, authReducer } from './userSlice';
 
@@ -17,6 +18,7 @@ export const store = configureStore({
     [CategoryApi.reducerPath]:CategoryApi.reducer,
     [BrandApi.reducerPath]:BrandApi.reducer,
     [TypeApi.reducerPath]:TypeApi.reducer,
+    [VarientApi.reducerPath]:VarientApi.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -27,6 +29,7 @@ export const store = configureStore({
       CategoryApi.middleware,
       BrandApi.middleware,
       TypeApi.middleware,
+      VarientApi.middleware,
     ),
 });
 
