@@ -31,28 +31,34 @@ import {
     const [data, setData] = React.useState([
       {
         id: 1,
-        name: 'Clinic A',
+        en_name: 'Clinic A',
+        ar_name: 'عيادة A',
         email: 'clinicA@example.com',
         password: '********', // Masked for security
-        locations: ['Location 1', 'Location 2'],
+        en_locations: ['Location 1', 'Location 2'],
+        ar_locations: ['موقع 1', 'موقع 2'],
         from: '09:00 AM',
         to: '05:00 PM',
       },
       {
         id: 2,
-        name: 'Clinic B',
+        en_name: 'Clinic B',
+        ar_name: 'عيادة B',
         email: 'clinicB@example.com',
         password: '********', // Masked for security
-        locations: ['Location 3'],
+        en_locations: ['Location 3'],
+        ar_locations: ['موقع 3'],
         from: '10:00 AM',
         to: '06:00 PM',
       },
       {
         id: 3,
-        name: 'Clinic C',
+        en_name: 'Clinic C',
+        ar_name: 'عيادة C',
         email: 'clinicC@example.com',
         password: '********', // Masked for security
-        locations: ['Location 4', 'Location 5'],
+        en_locations: ['Location 4', 'Location 5'],
+        ar_locations: ['موقع 4', 'موقع 5'],
         from: '08:00 AM',
         to: '04:00 PM',
       },
@@ -85,8 +91,8 @@ import {
           </Flex>
         ),
       }),
-      columnHelper.accessor('name', {
-        id: 'name',
+      columnHelper.accessor('en_name', {
+        id: 'en_name',
         header: () => (
           <Text
             justifyContent="space-between"
@@ -94,7 +100,25 @@ import {
             fontSize={{ sm: '10px', lg: '12px' }}
             color="gray.400"
           >
-            Name
+            En-Name
+          </Text>
+        ),
+        cell: (info) => (
+          <Text color={textColor}>
+            {info.getValue()}
+          </Text>
+        ),
+      }),
+      columnHelper.accessor('ar_name', {
+        id: 'ar_name',
+        header: () => (
+          <Text
+            justifyContent="space-between"
+            align="center"
+            fontSize={{ sm: '10px', lg: '12px' }}
+            color="gray.400"
+          >
+            Ar-Name
           </Text>
         ),
         cell: (info) => (
@@ -121,8 +145,8 @@ import {
           </Text>
         ),
       }),
-      columnHelper.accessor('locations', {
-        id: 'locations',
+      columnHelper.accessor('en_locations', {
+        id: 'en_locations',
         header: () => (
           <Text
             justifyContent="space-between"
@@ -130,7 +154,29 @@ import {
             fontSize={{ sm: '10px', lg: '12px' }}
             color="gray.400"
           >
-            Locations
+            En-Locations
+          </Text>
+        ),
+        cell: (info) => (
+          <Box>
+            {info.getValue().map((location, index) => (
+              <Text key={index} color={textColor}>
+                {location}
+              </Text>
+            ))}
+          </Box>
+        ),
+      }),
+      columnHelper.accessor('ar_locations', {
+        id: 'ar_locations',
+        header: () => (
+          <Text
+            justifyContent="space-between"
+            align="center"
+            fontSize={{ sm: '10px', lg: '12px' }}
+            color="gray.400"
+          >
+            Ar-Locations
           </Text>
         ),
         cell: (info) => (
