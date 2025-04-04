@@ -146,42 +146,6 @@ const AllCategories = () => {
       ),
       cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
     }),
-    columnHelper.accessor('category_type', {
-      id: 'category_type',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Category Type
-        </Text>
-      ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor('image', {
-      id: 'image',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Image
-        </Text>
-      ),
-      cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="Category Img"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
-        />
-      ),
-    }),
     columnHelper.accessor('id', {
       id: 'actions',
       header: () => (

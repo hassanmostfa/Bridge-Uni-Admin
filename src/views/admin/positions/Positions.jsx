@@ -27,25 +27,31 @@ import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
-const About = () => {
+const Positions = () => {
   const [data, setData] = React.useState([
     {
       id: 1,
-      textEN: 'About our company services',
-      textAR: 'حول خدمات شركتنا',
+      enPosition: 'Manager',
+      arPosition: 'مدير',
       image: 'https://via.placeholder.com/150',
+      out_link: 'https://linkout.com',
+      in_link: 'https://linkout.com',
     },
     {
       id: 2,
-      textEN: 'Our mission statement',
-      textAR: 'بيان مهمتنا',
+      enPosition: 'Developer',
+      arPosition: 'مطور',
       image: 'https://via.placeholder.com/150',
+      out_link: 'https://linkout.com',
+      in_link: 'https://linkout.com',
     },
     {
       id: 3,
-      textEN: 'Company values and vision',
-      textAR: 'قيم ورؤية الشركة',
+      enPosition: 'Designer',
+      arPosition: 'مصمم',
       image: 'https://via.placeholder.com/150',
+      out_link: 'https://linkout.com',
+      in_link: 'https://linkout.com',
     },
   ]);
 
@@ -74,8 +80,8 @@ const About = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('textEN', {
-      id: 'textEN',
+    columnHelper.accessor('enPosition', {
+      id: 'enPosition',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -83,13 +89,13 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Text (English)
+          Position (English)
         </Text>
       ),
       cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
     }),
-    columnHelper.accessor('textAR', {
-      id: 'textAR',
+    columnHelper.accessor('arPosition', {
+      id: 'arPosition',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -97,35 +103,13 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Text (Arabic)
+          Position (Arabic)
         </Text>
       ),
       cell: (info) => (
         <Text color={textColor} dir="rtl">
           {info.getValue()}
         </Text>
-      ),
-    }),
-    columnHelper.accessor('image', {
-      id: 'image',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Image
-        </Text>
-      ),
-      cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="About content"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
-        />
       ),
     }),
     columnHelper.accessor('actions', {
@@ -158,7 +142,7 @@ const About = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/edit-about/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/cms/edit-position/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -167,7 +151,7 @@ const About = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/view-about/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/cms/view-position/${info.row.original.id}`)}
           />
         </Flex>
       ),
@@ -201,7 +185,7 @@ const About = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            About Us Content
+            All Positions
           </Text>
           <Button
             variant="darkBrand"
@@ -211,11 +195,11 @@ const About = () => {
             borderRadius="70px"
             px="24px"
             py="5px"
-            onClick={() => navigate('/admin/cms/add-about')}
+            onClick={() => navigate('/admin/cms/add-position')}
             width={'200px'}
           >
             <PlusSquareIcon me="10px" />
-            Add New Content
+            Add New Position
           </Button>
         </Flex>
         <Box>
@@ -284,4 +268,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default Positions;

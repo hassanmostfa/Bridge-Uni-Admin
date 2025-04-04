@@ -20,13 +20,10 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import * as React from 'react';
-import { MdCancel, MdCheckCircle, MdOutlineError } from 'react-icons/md';
 import Card from 'components/card/Card';
-import Menu from 'components/menu/MainMenu';
 import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
-
 
 const columnHelper = createColumnHelper();
 
@@ -34,32 +31,24 @@ const Banner = () => {
   const [data, setData] = React.useState([
     {
       id: 1,
-      image:
-        'https://th.bing.com/th/id/OIP.4NebaoMBQ1I-_Sk9KLW0DQHaFz?w=220&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
-      title: 'ads',
-      out_link: 'https://linkout.com',
-      in_link: 'https://linkout.com',
+      image: 'https://th.bing.com/th/id/OIP.4NebaoMBQ1I-_Sk9KLW0DQHaFz?w=220&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
+      titleAR: 'إعلان',
+      titleEN: 'Ad',
     },
     {
       id: 2,
-      image:
-        'https://th.bing.com/th/id/OIP.4NebaoMBQ1I-_Sk9KLW0DQHaFz?w=220&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
-      title: 'ads2',
-      out_link: 'https://linkout.com',
-      in_link: 'https://linkout.com',
+      image: 'https://th.bing.com/th/id/OIP.4NebaoMBQ1I-_Sk9KLW0DQHaFz?w=220&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
+      titleAR: 'إعلان ٢',
+      titleEN: 'Ad 2',
     },
     {
       id: 3,
-      image:
-        'https://th.bing.com/th/id/OIP.4NebaoMBQ1I-_Sk9KLW0DQHaFz?w=220&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
-      title: 'ads3',
-      out_link: 'https://linkout.com',
-      in_link: 'https://linkout.com',
+      image: 'https://th.bing.com/th/id/OIP.4NebaoMBQ1I-_Sk9KLW0DQHaFz?w=220&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
+      titleAR: 'إعلان ٣',
+      titleEN: 'Ad 3',
     },
   ]);
 
- 
-  
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
 
@@ -85,8 +74,8 @@ const Banner = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('title', {
-      id: 'title',
+    columnHelper.accessor('titleEN', {
+      id: 'titleEN',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -94,13 +83,13 @@ const Banner = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Title
+          Title (English)
         </Text>
       ),
       cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
     }),
-    columnHelper.accessor('out_link', {
-      id: 'out_link',
+    columnHelper.accessor('titleAR', {
+      id: 'titleAR',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -108,24 +97,14 @@ const Banner = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          External Link
+          Title (Arabic)
         </Text>
       ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor('in_link', {
-      id: 'in_link',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Internal Link
+      cell: (info) => (
+        <Text color={textColor} dir="rtl">
+          {info.getValue()}
         </Text>
       ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
     }),
     columnHelper.accessor('image', {
       id: 'image',
@@ -142,7 +121,7 @@ const Banner = () => {
       cell: (info) => (
         <img
           src={info.getValue()}
-          alt="Brand Image"
+          alt="Banner"
           width={70}
           height={70}
           style={{ borderRadius: '8px' }}
@@ -170,6 +149,7 @@ const Banner = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
+            onClick={() => console.log('Delete', info.row.original.id)}
           />
           <Icon
             w="18px"
@@ -178,6 +158,7 @@ const Banner = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
+            onClick={() => navigate(`/admin/cms/edit-banner/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -186,6 +167,7 @@ const Banner = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
+            onClick={() => navigate(`/admin/cms/view-banner/${info.row.original.id}`)}
           />
         </Flex>
       ),
@@ -273,30 +255,27 @@ const Banner = () => {
               ))}
             </Thead>
             <Tbody>
-              {table
-                .getRowModel()
-                .rows.slice(0, 11)
-                .map((row) => {
-                  return (
-                    <Tr key={row.id}>
-                      {row.getVisibleCells().map((cell) => {
-                        return (
-                          <Td
-                            key={cell.id}
-                            fontSize={{ sm: '14px' }}
-                            minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                            borderColor="transparent"
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </Td>
-                        );
-                      })}
-                    </Tr>
-                  );
-                })}
+              {table.getRowModel().rows.map((row) => {
+                return (
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => {
+                      return (
+                        <Td
+                          key={cell.id}
+                          fontSize={{ sm: '14px' }}
+                          minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                          borderColor="transparent"
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </Td>
+                      );
+                    })}
+                  </Tr>
+                );
+              })}
             </Tbody>
           </Table>
         </Box>

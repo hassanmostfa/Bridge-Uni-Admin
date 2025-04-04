@@ -29,7 +29,6 @@ import Card from 'components/card/Card';
 import { ChevronLeftIcon, ChevronRightIcon, EditIcon, PlusSquareIcon, SearchIcon } from '@chakra-ui/icons';
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
-import { useGetAdminsQuery, useDeleteUserMutation } from 'api/userSlice';
 import Swal from 'sweetalert2';
 
 const columnHelper = createColumnHelper();
@@ -38,32 +37,33 @@ const Admins = () => {
   const [page, setPage] = React.useState(1); // Current page
   const [limit, setLimit] = React.useState(10); // Items per page
   const [searchQuery, setSearchQuery] = React.useState(''); // Search query
-  const { data, refetch, isError, isLoading } = useGetAdminsQuery({ page, limit }); // Pass page and limit here
-  const [deleteUser, { isError: isDeleteError, isLoading: isDeleteLoading }] = useDeleteUserMutation();
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
-  // Extract table data and pagination info
-  const tableData = data?.data?.data || [];
-  const pagination = data?.data?.pagination || { page: 1, limit: 10, totalItems: 0, totalPages: 1 };
+  // Default data with name, email, and phone number
+  const defaultData = [
+    { id: 1, name: 'John Doe', email: 'john@example.com', phone: '123-456-7890', roleName: 'Admin' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '234-567-8901', roleName: 'Editor' },
+    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', phone: '345-678-9012', roleName: 'Viewer' },
+    { id: 4, name: 'Alice Williams', email: 'alice@example.com', phone: '456-789-0123', roleName: 'Admin' },
+    { id: 5, name: 'Charlie Brown', email: 'charlie@example.com', phone: '567-890-1234', roleName: 'Editor' },
+  ];
+
+  // Mock pagination info
+  const pagination = { page, limit, totalItems: defaultData.length, totalPages: Math.ceil(defaultData.length / limit) };
 
   // Filter data based on search query (client-side)
   const filteredData = React.useMemo(() => {
-    if (!searchQuery) return tableData; // Return all data if no search query
-    return tableData.filter((item) =>
+    if (!searchQuery) return defaultData; // Return all data if no search query
+    return defaultData.filter((item) =>
       Object.values(item).some((value) =>
         String(value).toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-  }, [tableData, searchQuery]);
-
-  // Refetch data when page or limit changes
-  React.useEffect(() => {
-    refetch();
-  }, [page, limit, refetch]);
+  }, [searchQuery]);
 
   // Columns definition
   const columns = [
@@ -97,6 +97,24 @@ const Admins = () => {
           color="gray.400"
         >
           EMAIL
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColor}>
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('phone', {
+      id: 'phone',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          PHONE
         </Text>
       ),
       cell: (info) => (
@@ -144,7 +162,7 @@ const Admins = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
-            onClick={() => handleDeleteRole(info.getValue())}
+            onClick={() => handleDeleteAdmin(info.getValue())}
           />
           <Icon
             w="18px"
@@ -183,7 +201,7 @@ const Admins = () => {
   });
 
   // Delete function
-  const handleDeleteRole = async (id) => {
+  const handleDeleteAdmin = async (id) => {
     try {
       const result = await Swal.fire({
         title: 'Are you sure?',
@@ -196,13 +214,12 @@ const Admins = () => {
       });
 
       if (result.isConfirmed) {
-        await deleteUser(id).unwrap(); // Delete the role
-        refetch(); // Refetch the data
+        // In a real app, you would call an API here
         Swal.fire('Deleted!', 'The Admin has been deleted.', 'success');
       }
     } catch (error) {
-      console.error('Failed to delete role:', error);
-      Swal.fire('Error!', 'Failed to delete the role.', 'error');
+      console.error('Failed to delete admin:', error);
+      Swal.fire('Error!', 'Failed to delete the admin.', 'error');
     }
   };
 

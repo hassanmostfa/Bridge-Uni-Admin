@@ -11,6 +11,15 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  Checkbox,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -20,40 +29,76 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import * as React from 'react';
+import { CgAssign } from 'react-icons/cg';
 import Card from 'components/card/Card';
-import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
+import { EditIcon } from '@chakra-ui/icons';
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
-const About = () => {
+const Providers = () => {
   const [data, setData] = React.useState([
     {
       id: 1,
-      textEN: 'About our company services',
-      textAR: 'حول خدمات شركتنا',
-      image: 'https://via.placeholder.com/150',
+      provider_name_ar: 'مستشفى الملك فهد',
+      provider_name_en: 'King Fahad Hospital',
     },
     {
       id: 2,
-      textEN: 'Our mission statement',
-      textAR: 'بيان مهمتنا',
-      image: 'https://via.placeholder.com/150',
+      provider_name_ar: 'مركز الرياض الطبي',
+      provider_name_en: 'Riyadh Medical Center',
     },
     {
       id: 3,
-      textEN: 'Company values and vision',
-      textAR: 'قيم ورؤية الشركة',
-      image: 'https://via.placeholder.com/150',
+      provider_name_ar: 'مستشفى الدكتور سليمان الحبيب',
+      provider_name_en: 'Dr. Sulaiman Al Habib Hospital',
+    },
+    {
+      id: 4,
+      provider_name_ar: 'مستشفى الملك خالد التخصصي',
+      provider_name_en: 'King Khalid Specialist Hospital',
+    },
+    {
+      id: 5,
+      provider_name_ar: 'مستشفى الملك فيصل التخصصي',
+      provider_name_en: 'King Faisal Specialist Hospital',
     },
   ]);
 
+  const [selectedProviderId, setSelectedProviderId] = React.useState(null);
+  const [selectedClinics, setSelectedClinics] = React.useState([]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  const clinics = [
+    { id: 1, name: 'Clinic A' },
+    { id: 2, name: 'Clinic B' },
+    { id: 3, name: 'Clinic C' },
+  ];
+
+  const handleAssignClick = (providerId) => {
+    setSelectedProviderId(providerId);
+    onOpen();
+  };
+
+  const handleClinicSelection = (clinicId) => {
+    if (selectedClinics.includes(clinicId)) {
+      setSelectedClinics(selectedClinics.filter((id) => id !== clinicId));
+    } else {
+      setSelectedClinics([...selectedClinics, clinicId]);
+    }
+  };
+
+  const handleAssignClinics = () => {
+    console.log(`Assigning clinics ${selectedClinics.join(', ')} to provider ${selectedProviderId}`);
+    onClose();
+    setSelectedClinics([]);
+  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -70,12 +115,14 @@ const About = () => {
       ),
       cell: (info) => (
         <Flex align="center">
-          <Text color={textColor}>{info.getValue()}</Text>
+          <Text color={textColor}>
+            {info.getValue()}
+          </Text>
         </Flex>
       ),
     }),
-    columnHelper.accessor('textEN', {
-      id: 'textEN',
+    columnHelper.accessor('provider_name_ar', {
+      id: 'provider_name_ar',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -83,31 +130,17 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Text (English)
-        </Text>
-      ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor('textAR', {
-      id: 'textAR',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Text (Arabic)
+          Provider Name (AR)
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor} dir="rtl">
+        <Text color={textColor}>
           {info.getValue()}
         </Text>
       ),
     }),
-    columnHelper.accessor('image', {
-      id: 'image',
+    columnHelper.accessor('provider_name_en', {
+      id: 'provider_name_en',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -115,17 +148,13 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Image
+          Provider Name (EN)
         </Text>
       ),
       cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="About content"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
-        />
+        <Text color={textColor}>
+          {info.getValue()}
+        </Text>
       ),
     }),
     columnHelper.accessor('actions', {
@@ -149,7 +178,6 @@ const About = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
-            onClick={() => console.log('Delete', info.row.original.id)}
           />
           <Icon
             w="18px"
@@ -158,7 +186,6 @@ const About = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/edit-about/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -167,7 +194,16 @@ const About = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/view-about/${info.row.original.id}`)}
+          />
+          <Icon
+            w="18px"
+            h="18px"
+            me="10px"
+            color={textColor}
+            as={CgAssign}
+            cursor="pointer"
+            title="Assign to clinic"
+            onClick={() => handleAssignClick(info.row.original.id)}
           />
         </Flex>
       ),
@@ -201,7 +237,7 @@ const About = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            About Us Content
+            All Providers
           </Text>
           <Button
             variant="darkBrand"
@@ -211,11 +247,10 @@ const About = () => {
             borderRadius="70px"
             px="24px"
             py="5px"
-            onClick={() => navigate('/admin/cms/add-about')}
+            onClick={() => navigate('/admin/add-provider')}
             width={'200px'}
           >
-            <PlusSquareIcon me="10px" />
-            Add New Content
+            Add New Provider
           </Button>
         </Flex>
         <Box>
@@ -255,33 +290,76 @@ const About = () => {
               ))}
             </Thead>
             <Tbody>
-              {table.getRowModel().rows.map((row) => {
-                return (
-                  <Tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <Td
-                          key={cell.id}
-                          fontSize={{ sm: '14px' }}
-                          minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                          borderColor="transparent"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </Td>
-                      );
-                    })}
-                  </Tr>
-                );
-              })}
+              {table
+                .getRowModel()
+                .rows.slice(0, 11)
+                .map((row) => {
+                  return (
+                    <Tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => {
+                        return (
+                          <Td
+                            key={cell.id}
+                            fontSize={{ sm: '14px' }}
+                            minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                            borderColor="transparent"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </Td>
+                        );
+                      })}
+                    </Tr>
+                  );
+                })}
             </Tbody>
           </Table>
         </Box>
       </Card>
+
+      {/* Modal for Assigning Clinics */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Assign Clinics to Provider</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {clinics.map((clinic) => (
+              <Box key={clinic.id} mb={2}>
+                <Checkbox
+                  isChecked={selectedClinics.includes(clinic.id)}
+                  onChange={() => handleClinicSelection(clinic.id)}
+                  colorScheme="brandScheme"
+                >
+                  {clinic.name}
+                </Checkbox>
+              </Box>
+            ))}
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="darkBrand"
+              color="white"
+              fontSize="sm"
+              fontWeight="500"
+              borderRadius="70px"
+              px="24px"
+              py="5px"
+              mr={3}
+              onClick={handleAssignClinics}
+            >
+              Assign
+            </Button>
+            <Button bg={useColorModeValue('gray.200', 'gray.600')} mr={3} onClick={onClose}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };
 
-export default About;
+export default Providers;

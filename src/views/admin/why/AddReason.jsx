@@ -9,16 +9,17 @@ import {
   Icon,
   Textarea,
 } from "@chakra-ui/react";
-import "./about.css";
-import { IoMdArrowBack } from "react-icons/io";
+
 import { FaUpload } from "react-icons/fa6";
+import { IoMdArrowBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 
-const AddAbout = () => {
-  const [textEN, setTextEN] = useState("");
-  const [textAR, setTextAR] = useState("");
+const AddReason = () => {
+  const [enDescription, setEnDescription] = useState("");
+  const [arDescription, setArDescription] = useState("");
   const [image, setImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const navigate = useNavigate();
 
@@ -49,13 +50,19 @@ const AddAbout = () => {
     handleImageUpload(files);
   };
 
+  const handleCancel = () => {
+    setEnDescription("");
+    setArDescription("");
+    setImage(null);
+  };
+
   const handleSubmit = () => {
-    const aboutData = {
-      textEN,
-      textAR,
+    const reasonData = {
+      en_description: enDescription,
+      ar_description: arDescription,
       image,
     };
-    console.log("About Data:", aboutData);
+    console.log("Reason Data:", reasonData);
     // You can send this data to an API or perform other actions
   };
 
@@ -70,7 +77,7 @@ const AddAbout = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New About Content
+            Add New Reason
           </Text>
           <Button
             type="button"
@@ -83,42 +90,42 @@ const AddAbout = () => {
           </Button>
         </div>
         <form>
-          {/* English Text Field */}
+          {/* English Description Field */}
           <div className="mb-3">
             <Text color={textColor} fontSize="sm" fontWeight="700">
-              Text (English)
+              English Description
               <span className="text-danger mx-1">*</span>
-            </Text>
+            </Text> 
             <Textarea
-              id="textEN"
-              placeholder="Enter about content in English"
-              value={textEN}
-              onChange={(e) => setTextEN(e.target.value)}
+              id="en_description"
+              placeholder="Enter English description"
+              value={enDescription}
+              onChange={(e) => setEnDescription(e.target.value)}
               required
-              mt="8px"
-              minH="120px"
+              mt={"8px"}
+              minH="100px"
             />
           </div>
 
-          {/* Arabic Text Field */}
+          {/* Arabic Description Field */}
           <div className="mb-3">
             <Text color={textColor} fontSize="sm" fontWeight="700">
-              Text (Arabic)
+              Arabic Description
               <span className="text-danger mx-1">*</span>
-            </Text>
+            </Text> 
             <Textarea
-              id="textAR"
-              placeholder="أدخل المحتوى باللغة العربية"
-              value={textAR}
-              onChange={(e) => setTextAR(e.target.value)}
+              id="ar_description"
+              placeholder="Enter Arabic description"
+              value={arDescription}
+              onChange={(e) => setArDescription(e.target.value)}
               required
-              mt="8px"
-              minH="120px"
+              mt={"8px"}
+              minH="100px"
               dir="rtl"
             />
           </div>
 
-          {/* Image Upload Section */}
+          {/* Drag-and-Drop Upload Section */}
           <Box
             border="1px dashed"
             borderColor={isDragging ? "blue.500" : "gray.300"}
@@ -131,7 +138,7 @@ const AddAbout = () => {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             mb={4}
-            transition="all 0.2s"
+            transition="all 0.2s ease"
           >
             <Icon as={FaUpload} w={8} h={8} color="#422afb" mb={2} />
             <Text color="gray.500" mb={2}>
@@ -159,35 +166,44 @@ const AddAbout = () => {
               <Box
                 mt={4}
                 display={'flex'}
-                flexDirection="column"
+                justifyContent="center"
                 alignItems="center"
+                flexDirection="column"
               >
                 <img
                   src={URL.createObjectURL(image)}
-                  alt="About content preview"
-                  width={150}
-                  height={100}
-                  style={{ borderRadius: "md", objectFit: "cover" }}
+                  alt="Preview"
+                  width={120}
+                  height={120}
+                  style={{ borderRadius: '8px', objectFit: 'cover' }}
                 />
-                <Text mt={2} fontSize="sm">
+                <Text mt={2} fontSize="sm" color="gray.600">
                   {image.name}
                 </Text>
               </Box>
             )}
           </Box>
-
+          
           {/* Action Buttons */}
-          <Flex justify="flex-start" mt={4}>
+          <Flex justify="center" mt={4} gap={4}>
+            <Button 
+              variant="outline" 
+              colorScheme="red" 
+              onClick={handleCancel}
+              width="120px"
+            >
+              Cancel
+            </Button>
             <Button
-              variant="darkBrand"
-              color="white"
-              fontSize="sm"
-              fontWeight="500"
-              borderRadius="70px"
-              px="24px"
-              py="5px"
+              variant='darkBrand'
+              color='white'
+              fontSize='sm'
+              fontWeight='500'
+              borderRadius='70px'
+              px='24px'
+              py='5px'
+              width="120px"
               onClick={handleSubmit}
-              mt="30px"
             >
               Save
             </Button>
@@ -198,4 +214,4 @@ const AddAbout = () => {
   );
 };
 
-export default AddAbout;
+export default AddReason;

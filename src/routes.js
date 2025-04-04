@@ -5,13 +5,7 @@ import {
   MdHome,
   MdOutlineShoppingCart,
   MdSettings,
-  MdLocalPharmacy,
-  MdMedicalServices,
-  MdPeople,
   MdCategory,
-  MdInventory,
-  MdAssignment,
-  MdList,
 } from 'react-icons/md';
 
 import { TbBrandAdonisJs } from 'react-icons/tb';
@@ -19,75 +13,63 @@ import { MdAdminPanelSettings } from 'react-icons/md';
 import { TiMinus } from 'react-icons/ti';
 import { BiSolidCategoryAlt } from 'react-icons/bi';
 import { FaRegCalendarDays } from 'react-icons/fa6';
-import { LiaClinicMedicalSolid } from 'react-icons/lia';
-import { IoNotificationsOutline } from 'react-icons/io5';
-import { CiDiscount1 } from 'react-icons/ci';
-import { BsEnvelopeArrowUpFill } from "react-icons/bs";
-
+import { VscOrganization } from "react-icons/vsc";
+import { FaEnvelopeOpenText } from "react-icons/fa";
+import { ImQuestion } from "react-icons/im";
+import { FaPeopleCarry } from "react-icons/fa";
+import { FaWifi } from "react-icons/fa";
+import { MdSummarize } from "react-icons/md";
+import { ImAirplane } from "react-icons/im";
+import { GiSpellBook } from "react-icons/gi";
 
 // Admin Imports
 import MainDashboard from 'views/admin/default';
-import NFTMarketplace from 'views/admin/marketplace';
-import Profile from 'views/admin/profile';
 import Admins from 'views/admin/admins/Admins';
 import AddAdmin from 'views/admin/admins/AddAdmin';
 import Roles from 'views/admin/roles/Roles';
-import Users from 'views/admin/users/Users';
-import FamilyAccounts from 'views/admin/users/FamilyAccounts';
-import PromoCodes from 'views/admin/promoCodes/PromoCodes';
-import AddPromoCode from 'views/admin/promoCodes/AddPromoCode';
 import AddRole from 'views/admin/roles/AddRole';
-import AllNotification from 'views/admin/notification/AllNotification';
-import AddNotification from 'views/admin/notification/AddNotification';
-import AllTypes from 'views/admin/productType/AllTypes';
-import AddType from 'views/admin/productType/AddType';
-import AllBrands from 'views/admin/brand/AllBrands';
-import AddBrand from 'views/admin/brand/AddBrand';
+import SocialMedia from 'views/admin/socialMedia/SocialMedia';
+import AddSocialLink from 'views/admin/socialMedia/AddSocialLink';
+import StudentTestimonials from 'views/admin/student/StudentTestimonials';
 import AllCategories from 'views/admin/category/AllCategories';
 import AddCategory from 'views/admin/category/AddCategory';
 import Blogs from 'views/admin/blog/Blogs';
 import AddBlog from 'views/admin/blog/AddBlog';
-import Ads from 'views/admin/ads/Ads';
-import AddAd from 'views/admin/ads/AddAd';
+import Positions from 'views/admin/positions/Positions';
+import AddPosition from 'views/admin/positions/AddPositions';
 import Banner from 'views/admin/banner/Banner';
 import AddBanner from 'views/admin/banner/AddBanner';
 import About from 'views/admin/about-us/About';
 import AddAbout from 'views/admin/about-us/AddAbout';
 import PrivcyAndPolicy from 'views/admin/privcyAndPolicy/PrivcyAndPolicy';
 import AddPrivcy from 'views/admin/privcyAndPolicy/AddPrivcy';
-import Returns from 'views/admin/return/Returns';
-import AddReturn from 'views/admin/return/AddReturn';
-import Pharmacy from 'views/admin/pharmacy/Pharmacy';
-import AddPharmacy from 'views/admin/pharmacy/AddPharmacy';
-import Branches from 'views/admin/pharmacy/Branches';
-import AddBranch from 'views/admin/pharmacy/AddBranch';
-import Variants from 'views/admin/variants/Variants';
-import AddVariant from 'views/admin/variants/AddVariant';
-import Attributes from 'views/admin/variants/Attributes';
-import AddAttribute from 'views/admin/variants/AddAttribute';
-import Tags from 'views/admin/tags/Tags';
-import AddTag from 'views/admin/tags/AddTag';
-import Presecibtions from 'views/admin/presecibtions/Presecibtions';
-import AddPresecibtions from 'views/admin/presecibtions/AddPresecibtions';
+import WhyUniBridge from 'views/admin/why/WhyUniBridge';
+import AddReason from 'views/admin/why/AddReason';
+import Partners from 'views/admin/partners/Partners';
+import AddPartner from 'views/admin/partners/AddPartner';
 import ProtectedRoute from 'components/protectedRoute/ProtectedRoute';
 import EditRole from 'views/admin/roles/EditRole';
-import Products from 'views/admin/products/Products';
-import AddProduct from 'views/admin/products/AddProduct';
-import Doctors from 'views/admin/doctors/Doctors';
-import AddDoctor from 'views/admin/doctors/AddDoctor';
-import Clinics from 'views/admin/clinics/Clinics';
-import AddClinic from 'views/admin/clinics/AddClinic';
+import OnlineCourses from 'views/admin/courses/OnlineCourses';
+import AddOnlineCourse from 'views/admin/courses/AddOnlineCourse';
+import Providers from 'views/admin/providers/Providers';
+import AddProvider from 'views/admin/providers/AddProvider';
+import Inquires from 'views/admin/inquires/Inquires';
 import EditAdmin from 'views/admin/admins/EditAdmin';
 import ShowAdmin from 'views/admin/admins/ShowAdmin';
-import EditPharmacy from 'views/admin/pharmacy/EditPharmacy';
-import Orders from 'views/admin/orders/Orders';
-import Appointments from 'views/admin/appointments/Appointments';
-import PharmacyRequests from 'views/admin/pharmacy/PharmacyRequests';
+import JoinUsRequests from 'views/admin/joinUs/JoinUsRequests';
 import EditCategory from 'views/admin/category/EditCategory';
-import EditBrand from 'views/admin/brand/EditBrand';
-import EditType from 'views/admin/productType/EditType';
-import EditVariant from 'views/admin/variants/EditVariant';
-
+import Contacts from 'views/admin/contact-us/Contacts';
+import AddContact from 'views/admin/contact-us/AddContact';
+import PopularMajors from 'views/admin/majors/PopularMajors';
+import AddMajor from 'views/admin/majors/AddMajor';
+import AddTestimonial from 'views/admin/student/AddTestimonial';
+import ShortCourses from 'views/admin/courses/ShortCourses';
+import AddShortCourse from 'views/admin/courses/AddShortCourse';
+import StudyAbroad from 'views/admin/studyAbroad/StudyAbroad';
+import AddProgram from 'views/admin/studyAbroad/AddProgram';
+import OnlineApps from 'views/admin/applications/OnlineApps';
+import ShortApps from 'views/admin/applications/ShortApps';
+import StudyAbroadApps from 'views/admin/applications/StudyAbroadApps';
 
 const routes = [
   {
@@ -171,365 +153,8 @@ const routes = [
     showInSidebar: false,
   },
   /* End Admin Routes */
-  {
-    name: 'Pharmacy Management',
-    layout: '/admin',
-    path: '/pharmacy',
-    icon: (
-      <Icon as={MdLocalPharmacy} width="20px" height="20px" color="inherit" />
-    ),
-    component: <Pharmacy />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Pharmacy Management',
-    layout: '/admin',
-    path: '/add-pharmacy',
-    component: <AddPharmacy />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Pharmacy Management',
-    layout: '/admin',
-    path: '/edit-pharmacy/:id',
-    component: <EditPharmacy />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Pharmacy Management',
-    layout: '/admin',
-    path: '/pharmacy-branches',
-    component: <Branches />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Pharmacy Management',
-    layout: '/admin',
-    path: '/add-branch',
-    component: <AddBranch />,
-    showInSidebar: false,
-  },
 
-  /* Start Clinics Routes */
-  {
-    name: 'Clinic Management',
-    layout: '/admin',
-    path: '/clinics',
-    icon: (
-      <Icon
-        as={LiaClinicMedicalSolid}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <Clinics />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Clinic Management',
-    layout: '/admin',
-    path: '/add-clinic',
-    component: <AddClinic />,
-    showInSidebar: false,
-  },
-  /* Start Clinics Routes */
-
-  /* Start Doctors Routes */
-  {
-    name: 'Doctor Management',
-    layout: '/admin',
-    path: '/doctors',
-    icon: (
-      <Icon as={MdMedicalServices} width="20px" height="20px" color="inherit" />
-    ),
-    component: <Doctors />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Doctor Management',
-    layout: '/admin',
-    path: '/add/doctor',
-    component: <AddDoctor />,
-    showInSidebar: false,
-  },
-  /* End Doctors Routes */
-  
-  {
-    name: 'User Management',
-    layout: '/admin',
-    path: '/users',
-    icon: <Icon as={MdPeople} width="20px" height="20px" color="inherit" />,
-    component: <Users />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Categories',
-    layout: '/admin',
-    path: '/categories',
-    icon: (
-      <Icon
-        as={BiSolidCategoryAlt}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <AllCategories />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Categories',
-    layout: '/admin',
-    path: '/add-category',
-    icon: (
-      <Icon
-        as={BiSolidCategoryAlt}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <AddCategory />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Categories',
-    layout: '/admin',
-    path: '/edit-category/:id',
-    icon: (
-      <Icon
-        as={BiSolidCategoryAlt}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <EditCategory />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Products',
-    layout: '/admin',
-    path: '/products',
-    icon: <Icon as={MdInventory} width="20px" height="20px" color="inherit" />,
-    component: <Products />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Products',
-    layout: '/admin',
-    path: '/add-product',
-    component: <AddProduct />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Variants',
-    layout: '/admin',
-    path: '/variants',
-    icon: <Icon as={MdList} width="20px" height="20px" color="inherit" />,
-    component: <Variants />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Variants',
-    layout: '/admin',
-    path: '/add-variant',
-    component: <AddVariant />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Variants',
-    layout: '/admin',
-    path: '/edit-variant/:id',
-    component: <EditVariant />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Variants',
-    layout: '/admin',
-    path: '/variant-attributes',
-    component: <Attributes />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Variants',
-    layout: '/admin',
-    path: '/add-attribute',
-    component: <AddAttribute />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Product Types',
-    layout: '/admin',
-    path: '/product-types',
-    icon: <Icon as={MdCategory} width="20px" height="20px" color="inherit" />,
-    component: <AllTypes />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Product Types',
-    layout: '/admin',
-    path: '/add-product-types',
-    icon: <Icon as={MdCategory} width="20px" height="20px" color="inherit" />,
-    component: <AddType />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Product Types',
-    layout: '/admin',
-    path: '/add-product-types',
-    icon: <Icon as={MdCategory} width="20px" height="20px" color="inherit" />,
-    component: <AddType />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Product Types',
-    layout: '/admin',
-    path: '/edit-product-type/:id',
-    icon: <Icon as={MdCategory} width="20px" height="20px" color="inherit" />,
-    component: <EditType />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Brands',
-    layout: '/admin',
-    path: '/brands',
-    icon: (
-      <Icon as={TbBrandAdonisJs} width="20px" height="20px" color="inherit" />
-    ),
-    component: <AllBrands />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Brands',
-    layout: '/admin',
-    path: '/add-brand',
-    icon: (
-      <Icon as={TbBrandAdonisJs} width="20px" height="20px" color="inherit" />
-    ),
-    component: <AddBrand />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Brands',
-    layout: '/admin',
-    path: '/edit-brand/:id',
-    icon: (
-      <Icon as={TbBrandAdonisJs} width="20px" height="20px" color="inherit" />
-    ),
-    component: <EditBrand />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Prescription',
-    layout: '/admin',
-    path: '/prescription',
-    icon: <Icon as={MdAssignment} width="20px" height="20px" color="inherit" />,
-    component: <Presecibtions />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Prescription',
-    layout: '/admin',
-    path: '/add-prescription',
-    icon: <Icon as={MdAssignment} width="20px" height="20px" color="inherit" />,
-    component: <AddPresecibtions />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Orders',
-    layout: '/admin',
-    path: '/orders',
-    icon: (
-      <Icon
-        as={MdOutlineShoppingCart}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <Orders />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Pharmacy Requests',
-    layout: '/admin',
-    path: '/pharmacy-requests',
-    icon: (
-      <Icon
-        as={BsEnvelopeArrowUpFill}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <PharmacyRequests />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Notifications',
-    layout: '/admin',
-    path: '/notifications',
-    icon: (
-      <Icon
-        as={IoNotificationsOutline}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <AllNotification />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Notifications',
-    layout: '/admin',
-    path: '/add-notifications',
-    icon: (
-      <Icon
-        as={IoNotificationsOutline}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <AddNotification />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Promo Codes',
-    layout: '/admin',
-    path: '/promo-codes',
-    icon: <Icon as={CiDiscount1} width="20px" height="20px" color="inherit" />,
-    component: <PromoCodes />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Promo Codes',
-    layout: '/admin',
-    path: '/add-promo-code',
-    component: <AddPromoCode />,
-    showInSidebar: false,
-  },
-  {
-    name: 'Appointments',
-    layout: '/admin',
-    path: '/appointments',
-    icon: (
-      <Icon as={FaRegCalendarDays} width="20px" height="20px" color="inherit" />
-    ),
-    component: <Appointments />,
-    showInSidebar: true,
-  },
-  {
-    name: 'Reports',
-    layout: '/admin',
-    path: '/reports',
-    icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
-    component: <NFTMarketplace />,
-    showInSidebar: true,
-  },
+  /* Start CMS Routes */
   {
     name: 'CMS',
     layout: '/admin',
@@ -538,32 +163,10 @@ const routes = [
     showInSidebar: true,
     subRoutes: [
       {
-        name: 'Tags',
-        path: '/tags',
-        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
-        component: <Tags />,
-        showInSidebar: true,
-      },
-      {
-        name: 'Blogs',
-        path: '/blogs',
-        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
-        component: <Blogs />,
-        showInSidebar: true,
-      },
-      
-      {
         name: 'Banners',
         path: '/cms/banners',
         icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
         component: <Banner />,
-        showInSidebar: true,
-      },
-      {
-        name: 'Ads',
-        path: '/cms/ads',
-        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
-        component: <Ads />,
         showInSidebar: true,
       },
       {
@@ -581,36 +184,343 @@ const routes = [
         showInSidebar: true,
       },
       {
-        name: 'Return',
-        path: '/cms/returned',
+        name: 'Blogs',
+        path: '/blogs',
         icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
-        component: <Returns />,
+        component: <Blogs />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Contact Us',
+        path: '/contacts',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <Contacts />,
+        showInSidebar: true,
+      },
+      
+      {
+        name: 'Positions',
+        path: '/cms/positions',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <Positions />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Social Media Links',
+        path: '/cms/socials',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <SocialMedia />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Why Uni Bridge',
+        path: '/cms/why-uni-bridge',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <WhyUniBridge />,
+        showInSidebar: true,
+      },
+    ],
+  },
+  /* End CMS Routes */
+  {
+    name: 'Our Partners',
+    layout: '/admin',
+    path: '/partners',
+    icon: (
+      <Icon as={VscOrganization} width="20px" height="20px" color="inherit" />
+    ),
+    component: <Partners />,
+    showInSidebar: true,
+  },
+  {
+    name: 'Our Partners',
+    layout: '/admin',
+    path: '/add-partner',
+    component: <AddPartner />,
+    showInSidebar: false,
+  },
+
+  /* Start Join Us Requests */
+  {
+    name: 'Join Us Requests',
+    layout: '/admin',
+    path: '/pharmacy-requests',
+    icon: (
+      <Icon
+        as={FaEnvelopeOpenText}
+        width="20px"
+        height="20px"
+        color="inherit"
+      />
+    ),
+    component: <JoinUsRequests />,
+    showInSidebar: true,
+  },
+  /* End Join Us Requests */
+
+  /* Start Inquires Routes */
+  {
+    name: 'Inquires',
+    layout: '/admin',
+    path: '/inquires',
+    icon: (
+      <Icon
+        as={ImQuestion}
+        width="20px"
+        height="20px"
+        color="inherit"
+      />
+    ),
+    component: <Inquires />,
+    showInSidebar: true,
+  },
+  /* End Inquires Routes */
+
+
+
+  /* Start Providers Routes */
+  {
+    name: 'Providers',
+    layout: '/admin',
+    path: '/providers',
+    icon: (
+      <Icon as={FaPeopleCarry} width="20px" height="20px" color="inherit" />
+    ),
+    component: <Providers />,
+    showInSidebar: true,
+  },
+  {
+    name: 'Providers',
+    layout: '/admin',
+    path: '/add-provider',
+    component: <AddProvider />,
+    showInSidebar: false,
+  },
+  /* End Providers Routes */
+  
+
+    /* Start Categories Routes */
+    {
+      name: 'Categories',
+      layout: '/admin',
+      path: '/categories',
+      icon: (
+        <Icon
+        as={BiSolidCategoryAlt}
+        width="20px"
+        height="20px"
+        color="inherit"
+        />
+      ),
+      component: <AllCategories />,
+      showInSidebar: true,
+    },
+    {
+      name: 'Categories',
+      layout: '/admin',
+      path: '/add-category',
+      icon: (
+        <Icon
+        as={BiSolidCategoryAlt}
+          width="20px"
+          height="20px"
+          color="inherit"
+          />
+        ),
+        component: <AddCategory />,
+        showInSidebar: false,
+      },
+      {
+        name: 'Categories',
+      layout: '/admin',
+      path: '/edit-category/:id',
+      icon: (
+        <Icon
+        as={BiSolidCategoryAlt}
+        width="20px"
+        height="20px"
+        color="inherit"
+        />
+      ),
+      component: <EditCategory />,
+      showInSidebar: false,
+    },
+    /* End Categories Routes */
+
+       /* Start Popular Majors Routes */
+       {
+        name: 'Popular Majors',
+        layout: '/admin',
+        path: '/majors',
+        icon: (
+          <Icon
+          as={MdBarChart}
+          width="20px"
+          height="20px"
+          color="inherit"
+          />
+        ),
+        component: <PopularMajors />,
+        showInSidebar: true,
+      },
+        {
+        name: 'Popular Majors',
+        layout: '/admin',
+        path: '/add-major',
+        component: <AddMajor />,
+        showInSidebar: false,
+      },
+      /* End Popular Majors Routes */
+
+      /* Start  Student Testimonials Routes */
+      {
+        name: 'Student Testimonials',
+        layout: '/admin',
+        path: '/student-testimonials',
+        icon: (
+          <Icon as={TbBrandAdonisJs} width="20px" height="20px" color="inherit" />
+        ),
+        component: <StudentTestimonials />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Student Testimonials',
+        layout: '/admin',
+        path: '/add-testimonial',
+        icon: (
+          <Icon as={TbBrandAdonisJs} width="20px" height="20px" color="inherit" />
+        ),
+        component: <AddTestimonial />,
+        showInSidebar: false,
+      },
+      /* End Student Testimonials Routes */
+
+      
+  /* Start Online Courses Routes */
+  {
+    name: 'Online Courses',
+    layout: '/admin',
+    path: '/online-courses',
+    icon: <Icon as={FaWifi} width="20px" height="20px" color="inherit" />,
+    component: <OnlineCourses />,
+    showInSidebar: true,
+  },
+  {
+    name: 'Online Courses',
+    layout: '/admin',
+    path: '/add-online-course',
+    component: <AddOnlineCourse />,
+    showInSidebar: false,
+  },
+
+  /* Start Short Courses Routes */
+  {
+    name: 'Short Courses',
+    layout: '/admin',
+    path: '/short-courses',
+    icon: <Icon as={MdSummarize} width="20px" height="20px" color="inherit" />,
+    component: <ShortCourses />,
+    showInSidebar: true,
+  },
+  {
+    name: 'Short Courses',
+    layout: '/admin',
+    path: '/add-short-course',
+    component: <AddShortCourse />,
+    showInSidebar: false,
+  },
+
+  /* End Short Courses Routes */
+
+  /* Start Study Abroad Routes */
+  {
+    name: 'Study Abroad',
+    layout: '/admin',
+    path: '/study-abroad',
+    icon: <Icon as={ImAirplane} width="20px" height="20px" color="inherit" />,
+    component: <StudyAbroad />,
+    showInSidebar: true,
+  },
+  {
+    name: 'Study Abroad',
+    layout: '/admin',
+    path: '/add-study-abroad',
+    component: <AddProgram />,
+    showInSidebar: false,
+  },
+  /* End Study Abroad Routes */
+
+  /* Start Social Media Links Routes */
+  {
+    name: 'Social Media Links',
+    layout: '/admin',
+    path: '/add-social-link',
+    icon: <Icon as={MdCategory} width="20px" height="20px" color="inherit" />,
+    component: <AddSocialLink />,
+    showInSidebar: false,
+  },
+  /* End Social Media Links Routes */
+
+  /* Start Application Routes */
+  {
+    name: 'Applications',
+    layout: '/admin',
+    icon: (
+      <Icon
+      as={GiSpellBook}
+      width="20px"
+      height="20px"
+      color="#8f9bba"
+      />
+    ),
+    component: null,
+    showInSidebar: true,
+    subRoutes: [
+      {
+        name: 'Online Courses',
+        path: '/online/apps',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <OnlineApps />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Short Courses',
+        path: '/short/apps',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <ShortApps />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Study Abroad',
+        path: '/study/abroad/apps',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <StudyAbroadApps />,
         showInSidebar: true,
       },
     ],
   },
   {
-    name: 'Add tag',
+    name: 'Add Contact',
     layout: '/admin',
-    path: '/add-tag',
+    path: '/add-contact',
     icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
-    component: <AddTag />,
+    component: <AddContact />,
     showInSidebar: false,
   },
   {
     name: 'Add blog',
     layout: '/admin',
-    path: '/add-blogs',
+    path: '/add-blog',
     icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
     component: <AddBlog />,
     showInSidebar: false,
   },
   {
-    name: 'Add ads',
+    name: 'Add Position',
     layout: '/admin', 
-    path: '/cms/add-ads',
+    path: '/cms/add-position',
     icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
-    component: <AddAd />,
+    component: <AddPosition />,
     showInSidebar: false,
   },
   {
@@ -637,19 +547,10 @@ const routes = [
     showInSidebar: false,
   },
   {
-    name: 'Add Return',
+    name: 'Add Reason',
     layout: '/admin', 
-    path: '/cms/add-return',
-    component: <AddReturn />,
-    showInSidebar: false,
-  },
-
-  
-  {
-    name: 'Family Accounts',
-    layout: '/admin',
-    path: '/family-Accounts',
-    component: <FamilyAccounts />,
+    path: '/cms/add-why-unibridge',
+    component: <AddReason />,
     showInSidebar: false,
   },
 ];

@@ -27,25 +27,27 @@ import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
-const About = () => {
+const PopularMajors = () => {
   const [data, setData] = React.useState([
     {
       id: 1,
-      textEN: 'About our company services',
-      textAR: 'حول خدمات شركتنا',
-      image: 'https://via.placeholder.com/150',
+      title: 'Computer Science',
+      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
     },
     {
       id: 2,
-      textEN: 'Our mission statement',
-      textAR: 'بيان مهمتنا',
-      image: 'https://via.placeholder.com/150',
+      title: 'Business Administration',
+      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
     },
     {
       id: 3,
-      textEN: 'Company values and vision',
-      textAR: 'قيم ورؤية الشركة',
-      image: 'https://via.placeholder.com/150',
+      title: 'Medicine',
+      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    },
+    {
+      id: 4,
+      title: 'Engineering',
+      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
     },
   ]);
 
@@ -70,38 +72,26 @@ const About = () => {
       ),
       cell: (info) => (
         <Flex align="center">
-          <Text color={textColor}>{info.getValue()}</Text>
+          <Text color={textColor}>
+            {info.getValue()}
+          </Text>
         </Flex>
       ),
     }),
-    columnHelper.accessor('textEN', {
-      id: 'textEN',
+    columnHelper.accessor('title', {
+      id: 'title',
       header: () => (
         <Text
           justifyContent="space-between"
-          align="center"
+          align="start"
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Text (English)
-        </Text>
-      ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor('textAR', {
-      id: 'textAR',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Text (Arabic)
+          Major Title
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor} dir="rtl">
+        <Text color={textColor}>
           {info.getValue()}
         </Text>
       ),
@@ -111,20 +101,26 @@ const About = () => {
       header: () => (
         <Text
           justifyContent="space-between"
-          align="center"
+          align="start"
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
+          w={'450px'}
         >
-          Image
+          Major Image
         </Text>
       ),
       cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="About content"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
+        <img 
+          src={info.getValue()} 
+          alt="Major" 
+          width={100} 
+          height={60} 
+          style={{ 
+            borderRadius: '8px',
+            objectFit: 'contain',
+            maxWidth: '100%',
+            height: 'auto'
+          }} 
         />
       ),
     }),
@@ -149,7 +145,9 @@ const About = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
-            onClick={() => console.log('Delete', info.row.original.id)}
+            onClick={() => {
+              setData(data.filter(item => item.id !== info.row.original.id));
+            }}
           />
           <Icon
             w="18px"
@@ -158,7 +156,7 @@ const About = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/edit-about/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/edit-major/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -167,7 +165,7 @@ const About = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/view-about/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/view-major/${info.row.original.id}`)}
           />
         </Flex>
       ),
@@ -201,21 +199,21 @@ const About = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            About Us Content
+            Popular Majors
           </Text>
           <Button
-            variant="darkBrand"
-            color="white"
-            fontSize="sm"
-            fontWeight="500"
-            borderRadius="70px"
-            px="24px"
-            py="5px"
-            onClick={() => navigate('/admin/cms/add-about')}
+            variant='darkBrand'
+            color='white'
+            fontSize='sm'
+            fontWeight='500'
+            borderRadius='70px'
+            px='24px'
+            py='5px'
+            onClick={() => navigate('/admin/add-major')}
             width={'200px'}
           >
             <PlusSquareIcon me="10px" />
-            Add New Content
+            Add New Major
           </Button>
         </Flex>
         <Box>
@@ -255,27 +253,29 @@ const About = () => {
               ))}
             </Thead>
             <Tbody>
-              {table.getRowModel().rows.map((row) => {
-                return (
-                  <Tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <Td
-                          key={cell.id}
-                          fontSize={{ sm: '14px' }}
-                          minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                          borderColor="transparent"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </Td>
-                      );
-                    })}
-                  </Tr>
-                );
-              })}
+              {table
+                .getRowModel()
+                .rows.map((row) => {
+                  return (
+                    <Tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => {
+                        return (
+                          <Td
+                            key={cell.id}
+                            fontSize={{ sm: '14px' }}
+                            minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                            borderColor="transparent"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </Td>
+                        );
+                      })}
+                    </Tr>
+                  );
+                })}
             </Tbody>
           </Table>
         </Box>
@@ -284,4 +284,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default PopularMajors;

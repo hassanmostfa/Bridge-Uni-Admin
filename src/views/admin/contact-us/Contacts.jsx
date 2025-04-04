@@ -22,30 +22,35 @@ import {
 import * as React from 'react';
 import Card from 'components/card/Card';
 import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
-import { FaEye, FaTrash } from 'react-icons/fa6';
+import { FaTrash, FaWhatsapp } from 'react-icons/fa6';
+import { MdEmail, MdSupportAgent } from 'react-icons/md';
+import { BsTelephoneFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
-const About = () => {
+const Contacts = () => {
   const [data, setData] = React.useState([
     {
       id: 1,
-      textEN: 'About our company services',
-      textAR: 'حول خدمات شركتنا',
-      image: 'https://via.placeholder.com/150',
+      chatSupportEmail: 'support@example.com',
+      email: 'info@example.com',
+      phoneNumber: '+201234567890',
+      whatsappNumber: '+201234567890',
     },
     {
       id: 2,
-      textEN: 'Our mission statement',
-      textAR: 'بيان مهمتنا',
-      image: 'https://via.placeholder.com/150',
+      chatSupportEmail: 'help@company.com',
+      email: 'contact@company.com',
+      phoneNumber: '+201112223344',
+      whatsappNumber: '+201112223344',
     },
     {
       id: 3,
-      textEN: 'Company values and vision',
-      textAR: 'قيم ورؤية الشركة',
-      image: 'https://via.placeholder.com/150',
+      chatSupportEmail: 'assistance@service.org',
+      email: 'hello@service.org',
+      phoneNumber: '+201556677889',
+      whatsappNumber: '+201556677889',
     },
   ]);
 
@@ -74,8 +79,8 @@ const About = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('textEN', {
-      id: 'textEN',
+    columnHelper.accessor('chatSupportEmail', {
+      id: 'chatSupportEmail',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -83,31 +88,18 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Text (English)
-        </Text>
-      ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor('textAR', {
-      id: 'textAR',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Text (Arabic)
+          Chat Support Email
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor} dir="rtl">
-          {info.getValue()}
-        </Text>
+        <Flex align="center" gap={2}>
+          <Icon as={MdSupportAgent} color="blue.500" />
+          <Text color={textColor}>{info.getValue()}</Text>
+        </Flex>
       ),
     }),
-    columnHelper.accessor('image', {
-      id: 'image',
+    columnHelper.accessor('email', {
+      id: 'email',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -115,17 +107,52 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Image
+          Email
         </Text>
       ),
       cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="About content"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
-        />
+        <Flex align="center" gap={2}>
+          <Icon as={MdEmail} color="red.500" />
+          <Text color={textColor}>{info.getValue()}</Text>
+        </Flex>
+      ),
+    }),
+    columnHelper.accessor('phoneNumber', {
+      id: 'phoneNumber',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          Phone Number
+        </Text>
+      ),
+      cell: (info) => (
+        <Flex align="center" gap={2}>
+          <Icon as={BsTelephoneFill} color="green.500" />
+          <Text color={textColor}>{info.getValue()}</Text>
+        </Flex>
+      ),
+    }),
+    columnHelper.accessor('whatsappNumber', {
+      id: 'whatsappNumber',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          WhatsApp
+        </Text>
+      ),
+      cell: (info) => (
+        <Flex align="center" gap={2}>
+          <Icon as={FaWhatsapp} color="green.500" />
+          <Text color={textColor}>{info.getValue()}</Text>
+        </Flex>
       ),
     }),
     columnHelper.accessor('actions', {
@@ -158,16 +185,7 @@ const About = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/edit-about/${info.row.original.id}`)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/cms/view-about/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/edit-contact/${info.row.original.id}`)}
           />
         </Flex>
       ),
@@ -201,7 +219,7 @@ const About = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            About Us Content
+            Contact Information
           </Text>
           <Button
             variant="darkBrand"
@@ -211,11 +229,11 @@ const About = () => {
             borderRadius="70px"
             px="24px"
             py="5px"
-            onClick={() => navigate('/admin/cms/add-about')}
+            onClick={() => navigate('/admin/add-contact')}
             width={'200px'}
           >
             <PlusSquareIcon me="10px" />
-            Add New Content
+            Add Contact
           </Button>
         </Flex>
         <Box>
@@ -284,4 +302,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default Contacts;

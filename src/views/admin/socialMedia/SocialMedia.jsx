@@ -22,30 +22,28 @@ import {
 import * as React from 'react';
 import Card from 'components/card/Card';
 import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
-import { FaEye, FaTrash } from 'react-icons/fa6';
+import { FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
+import { FaInstagram, FaFacebook, FaLinkedin, FaTwitter } from 'react-icons/fa';
+import Swal from 'sweetalert2';
 
 const columnHelper = createColumnHelper();
 
-const About = () => {
+const SocialMedia = () => {
   const [data, setData] = React.useState([
     {
       id: 1,
-      textEN: 'About our company services',
-      textAR: 'حول خدمات شركتنا',
-      image: 'https://via.placeholder.com/150',
+      instagram: 'instagram.com/company',
+      facebook: 'facebook.com/company',
+      linkedin: 'linkedin.com/company',
+      twitter: 'twitter.com/company',
     },
     {
       id: 2,
-      textEN: 'Our mission statement',
-      textAR: 'بيان مهمتنا',
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 3,
-      textEN: 'Company values and vision',
-      textAR: 'قيم ورؤية الشركة',
-      image: 'https://via.placeholder.com/150',
+      instagram: 'instagram.com/business',
+      facebook: 'facebook.com/business',
+      linkedin: 'linkedin.com/business',
+      twitter: 'twitter.com/business',
     },
   ]);
 
@@ -54,6 +52,35 @@ const About = () => {
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  const handleDelete = async (id) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+      });
+
+      if (result.isConfirmed) {
+        setData(data.filter(item => item.id !== id));
+        Swal.fire('Deleted!', 'The social media link has been deleted.', 'success');
+      }
+    } catch (error) {
+      console.error('Failed to delete:', error);
+      Swal.fire('Error!', 'Failed to delete the social media link.', 'error');
+    }
+  };
+
+  const shortenLink = (link) => {
+    if (link.length > 20) {
+      return link.substring(0, 17) + '...';
+    }
+    return link;
+  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -74,8 +101,8 @@ const About = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('textEN', {
-      id: 'textEN',
+    columnHelper.accessor('instagram', {
+      id: 'instagram',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -83,31 +110,20 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Text (English)
-        </Text>
-      ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor('textAR', {
-      id: 'textAR',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Text (Arabic)
+          Instagram
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor} dir="rtl">
-          {info.getValue()}
-        </Text>
+        <Flex align="center" gap={2}>
+          <Icon as={FaInstagram} color="#E1306C" />
+          <Text color={textColor} title={info.getValue()}>
+            {shortenLink(info.getValue())}
+          </Text>
+        </Flex>
       ),
     }),
-    columnHelper.accessor('image', {
-      id: 'image',
+    columnHelper.accessor('facebook', {
+      id: 'facebook',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -115,20 +131,61 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Image
+          Facebook
         </Text>
       ),
       cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="About content"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
-        />
+        <Flex align="center" gap={2}>
+          <Icon as={FaFacebook} color="#4267B2" />
+          <Text color={textColor} title={info.getValue()}>
+            {shortenLink(info.getValue())}
+          </Text>
+        </Flex>
       ),
     }),
-    columnHelper.accessor('actions', {
+    columnHelper.accessor('linkedin', {
+      id: 'linkedin',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          LinkedIn
+        </Text>
+      ),
+      cell: (info) => (
+        <Flex align="center" gap={2}>
+          <Icon as={FaLinkedin} color="#0077B5" />
+          <Text color={textColor} title={info.getValue()}>
+            {shortenLink(info.getValue())}
+          </Text>
+        </Flex>
+      ),
+    }),
+    columnHelper.accessor('twitter', {
+      id: 'twitter',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          Twitter
+        </Text>
+      ),
+      cell: (info) => (
+        <Flex align="center" gap={2}>
+          <Icon as={FaTwitter} color="#1DA1F2" />
+          <Text color={textColor} title={info.getValue()}>
+            {shortenLink(info.getValue())}
+          </Text>
+        </Flex>
+      ),
+    }),
+    columnHelper.accessor('id', {
       id: 'actions',
       header: () => (
         <Text
@@ -149,7 +206,7 @@ const About = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
-            onClick={() => console.log('Delete', info.row.original.id)}
+            onClick={() => handleDelete(info.getValue())}
           />
           <Icon
             w="18px"
@@ -158,16 +215,7 @@ const About = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/edit-about/${info.row.original.id}`)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/cms/view-about/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/edit-social-media/${info.getValue()}`)}
           />
         </Flex>
       ),
@@ -201,7 +249,7 @@ const About = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            About Us Content
+            Social Media Links
           </Text>
           <Button
             variant="darkBrand"
@@ -211,11 +259,11 @@ const About = () => {
             borderRadius="70px"
             px="24px"
             py="5px"
-            onClick={() => navigate('/admin/cms/add-about')}
+            onClick={() => navigate('/admin/add-social-link')}
             width={'200px'}
           >
             <PlusSquareIcon me="10px" />
-            Add New Content
+            Add New Links
           </Button>
         </Flex>
         <Box>
@@ -284,4 +332,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default SocialMedia;

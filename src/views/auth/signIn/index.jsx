@@ -23,7 +23,7 @@ import { RiEyeCloseLine } from "react-icons/ri";
 import { useLoginUserMutation } from "api/userSlice";
 import Swal from "sweetalert2";
 import { LanguageContext } from "../../../components/auth/LanguageContext"; // Adjust the path accordingly
-import Logo from "../../../assets/img/bio-logo.png";
+import Logo from "../../../assets/img/logo.png";
 function SignIn() {
   const { language, toggleLanguage } = useContext(LanguageContext);
   const textColor = useColorModeValue("navy.700", "white");

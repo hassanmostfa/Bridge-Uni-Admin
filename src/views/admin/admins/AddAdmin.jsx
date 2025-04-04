@@ -31,7 +31,7 @@ const AddAdmin = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
+    phone: '',
     roleId: '',
   });
 
@@ -128,31 +128,31 @@ const AddAdmin = () => {
             />
           </Box>
 
-          {/* Password Field */}
+         {/* Phone Field with Formatting */}
           <Box mb="3">
             <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
-              Password <span style={{ color: 'red' }}>*</span>
+              Phone Number <span style={{ color: 'red' }}>*</span>
             </Text>
-            <Flex align="center">
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                placeholder="Enter password"
-                value={formData.password}
-                onChange={handleInputChange}
-                bg={inputBg}
-                color={textColor}
-                borderColor={inputBorder}
-                required
-              />
-              <Button
-                ml="2"
-                onClick={() => setShowPassword(!showPassword)}
-                variant="ghost"
-              >
-                {showPassword ? <ViewOffIcon /> : <ViewIcon />}
-              </Button>
-            </Flex>
+            <Input
+              type="tel"
+              name="phone"
+              placeholder="Enter phone number"
+              value={formData.phone}
+              onChange={(e) => {
+                const rawValue = e.target.value.replace(/\D/g, '');
+                handleInputChange({
+                  target: {
+                    name: 'phone',
+                    value: rawValue
+                  }
+                });
+              }}
+              bg={inputBg}
+              color={textColor}
+              borderColor={inputBorder}
+              required
+              maxLength={14} // For formatted number like (123) 456-7890
+            />
           </Box>
 
           {/* Role Dropdown */}

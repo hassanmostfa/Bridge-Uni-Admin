@@ -11,6 +11,7 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  Link,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -21,31 +22,36 @@ import {
 } from '@tanstack/react-table';
 import * as React from 'react';
 import Card from 'components/card/Card';
-import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
-import { FaEye, FaTrash } from 'react-icons/fa6';
+import { FaCheck, FaTimes, FaFilePdf } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
-const About = () => {
+const JoinUsRequests = () => {
   const [data, setData] = React.useState([
     {
       id: 1,
-      textEN: 'About our company services',
-      textAR: 'حول خدمات شركتنا',
-      image: 'https://via.placeholder.com/150',
+      firstName: 'John',
+      lastName: 'Doe',
+      positionApplied: 'Frontend Developer',
+      jobTitle: 'Senior Developer',
+      cv: 'john_doe_cv.pdf',
     },
     {
       id: 2,
-      textEN: 'Our mission statement',
-      textAR: 'بيان مهمتنا',
-      image: 'https://via.placeholder.com/150',
+      firstName: 'Jane',
+      lastName: 'Smith',
+      positionApplied: 'Backend Developer',
+      jobTitle: 'Team Lead',
+      cv: 'jane_smith_cv.pdf',
     },
     {
       id: 3,
-      textEN: 'Company values and vision',
-      textAR: 'قيم ورؤية الشركة',
-      image: 'https://via.placeholder.com/150',
+      firstName: 'Michael',
+      lastName: 'Johnson',
+      positionApplied: 'UX Designer',
+      jobTitle: 'Design Manager',
+      cv: 'michael_johnson_cv.pdf',
     },
   ]);
 
@@ -56,8 +62,8 @@ const About = () => {
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
   const columns = [
-    columnHelper.accessor('id', {
-      id: 'id',
+    columnHelper.accessor('firstName', {
+      id: 'firstName',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -65,49 +71,17 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          ID
+          First Name
         </Text>
       ),
       cell: (info) => (
-        <Flex align="center">
-          <Text color={textColor}>{info.getValue()}</Text>
-        </Flex>
-      ),
-    }),
-    columnHelper.accessor('textEN', {
-      id: 'textEN',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Text (English)
-        </Text>
-      ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor('textAR', {
-      id: 'textAR',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Text (Arabic)
-        </Text>
-      ),
-      cell: (info) => (
-        <Text color={textColor} dir="rtl">
+        <Text color={textColor}>
           {info.getValue()}
         </Text>
       ),
     }),
-    columnHelper.accessor('image', {
-      id: 'image',
+    columnHelper.accessor('lastName', {
+      id: 'lastName',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -115,17 +89,75 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Image
+          Last Name
         </Text>
       ),
       cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="About content"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
-        />
+        <Text color={textColor}>
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('positionApplied', {
+      id: 'positionApplied',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          Position Applied
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColor}>
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('jobTitle', {
+      id: 'jobTitle',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          Current Job Title
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColor}>
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('cv', {
+      id: 'cv',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          CV
+        </Text>
+      ),
+      cell: (info) => (
+        <Flex align="center">
+          <Icon as={FaFilePdf} color="red.500" mr={2} />
+          <Link 
+            href={`/path/to/cvs/${info.getValue()}`} 
+            color="blue.500"
+            isExternal
+            _hover={{ textDecoration: 'underline' }}
+          >
+            View CV
+          </Link>
+        </Flex>
       ),
     }),
     columnHelper.accessor('actions', {
@@ -141,34 +173,20 @@ const About = () => {
         </Text>
       ),
       cell: (info) => (
-        <Flex align="center">
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="red.500"
-            as={FaTrash}
-            cursor="pointer"
-            onClick={() => console.log('Delete', info.row.original.id)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="green.500"
-            as={EditIcon}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/cms/edit-about/${info.row.original.id}`)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/cms/view-about/${info.row.original.id}`)}
-          />
+        <Flex align="center" gap="15px">
+          <Flex border={`1px solid #01b574`} borderRadius={"5px"} padding={"5px"} align="center" gap="5px" cursor="pointer" onClick={() => handleApprove(info.row.original.id)}>
+            <Icon w="18px" h="18px" color="green.500" as={FaCheck} />
+            <Text fontSize="sm" color="green.500" fontWeight="bold">
+              Approve
+            </Text>
+          </Flex>
+    
+          <Flex w={"90px"} border={`1px solid #ee5d50`} justifyContent={"center"} borderRadius={"5px"} padding={"5px"} align="center" gap="5px" cursor="pointer" onClick={() => handleReject(info.row.original.id)}>
+            <Icon w="18px" h="18px" color="red.500" as={FaTimes} />
+            <Text fontSize="sm" color="red.500" fontWeight="bold">
+              Reject
+            </Text>
+          </Flex>
         </Flex>
       ),
     }),
@@ -186,6 +204,18 @@ const About = () => {
     debugTable: true,
   });
 
+  // Handle approve action
+  const handleApprove = (id) => {
+    console.log(`Approved application with ID: ${id}`);
+    // Add your approve logic here
+  };
+
+  // Handle reject action
+  const handleReject = (id) => {
+    console.log(`Rejected application with ID: ${id}`);
+    // Add your reject logic here
+  };
+
   return (
     <div className="container">
       <Card
@@ -201,22 +231,8 @@ const About = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            About Us Content
+            Join Us Requests
           </Text>
-          <Button
-            variant="darkBrand"
-            color="white"
-            fontSize="sm"
-            fontWeight="500"
-            borderRadius="70px"
-            px="24px"
-            py="5px"
-            onClick={() => navigate('/admin/cms/add-about')}
-            width={'200px'}
-          >
-            <PlusSquareIcon me="10px" />
-            Add New Content
-          </Button>
         </Flex>
         <Box>
           <Table variant="simple" color="gray.500" mb="24px" mt="12px">
@@ -255,27 +271,29 @@ const About = () => {
               ))}
             </Thead>
             <Tbody>
-              {table.getRowModel().rows.map((row) => {
-                return (
-                  <Tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <Td
-                          key={cell.id}
-                          fontSize={{ sm: '14px' }}
-                          minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                          borderColor="transparent"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </Td>
-                      );
-                    })}
-                  </Tr>
-                );
-              })}
+              {table
+                .getRowModel()
+                .rows.map((row) => {
+                  return (
+                    <Tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => {
+                        return (
+                          <Td
+                            key={cell.id}
+                            fontSize={{ sm: '14px' }}
+                            minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                            borderColor="transparent"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </Td>
+                        );
+                      })}
+                    </Tr>
+                  );
+                })}
             </Tbody>
           </Table>
         </Box>
@@ -284,4 +302,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default JoinUsRequests;

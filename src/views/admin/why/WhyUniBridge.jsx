@@ -27,25 +27,25 @@ import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
 
-const About = () => {
+const WhyUniBridge = () => {
   const [data, setData] = React.useState([
     {
       id: 1,
-      textEN: 'About our company services',
-      textAR: 'حول خدمات شركتنا',
-      image: 'https://via.placeholder.com/150',
+      image: 'https://th.bing.com/th/id/OIP.2tLY6p_5ubR3VvBlrP4iyAHaE8?w=254&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
+      en_description: 'UniBridge offers seamless integration between universities and students worldwide',
+      ar_description: 'يوفر يوني بريدج تكاملاً سلساً بين الجامعات والطلاب حول العالم',
     },
     {
       id: 2,
-      textEN: 'Our mission statement',
-      textAR: 'بيان مهمتنا',
-      image: 'https://via.placeholder.com/150',
+      image: 'https://th.bing.com/th/id/OIP.2tLY6p_5ubR3VvBlrP4iyAHaE8?w=254&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
+      en_description: 'Access to a global network of educational resources and opportunities',
+      ar_description: 'الوصول إلى شبكة عالمية من الموارد والفرص التعليمية',
     },
     {
       id: 3,
-      textEN: 'Company values and vision',
-      textAR: 'قيم ورؤية الشركة',
-      image: 'https://via.placeholder.com/150',
+      image: 'https://th.bing.com/th/id/OIP.2tLY6p_5ubR3VvBlrP4iyAHaE8?w=254&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
+      en_description: 'Simplified application process for international students',
+      ar_description: 'عملية تقديم مبسطة للطلاب الدوليين',
     },
   ]);
 
@@ -70,12 +70,14 @@ const About = () => {
       ),
       cell: (info) => (
         <Flex align="center">
-          <Text color={textColor}>{info.getValue()}</Text>
+          <Text color={textColor}>
+            {info.getValue()}
+          </Text>
         </Flex>
       ),
     }),
-    columnHelper.accessor('textEN', {
-      id: 'textEN',
+    columnHelper.accessor('en_description', {
+      id: 'en_description',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -83,25 +85,29 @@ const About = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Text (English)
-        </Text>
-      ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor('textAR', {
-      id: 'textAR',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Text (Arabic)
+         English Description
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor} dir="rtl">
+        <Text color={textColor}>
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('ar_description', {
+      id: 'ar_description',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+         Arabic Description
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColor}>
           {info.getValue()}
         </Text>
       ),
@@ -119,13 +125,7 @@ const About = () => {
         </Text>
       ),
       cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="About content"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
-        />
+        <img src={info.getValue()} alt="Why UniBridge" width={70} height={70} style={{ borderRadius: '8px' }} />
       ),
     }),
     columnHelper.accessor('actions', {
@@ -149,7 +149,6 @@ const About = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
-            onClick={() => console.log('Delete', info.row.original.id)}
           />
           <Icon
             w="18px"
@@ -158,7 +157,6 @@ const About = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/edit-about/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -167,7 +165,6 @@ const About = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/view-about/${info.row.original.id}`)}
           />
         </Flex>
       ),
@@ -201,21 +198,21 @@ const About = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            About Us Content
+            Why UniBridge
           </Text>
           <Button
-            variant="darkBrand"
-            color="white"
-            fontSize="sm"
-            fontWeight="500"
-            borderRadius="70px"
-            px="24px"
-            py="5px"
-            onClick={() => navigate('/admin/cms/add-about')}
+            variant='darkBrand'
+            color='white'
+            fontSize='sm'
+            fontWeight='500'
+            borderRadius='70px'
+            px='24px'
+            py='5px'
+            onClick={() => navigate('/admin/cms/add-why-unibridge')}
             width={'200px'}
           >
             <PlusSquareIcon me="10px" />
-            Add New Content
+            Add New Reason
           </Button>
         </Flex>
         <Box>
@@ -255,27 +252,30 @@ const About = () => {
               ))}
             </Thead>
             <Tbody>
-              {table.getRowModel().rows.map((row) => {
-                return (
-                  <Tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <Td
-                          key={cell.id}
-                          fontSize={{ sm: '14px' }}
-                          minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                          borderColor="transparent"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </Td>
-                      );
-                    })}
-                  </Tr>
-                );
-              })}
+              {table
+                .getRowModel()
+                .rows.slice(0, 11)
+                .map((row) => {
+                  return (
+                    <Tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => {
+                        return (
+                          <Td
+                            key={cell.id}
+                            fontSize={{ sm: '14px' }}
+                            minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                            borderColor="transparent"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </Td>
+                        );
+                      })}
+                    </Tr>
+                  );
+                })}
             </Tbody>
           </Table>
         </Box>
@@ -284,4 +284,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default WhyUniBridge;
