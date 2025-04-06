@@ -12,6 +12,7 @@ import {
   Tr,
   useColorModeValue,
   Link,
+  IconButton,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -22,7 +23,7 @@ import {
 } from '@tanstack/react-table';
 import * as React from 'react';
 import Card from 'components/card/Card';
-import { FaCheck, FaTimes, FaFilePdf } from 'react-icons/fa';
+import { FaFilePdf, FaDownload } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper();
@@ -149,14 +150,9 @@ const JoinUsRequests = () => {
       cell: (info) => (
         <Flex align="center">
           <Icon as={FaFilePdf} color="red.500" mr={2} />
-          <Link 
-            href={`/path/to/cvs/${info.getValue()}`} 
-            color="blue.500"
-            isExternal
-            _hover={{ textDecoration: 'underline' }}
-          >
-            View CV
-          </Link>
+          <Text color={textColor}>
+            {info.getValue()}
+          </Text>
         </Flex>
       ),
     }),
@@ -173,21 +169,12 @@ const JoinUsRequests = () => {
         </Text>
       ),
       cell: (info) => (
-        <Flex align="center" gap="15px">
-          <Flex border={`1px solid #01b574`} borderRadius={"5px"} padding={"5px"} align="center" gap="5px" cursor="pointer" onClick={() => handleApprove(info.row.original.id)}>
-            <Icon w="18px" h="18px" color="green.500" as={FaCheck} />
-            <Text fontSize="sm" color="green.500" fontWeight="bold">
-              Approve
-            </Text>
-          </Flex>
-    
-          <Flex w={"90px"} border={`1px solid #ee5d50`} justifyContent={"center"} borderRadius={"5px"} padding={"5px"} align="center" gap="5px" cursor="pointer" onClick={() => handleReject(info.row.original.id)}>
-            <Icon w="18px" h="18px" color="red.500" as={FaTimes} />
-            <Text fontSize="sm" color="red.500" fontWeight="bold">
-              Reject
-            </Text>
-          </Flex>
-        </Flex>
+        <IconButton
+          aria-label="Download CV"
+          icon={<FaDownload />}
+          colorScheme="green"
+          onClick={() => handleDownload(info.row.original.cv)}
+        />
       ),
     }),
   ];
@@ -204,16 +191,13 @@ const JoinUsRequests = () => {
     debugTable: true,
   });
 
-  // Handle approve action
-  const handleApprove = (id) => {
-    console.log(`Approved application with ID: ${id}`);
-    // Add your approve logic here
-  };
-
-  // Handle reject action
-  const handleReject = (id) => {
-    console.log(`Rejected application with ID: ${id}`);
-    // Add your reject logic here
+  // Handle download action
+  const handleDownload = (filename) => {
+    console.log(`Downloading CV: ${filename}`);
+    // Add your download logic here
+    // Example:
+    // const filePath = `/path/to/cvs/${filename}`;
+    // window.open(filePath, '_blank');
   };
 
   return (

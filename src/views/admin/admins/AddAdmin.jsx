@@ -10,6 +10,8 @@ import {
   Input,
   Box,
   Flex,
+  InputGroup,
+  InputRightElement,
 } from '@chakra-ui/react';
 import { ChevronDownIcon, ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import './admins.css';
@@ -28,11 +30,14 @@ const AddAdmin = () => {
   const inputBorder = useColorModeValue('gray.300', 'gray.600');
   const [selectedRole, setSelectedRole] = useState('Select a role');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     roleId: '',
+    password: '',
+    confirmPassword: '',
   });
 
   const handleInputChange = (e) => {
@@ -62,8 +67,32 @@ const AddAdmin = () => {
       return;
     }
 
+    // Validate password match
+    if (formData.password !== formData.confirmPassword) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Passwords do not match',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    // Validate password strength (optional)
+    if (formData.password.length < 8) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Password must be at least 8 characters long',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
     try {
-      const response = await createAdmin(formData).unwrap();
+      // Create payload without confirmPassword
+      const { confirmPassword, ...payload } = formData;
+      const response = await createAdmin(payload).unwrap();
       Swal.fire({
         icon: 'success',
         title: 'Success',
@@ -71,7 +100,7 @@ const AddAdmin = () => {
         confirmButtonText: 'OK',
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate('/admin/undefined/admins'); // Redirect to the admins page after successful submission
+          navigate('/admin/undefined/admins');
         }
       });
     } catch (error) {
@@ -128,7 +157,7 @@ const AddAdmin = () => {
             />
           </Box>
 
-         {/* Phone Field with Formatting */}
+          {/* Phone Field with Formatting */}
           <Box mb="3">
             <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
               Phone Number <span style={{ color: 'red' }}>*</span>
@@ -151,8 +180,68 @@ const AddAdmin = () => {
               color={textColor}
               borderColor={inputBorder}
               required
-              maxLength={14} // For formatted number like (123) 456-7890
+              maxLength={14}
             />
+          </Box>
+
+          {/* Password Field */}
+          <Box mb="3">
+            <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
+              Password <span style={{ color: 'red' }}>*</span>
+            </Text>
+            <InputGroup>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="Enter password"
+                value={formData.password}
+                onChange={handleInputChange}
+                bg={inputBg}
+                color={textColor}
+                borderColor={inputBorder}
+                required
+              />
+              <InputRightElement>
+                <Button
+                  size="sm"
+                  onClick={() => setShowPassword(!showPassword)}
+                  bg="transparent"
+                  _hover={{ bg: 'transparent' }}
+                >
+                  {showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                </Button>
+              </InputRightElement>
+            </InputGroup>
+          </Box>
+
+          {/* Confirm Password Field */}
+          <Box mb="3">
+            <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
+              Confirm Password <span style={{ color: 'red' }}>*</span>
+            </Text>
+            <InputGroup>
+              <Input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                placeholder="Confirm password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                bg={inputBg}
+                color={textColor}
+                borderColor={inputBorder}
+                required
+              />
+              <InputRightElement>
+                <Button
+                  size="sm"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  bg="transparent"
+                  _hover={{ bg: 'transparent' }}
+                >
+                  {showConfirmPassword ? <ViewOffIcon /> : <ViewIcon />}
+                </Button>
+              </InputRightElement>
+            </InputGroup>
           </Box>
 
           {/* Role Dropdown */}
