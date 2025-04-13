@@ -163,6 +163,48 @@ const routes = [
     showInSidebar: true,
     subRoutes: [
       {
+        name: 'Our Partners',
+        path: '/partners',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <Partners />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Join Us Requests',
+        path: '/pharmacy-requests',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <JoinUsRequests />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Inquires',
+        path: '/inquires',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <Inquires />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Providers',
+        path: '/providers',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <Providers />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Popular Majors',
+        path: '/majors',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <PopularMajors />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Student Testimonials',
+        path: '/student-testimonials',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <StudentTestimonials />,
+        showInSidebar: true,
+      },
+      {
         name: 'Banners',
         path: '/cms/banners',
         icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
@@ -222,16 +264,7 @@ const routes = [
     ],
   },
   /* End CMS Routes */
-  {
-    name: 'Our Partners',
-    layout: '/admin',
-    path: '/partners',
-    icon: (
-      <Icon as={VscOrganization} width="20px" height="20px" color="inherit" />
-    ),
-    component: <Partners />,
-    showInSidebar: true,
-  },
+
   {
     name: 'Our Partners',
     layout: '/admin',
@@ -240,55 +273,7 @@ const routes = [
     showInSidebar: false,
   },
 
-  /* Start Join Us Requests */
-  {
-    name: 'Join Us Requests',
-    layout: '/admin',
-    path: '/pharmacy-requests',
-    icon: (
-      <Icon
-        as={FaEnvelopeOpenText}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <JoinUsRequests />,
-    showInSidebar: true,
-  },
-  /* End Join Us Requests */
-
-  /* Start Inquires Routes */
-  {
-    name: 'Inquires',
-    layout: '/admin',
-    path: '/inquires',
-    icon: (
-      <Icon
-        as={ImQuestion}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <Inquires />,
-    showInSidebar: true,
-  },
-  /* End Inquires Routes */
-
-
-
   /* Start Providers Routes */
-  {
-    name: 'Providers',
-    layout: '/admin',
-    path: '/providers',
-    icon: (
-      <Icon as={FaPeopleCarry} width="20px" height="20px" color="inherit" />
-    ),
-    component: <Providers />,
-    showInSidebar: true,
-  },
   {
     name: 'Providers',
     layout: '/admin',
@@ -348,21 +333,6 @@ const routes = [
     /* End Categories Routes */
 
        /* Start Popular Majors Routes */
-       {
-        name: 'Popular Majors',
-        layout: '/admin',
-        path: '/majors',
-        icon: (
-          <Icon
-          as={MdBarChart}
-          width="20px"
-          height="20px"
-          color="inherit"
-          />
-        ),
-        component: <PopularMajors />,
-        showInSidebar: true,
-      },
         {
         name: 'Popular Majors',
         layout: '/admin',
@@ -373,16 +343,6 @@ const routes = [
       /* End Popular Majors Routes */
 
       /* Start  Student Testimonials Routes */
-      {
-        name: 'Student Testimonials',
-        layout: '/admin',
-        path: '/student-testimonials',
-        icon: (
-          <Icon as={TbBrandAdonisJs} width="20px" height="20px" color="inherit" />
-        ),
-        component: <StudentTestimonials />,
-        showInSidebar: true,
-      },
       {
         name: 'Student Testimonials',
         layout: '/admin',
