@@ -64,7 +64,8 @@ function SignIn() {
     try {
       const response = await loginUser(formData).unwrap();
       if (response) {
-        localStorage.setItem("token", response.data.token);
+        console.log(response.accessToken);
+        localStorage.setItem("token", response.accessToken);
         navigate("/");
       }
     } catch (err) {

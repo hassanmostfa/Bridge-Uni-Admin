@@ -28,6 +28,7 @@ import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
+import {useLogoutUserMutation} from "api/userSlice";
 export default function HeaderLinks(props) {
   const { secondary } = props;
   const { colorMode, toggleColorMode } = useColorMode();
@@ -46,11 +47,21 @@ export default function HeaderLinks(props) {
   );
   const borderButton = useColorModeValue('secondaryGray.500', 'whiteAlpha.200');
 
+  // Logout User
+  const [logoutUser] = useLogoutUserMutation();
    // Handle Logout
-   const handleLogout = () => {
+  // Handle Logout
+  const handleLogout = async () => {
+    try {
+      await logoutUser(); // if your logout endpoint requires a call
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+    // Remove token from localStorage
     localStorage.removeItem('token');
+    // Optionally redirect or reload
     window.location.reload();
-   }
+  };
   return (
     <Flex
       w={{ sm: '100%', md: 'auto' }}
