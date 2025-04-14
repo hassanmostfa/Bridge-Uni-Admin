@@ -70,6 +70,8 @@ import AddProgram from 'views/admin/studyAbroad/AddProgram';
 import OnlineApps from 'views/admin/applications/OnlineApps';
 import ShortApps from 'views/admin/applications/ShortApps';
 import StudyAbroadApps from 'views/admin/applications/StudyAbroadApps';
+import EditPrivacy from 'views/admin/privcyAndPolicy/EditPrivacy';
+import EditAbout from 'views/admin/about-us/EditAbout';
 
 const routes = [
   {
@@ -500,10 +502,25 @@ const routes = [
     showInSidebar: false,
   },
   {
+    name: 'edit About',
+    layout: '/admin', 
+    path: '/cms/edit-about/:id',
+    icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+    component: <EditAbout />,
+    showInSidebar: false,
+  },
+  {
     name: 'Add Privacy & Policy',
     layout: '/admin', 
     path: '/cms/add-privcy',
     component: <AddPrivcy />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Add Privacy & Policy',
+    layout: '/admin', 
+    path: '/cms/edit-privcy/:id',
+    component: <EditPrivacy />,
     showInSidebar: false,
   },
   {

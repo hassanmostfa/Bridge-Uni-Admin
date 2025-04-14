@@ -11,6 +11,8 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  useToast,
+  Spinner,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -24,36 +26,74 @@ import Card from 'components/card/Card';
 import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
+import { useGetAllAboutQuery } from 'api/aboutSlice';
+import { useDeleteAboutMutation } from 'api/aboutSlice';
+import Swal from 'sweetalert2';
 
 const columnHelper = createColumnHelper();
 
 const About = () => {
-  const [data, setData] = React.useState([
-    {
-      id: 1,
-      textEN: 'About our company services',
-      textAR: 'حول خدمات شركتنا',
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 2,
-      textEN: 'Our mission statement',
-      textAR: 'بيان مهمتنا',
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: 3,
-      textEN: 'Company values and vision',
-      textAR: 'قيم ورؤية الشركة',
-      image: 'https://via.placeholder.com/150',
-    },
-  ]);
-
+  const { data: aboutData, isLoading, isError, refetch } = useGetAllAboutQuery();
+  const [deleteAbout] = useDeleteAboutMutation();
+  const toast = useToast();
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  // Transform API data to match table structure
+  const data = React.useMemo(() => {
+    if (!aboutData?.data?.data) return [];
+    return aboutData.data.data.map(item => ({
+      id: item.id,
+      textEN: item.title_en || 'No English content',
+      textAR: item.title_ar || 'No Arabic content',
+      image: item.image || 'https://via.placeholder.com/150',
+    }));
+  }, [aboutData]);
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await deleteAbout(id).unwrap();
+        if (response.flag) {
+          Swal.fire(
+            'Deleted!',
+            response.message || 'About content has been deleted.',
+            'success'
+          );
+          refetch();
+        } else {
+          toast({
+            title: 'Error',
+            description: response.message || 'Failed to delete about content',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: error.data?.message || 'Failed to delete about content',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    }
+  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -86,7 +126,13 @@ const About = () => {
           Text (English)
         </Text>
       ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
+      cell: (info) => (
+        <Text color={textColor}>
+          {info.getValue().length > 50 
+            ? `${info.getValue().substring(0, 50)}...` 
+            : info.getValue()}
+        </Text>
+      ),
     }),
     columnHelper.accessor('textAR', {
       id: 'textAR',
@@ -102,7 +148,9 @@ const About = () => {
       ),
       cell: (info) => (
         <Text color={textColor} dir="rtl">
-          {info.getValue()}
+          {info.getValue().length > 50 
+            ? `${info.getValue().substring(0, 50)}...` 
+            : info.getValue()}
         </Text>
       ),
     }),
@@ -119,13 +167,21 @@ const About = () => {
         </Text>
       ),
       cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="About content"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
-        />
+        <Box boxSize="70px">
+          <img
+            src={info.getValue()}
+            alt="About content"
+            style={{ 
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '8px'
+            }}
+            onError={(e) => {
+              e.target.src = 'https://via.placeholder.com/150';
+            }}
+          />
+        </Box>
       ),
     }),
     columnHelper.accessor('actions', {
@@ -149,7 +205,7 @@ const About = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
-            onClick={() => console.log('Delete', info.row.original.id)}
+            onClick={() => handleDelete(info.row.original.id)}
           />
           <Icon
             w="18px"
@@ -183,8 +239,23 @@ const About = () => {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
   });
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" minH="100vh">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Flex justify="center" align="center" minH="100vh">
+        <Text color="red.500">Error loading about content</Text>
+      </Flex>
+    );
+  }
 
   return (
     <div className="container">

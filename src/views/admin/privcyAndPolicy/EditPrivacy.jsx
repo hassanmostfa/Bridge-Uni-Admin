@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -8,20 +8,33 @@ import {
   useColorModeValue,
   Icon,
   useToast,
+  Spinner,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddPrivacyMutation } from "api/privacySlice";
-import Swal from "sweetalert2";
+import { useNavigate, useParams } from "react-router-dom";
 
-const AddPrivcy = () => {
-  const [addPrivacy] = useAddPrivacyMutation();
+import Swal from "sweetalert2";
+import { useGetPrivacyQuery } from "api/privacySlice";
+import { useUpdatePrivacyMutation } from "api/privacySlice";
+
+const EditPrivacy = () => {
+  const { id } = useParams();
+  const [updatePrivacy] = useUpdatePrivacyMutation();
+  const { data: privacyData, isLoading, isError, refetch } = useGetPrivacyQuery(id);
   const [englishTitle, setEnglishTitle] = useState("");
   const [arabicTitle, setArabicTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
   const textColor = useColorModeValue("secondaryGray.900", "white");
+
+  // Load existing data when component mounts or data changes
+  useEffect(() => {
+    if (privacyData?.data) {
+      setEnglishTitle(privacyData.data.title_en || "");
+      setArabicTitle(privacyData.data.title_ar || "");
+    }
+  }, [privacyData]);
 
   const handleCancel = () => {
     Swal.fire({
@@ -34,8 +47,6 @@ const AddPrivcy = () => {
       confirmButtonText: 'Yes, discard changes!'
     }).then((result) => {
       if (result.isConfirmed) {
-        setEnglishTitle("");
-        setArabicTitle("");
         navigate(-1);
       }
     });
@@ -64,29 +75,32 @@ const AddPrivcy = () => {
         title_ar: arabicTitle,
       };
 
-      const response = await addPrivacy(privacyData).unwrap();
+      const response = await updatePrivacy({id,data:privacyData}).unwrap();
 
       if (response.flag) {
         await Swal.fire({
           title: 'Success!',
-          text: response.message || 'Privacy policy created successfully',
+          text: response.message || 'Privacy policy updated successfully',
           icon: 'success',
           confirmButtonText: 'OK'
         });
+        refetch();
         navigate('/admin/undefined/cms/privacy-and-policy');
       } else {
         toast({
           title: 'Error',
-          description: response.message || 'Failed to create privacy policy',
+          description: response.message || 'Failed to update privacy policy',
           status: 'error',
           duration: 5000,
           isClosable: true,
         });
       }
     } catch (error) {
+
+      
       toast({
         title: 'Error',
-        description: error.data?.message || 'Failed to create privacy policy',
+        description: error.data?.message || 'Failed to update privacy policy',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -95,6 +109,22 @@ const AddPrivcy = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" height="100vh">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Flex justify="center" align="center" height="100vh">
+        <Text color="red.500">Error loading privacy policy data</Text>
+      </Flex>
+    );
+  }
 
   return (
     <div className="container add-admin-container w-100">
@@ -107,7 +137,7 @@ const AddPrivcy = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New Privacy & Policy
+            Edit Privacy & Policy
           </Text>
           <Button
             type="button"
@@ -178,9 +208,9 @@ const AddPrivcy = () => {
               py='5px' 
               type="submit"
               isLoading={isSubmitting}
-              loadingText="Submitting..."
+              loadingText="Updating..."
             >
-              Submit
+              Update
             </Button>
           </Flex>
         </form>
@@ -189,4 +219,4 @@ const AddPrivcy = () => {
   );
 };
 
-export default AddPrivcy;
+export default EditPrivacy;

@@ -28,7 +28,6 @@ export const roleApi = createApi({
     getModules: builder.query({
       query: () => '/admin/module',
     }),
-
     addRole: builder.mutation({
       query: (role) => ({
         url: "/admin/role",

@@ -1,6 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
+import { aboutApi } from "api/aboutSlice";
 import { CategoryApi } from "api/categorySlice";
+import { filesApi } from "api/filesSlice";
+import { privacyApi } from "api/privacySlice";
 import { roleApi } from "api/roleSlice";
 import { apiService } from "api/userSlice";
 
@@ -11,6 +14,9 @@ export const store = configureStore({
     [apiService.reducerPath]: apiService.reducer,
     [roleApi.reducerPath]: roleApi.reducer,
     [CategoryApi.reducerPath]:CategoryApi.reducer,
+    [privacyApi.reducerPath]:privacyApi.reducer,
+    [aboutApi.reducerPath]:aboutApi.reducer,
+    [filesApi.reducerPath]:filesApi.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -18,6 +24,9 @@ export const store = configureStore({
       apiService.middleware,
       roleApi.middleware,
       CategoryApi.middleware,
+      privacyApi.middleware,
+      aboutApi.middleware,
+      filesApi.middleware,
     ),
 });
 
