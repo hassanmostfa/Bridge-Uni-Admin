@@ -38,6 +38,7 @@ import AddBlog from 'views/admin/blog/AddBlog';
 import Positions from 'views/admin/positions/Positions';
 import AddPosition from 'views/admin/positions/AddPositions';
 import Banner from 'views/admin/banner/Banner';
+import UpdateBanner from 'views/admin/banner/UpdateBanner';
 import AddBanner from 'views/admin/banner/AddBanner';
 import About from 'views/admin/about-us/About';
 import AddAbout from 'views/admin/about-us/AddAbout';
@@ -47,6 +48,7 @@ import WhyUniBridge from 'views/admin/why/WhyUniBridge';
 import AddReason from 'views/admin/why/AddReason';
 import Partners from 'views/admin/partners/Partners';
 import AddPartner from 'views/admin/partners/AddPartner';
+import UpdatePartner from 'views/admin/partners/UpdatePartner';
 import ProtectedRoute from 'components/protectedRoute/ProtectedRoute';
 import EditRole from 'views/admin/roles/EditRole';
 import OnlineCourses from 'views/admin/courses/OnlineCourses';
@@ -173,7 +175,7 @@ const routes = [
       },
       {
         name: 'Join Us Requests',
-        path: '/pharmacy-requests',
+        path: '/joinUs/requests',
         icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
         component: <JoinUsRequests />,
         showInSidebar: true,
@@ -528,6 +530,20 @@ const routes = [
     layout: '/admin', 
     path: '/cms/add-why-unibridge',
     component: <AddReason />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Partners',
+    layout: '/admin', 
+    path: '/cms/update-partner/:id',
+    component: <UpdatePartner />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Banners',
+    layout: '/admin', 
+    path: 'cms/edit-banner/:id',
+    component: <UpdateBanner />,
     showInSidebar: false,
   },
 ];

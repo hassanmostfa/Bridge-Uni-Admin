@@ -11,6 +11,8 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  useToast,
+  Spinner,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -24,63 +26,97 @@ import Card from 'components/card/Card';
 import { EditIcon } from '@chakra-ui/icons';
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
+import { useGetAllInquiresQuery, useDeleteInquireMutation } from '../../../api/Inquiries';
+import Swal from 'sweetalert2';
 
 const columnHelper = createColumnHelper();
 
 const Inquires = () => {
-  const [data, setData] = React.useState([
-    {
-      id: 1,
-      full_name: 'John Doe',
-      email: 'john.doe@example.com',
-      phone_no: '+1234567890',
-      nationality: 'American',
-      country_of_residence: 'United States',
-      country_of_origin: 'United States',
-    },
-    {
-      id: 2,
-      full_name: 'Maria Garcia',
-      email: 'maria.garcia@example.com',
-      phone_no: '+3498765432',
-      nationality: 'Spanish',
-      country_of_residence: 'Spain',
-      country_of_origin: 'Mexico',
-    },
-    {
-      id: 3,
-      full_name: 'Ahmed Khan',
-      email: 'ahmed.khan@example.com',
-      phone_no: '+971501234567',
-      nationality: 'Emirati',
-      country_of_residence: 'UAE',
-      country_of_origin: 'Pakistan',
-    },
-    {
-      id: 4,
-      full_name: 'Li Wei',
-      email: 'li.wei@example.com',
-      phone_no: '+8613812345678',
-      nationality: 'Chinese',
-      country_of_residence: 'China',
-      country_of_origin: 'China',
-    },
-    {
-      id: 5,
-      full_name: 'Sophie Martin',
-      email: 'sophie.martin@example.com',
-      phone_no: '+33123456789',
-      nationality: 'French',
-      country_of_residence: 'France',
-      country_of_origin: 'Belgium',
-    },
-  ]);
-
+  const { data: apiResponse, isLoading, error, refetch } = useGetAllInquiresQuery();
+  const [deleteInquiry] = useDeleteInquireMutation();
+  const [tableData, setTableData] = React.useState([]);
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
+  const toast = useToast();
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  React.useEffect(() => {
+    if (apiResponse?.flag && apiResponse?.data?.data) {
+      const transformedData = apiResponse.data.data.map(item => ({
+        id: item.id,
+        full_name: item.full_name,
+        email: item.email,
+        phone: item.phone,
+        nationality: item.nationality,
+        country_of_residence: item.country_of_residence,
+        country_of_origin: item.country_of_origin,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt
+      }));
+      setTableData(transformedData);
+    }
+  }, [apiResponse]);
+
+     // Trigger refetch when component mounts (navigates to)
+     React.useEffect(() => {
+      // Only trigger refetch if the data is not being loaded
+      if (!isLoading) {
+        refetch(); // Manually trigger refetch when component is mounted
+      }
+    }, [refetch, isLoading]); // Dependency array to ensure it only runs on mount
+    
+    
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await deleteInquiry(id).unwrap();
+        if (response.flag) {
+          await Swal.fire(
+            'Deleted!',
+            'Inquiry has been deleted.',
+            'success'
+          );
+          refetch();
+        } else {
+          toast({
+            title: 'Error',
+            description: response.message || 'Failed to delete inquiry.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: error?.data?.message || 'An unexpected error occurred.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    }
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/admin/edit/inquiry/${id}`);
+  };
+
+  const handleView = (id) => {
+    navigate(`/admin/view/inquiry/${id}`);
+  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -97,7 +133,7 @@ const Inquires = () => {
       ),
       cell: (info) => (
         <Flex align="center">
-          <Text color={textColor}>
+          <Text color={textColor} fontSize="sm">
             {info.getValue()}
           </Text>
         </Flex>
@@ -116,7 +152,7 @@ const Inquires = () => {
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -134,13 +170,13 @@ const Inquires = () => {
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
     }),
-    columnHelper.accessor('phone_no', {
-      id: 'phone_no',
+    columnHelper.accessor('phone', {
+      id: 'phone',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -148,11 +184,11 @@ const Inquires = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Phone No
+          Phone
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -170,7 +206,7 @@ const Inquires = () => {
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -184,11 +220,11 @@ const Inquires = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Country of Residence
+          Residence
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -202,11 +238,11 @@ const Inquires = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Country of Origin
+          Origin
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -232,25 +268,8 @@ const Inquires = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
+            title="Delete Inquiry"
             onClick={() => handleDelete(info.row.original.id)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="green.500"
-            as={EditIcon}
-            cursor="pointer"
-            onClick={() => handleEdit(info.row.original.id)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
-            onClick={() => handleView(info.row.original.id)}
           />
         </Flex>
       ),
@@ -258,7 +277,7 @@ const Inquires = () => {
   ];
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     state: {
       sorting,
@@ -266,26 +285,26 @@ const Inquires = () => {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
   });
 
-  // Handle delete action
-  const handleDelete = (id) => {
-    setData(data.filter((inquiry) => inquiry.id !== id));
-  };
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" h="100px">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
 
-  // Handle edit action
-  const handleEdit = (id) => {
-    navigate(`/admin/edit/inquiry/${id}`);
-  };
-
-  // Handle view action
-  const handleView = (id) => {
-    navigate(`/admin/view/inquiry/${id}`);
-  };
+  if (error) {
+    return (
+      <Text color="red.500" textAlign="center" mt={4}>
+        Error: {error.message || 'Failed to load inquiries'}
+      </Text>
+    );
+  }
 
   return (
-    <div className="container">
+    <Box className="container">
       <Card
         flexDirection="column"
         w="100%"
@@ -301,19 +320,6 @@ const Inquires = () => {
           >
             All Inquiries
           </Text>
-          {/* <Button
-            variant='darkBrand'
-            color='white'
-            fontSize='sm'
-            fontWeight='500'
-            borderRadius='70px'
-            px='24px'
-            py='5px'
-            onClick={() => navigate('/admin/add-inquiry')}
-            width={'200px'}
-          >
-            Add New Inquiry
-          </Button> */}
         </Flex>
         <Box>
           <Table variant="simple" color="gray.500" mb="24px" mt="12px">
@@ -352,35 +358,28 @@ const Inquires = () => {
               ))}
             </Thead>
             <Tbody>
-              {table
-                .getRowModel()
-                .rows.slice(0, 11)
-                .map((row) => {
-                  return (
-                    <Tr key={row.id}>
-                      {row.getVisibleCells().map((cell) => {
-                        return (
-                          <Td
-                            key={cell.id}
-                            fontSize={{ sm: '14px' }}
-                            minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                            borderColor="transparent"
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </Td>
-                        );
-                      })}
-                    </Tr>
-                  );
-                })}
+              {table.getRowModel().rows.map((row) => (
+                <Tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <Td
+                      key={cell.id}
+                      fontSize={{ sm: '14px' }}
+                      minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                      borderColor="transparent"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </Td>
+                  ))}
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </Box>
       </Card>
-    </div>
+    </Box>
   );
 };
 

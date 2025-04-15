@@ -34,6 +34,8 @@ const columnHelper = createColumnHelper();
 
 const About = () => {
   const { data: aboutData, isLoading, isError, refetch } = useGetAllAboutQuery();
+  console.log("About Data:", aboutData);
+  
   const [deleteAbout] = useDeleteAboutMutation();
   const toast = useToast();
   const navigate = useNavigate();

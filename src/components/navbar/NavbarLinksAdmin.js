@@ -61,6 +61,8 @@ export default function HeaderLinks(props) {
     localStorage.removeItem('token');
     // Optionally redirect or reload
     window.location.reload();
+    window.location.href = '/admin/auth/sign-in';
+    
   };
   return (
     <Flex

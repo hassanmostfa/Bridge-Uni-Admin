@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -10,14 +10,17 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import { IoMdArrowBack } from 'react-icons/io';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FaUpload } from 'react-icons/fa6';
-import { useAddPartnerMutation } from '../../../api/partners';
+import { useUpdatePartnerMutation } from '../../../api/partners';
 import { useAddFileMutation } from '../../../api/filesSlice';
+import { useGetPartnerByIdQuery } from '../../../api/partners';
 
-const AddPartner = () => {
+const UpdatePartner = () => {
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     image: null,
+    currentImageUrl: '',
   });
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,7 +32,17 @@ const AddPartner = () => {
   const toast = useToast();
 
   const [addFile] = useAddFileMutation();
-  const [addPartner] = useAddPartnerMutation();
+  const [updatePartner] = useUpdatePartnerMutation();
+  const { data: partnerData, isLoading, error } = useGetPartnerByIdQuery(id);
+
+  useEffect(() => {
+    if (partnerData?.data) {
+      setFormData(prev => ({
+        ...prev,
+        currentImageUrl: partnerData.data.image
+      }));
+    }
+  }, [partnerData]);
 
   const handleImageUpload = (file) => {
     if (file && file.type.startsWith('image/')) {
@@ -69,48 +82,44 @@ const AddPartner = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.image) {
-      toast({
-        title: 'Error',
-        description: 'Please upload a logo',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      // First upload the image
-      const fileFormData = new FormData();
-      fileFormData.append('img', formData.image);
+      let imageUrl = formData.currentImageUrl;
 
-      const fileResponse = await addFile(fileFormData).unwrap();
-      
-      if (!fileResponse.flag) {
-        throw new Error(fileResponse.message || 'Failed to upload image');
+      // If a new image was uploaded, upload it first
+      if (formData.image) {
+        const fileFormData = new FormData();
+        fileFormData.append('img', formData.image);
+
+        const fileResponse = await addFile(fileFormData).unwrap();
+        
+        if (!fileResponse.flag) {
+          throw new Error(fileResponse.message || 'Failed to upload image');
+        }
+        imageUrl = fileResponse.url;
       }
 
-      // Then create the partner with the image URL
-      const partnerResponse = await addPartner({
-        image: fileResponse.url
+      // Then update the partner with the new data
+      const partnerResponse = await updatePartner({
+        id,
+        data: { image: imageUrl }  // Make sure to wrap in data object
       }).unwrap();
 
       if (!partnerResponse.flag) {
-        throw new Error(partnerResponse.message || 'Failed to add partner');
+        throw new Error(partnerResponse.message || 'Failed to update partner');
       }
 
       toast({
         title: 'Success',
-        description: 'Partner added successfully',
+        description: 'Partner updated successfully',
         status: 'success',
         duration: 5000,
         isClosable: true,
       });
 
       navigate('/admin/undefined/partners');
+      
     } catch (error) {
       toast({
         title: 'Error',
@@ -124,12 +133,15 @@ const AddPartner = () => {
     }
   };
 
+  if (isLoading) return <Spinner />;
+  if (error) return <Text>Error loading partner data</Text>;
+
   return (
     <Box w="100%" className="container">
       <Box bg={cardBg} className="add-admin-card shadow p-4 w-100">
         <div className="mb-3 d-flex justify-content-between align-items-center">
           <Text color={textColor} fontSize="22px" fontWeight="700">
-            Add New Partner
+            Update Partner
           </Text>
           <Button
             type="button"
@@ -179,14 +191,13 @@ const AddPartner = () => {
                   type="file"
                   id="fileInput"
                   hidden
-                  accept="image/*"
                   onChange={handleFileInputChange}
                 />
               </Button>
-              {formData.image && (
+              {(formData.image || formData.currentImageUrl) && (
                 <Box mt={4}>
                   <img
-                    src={URL.createObjectURL(formData.image)}
+                    src={formData.image ? URL.createObjectURL(formData.image) : formData.currentImageUrl}
                     alt="Partner logo preview"
                     style={{
                       maxWidth: '100%',
@@ -194,9 +205,11 @@ const AddPartner = () => {
                       borderRadius: '8px'
                     }}
                   />
-                  <Text mt={2} fontSize="sm" color="gray.600">
-                    {formData.image.name}
-                  </Text>
+                  {formData.image && (
+                    <Text mt={2} fontSize="sm" color="gray.600">
+                      {formData.image.name}
+                    </Text>
+                  )}
                 </Box>
               )}
             </Box>
@@ -225,7 +238,7 @@ const AddPartner = () => {
               onClick={handleSubmit}
               isDisabled={isSubmitting}
             >
-              {isSubmitting ? <Spinner size="sm" /> : 'Save Partner'}
+              {isSubmitting ? <Spinner size="sm" /> : 'Update Partner'}
             </Button>
           </Flex>
         </Box>
@@ -234,4 +247,4 @@ const AddPartner = () => {
   );
 };
 
-export default AddPartner;
+export default UpdatePartner;

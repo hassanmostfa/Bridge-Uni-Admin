@@ -11,6 +11,8 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  useToast,
+  Spinner,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -22,36 +24,84 @@ import {
 import * as React from 'react';
 import Card from 'components/card/Card';
 import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
-import { FaEye, FaTrash } from 'react-icons/fa6';
+import { FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
+import { useGetAllPartnersQuery, useDeletePartnerMutation } from "../../../api/partners";
+import Swal from "sweetalert2";
 
 const columnHelper = createColumnHelper();
 
 const Partners = () => {
-  const [data, setData] = React.useState([
-    {
-      id: 1,
-      logo: 'https://images.pexels.com/photos/2351858/pexels-photo-2351858.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      id: 2,
-      logo: 'https://images.pexels.com/photos/125779/pexels-photo-125779.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      id: 3,
-      logo: 'https://images.pexels.com/photos/1961795/pexels-photo-1961795.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      id: 4,
-      logo: 'https://images.pexels.com/photos/1878821/pexels-photo-1878821.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-  ]);
-
+  const { data: apiResponse, isLoading, error, refetch } = useGetAllPartnersQuery();
+  const [deletePartner, { isLoading: isLoadingDelete }] = useDeletePartnerMutation();
+  const [tableData, setTableData] = React.useState([]);
+  const toast = useToast();
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  React.useEffect(() => {
+    if (apiResponse?.flag && apiResponse?.data?.data) {
+      const transformedData = apiResponse.data.data.map(item => ({
+        id: item.id,
+        logo: item.image,
+      }));
+      setTableData(transformedData);
+    }
+  }, [apiResponse]);
+
+   // Trigger refetch when component mounts (navigates to)
+   React.useEffect(() => {
+    // Only trigger refetch if the data is not being loaded
+    if (!isLoading) {
+      refetch(); // Manually trigger refetch when component is mounted
+    }
+  }, [refetch, isLoading]); // Dependency array to ensure it only runs on mount
+  
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await deletePartner(id).unwrap();
+        
+        if (response.flag) {
+          await Swal.fire(
+            'Deleted!',
+            'Partner has been deleted.',
+            'success'
+          );
+          refetch();
+        } else {
+          toast({
+            title: 'Error',
+            description: response.message || 'Failed to delete partner.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: error?.data?.message || 'An unexpected error occurred.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    }
+  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -66,10 +116,9 @@ const Partners = () => {
           ID
         </Text>
       ),
-
       cell: (info) => (
         <Flex align="center">
-          <Text color={textColor}>
+          <Text color={textColor} fontSize="sm">
             {info.getValue()}
           </Text>
         </Flex>
@@ -89,18 +138,18 @@ const Partners = () => {
         </Text>
       ),
       cell: (info) => (
-        <img 
-          src={info.getValue()} 
-          alt="Partner Logo" 
-          width={100} 
-          height={60} 
-          style={{ 
-            borderRadius: '8px',
-            objectFit: 'contain',
-            maxWidth: '100%',
-            height: 'auto'
-          }} 
-        />
+        <Box maxW="150px">
+          <img 
+            src={info.getValue()} 
+            alt="Partner Logo" 
+            style={{ 
+              borderRadius: '8px',
+              objectFit: 'contain',
+              maxWidth: '100%',
+              maxHeight: '60px'
+            }} 
+          />
+        </Box>
       ),
     }),
     columnHelper.accessor('actions', {
@@ -121,28 +170,22 @@ const Partners = () => {
             w="18px"
             h="18px"
             me="10px"
-            color="red.500"
-            as={FaTrash}
-            cursor="pointer"
-            onClick={() => {
-              setData(data.filter(item => item.id !== info.row.original.id));
-            }}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
             color="green.500"
             as={EditIcon}
             cursor="pointer"
+            title="Edit Partner"
+            onClick={() => navigate(`/admin/cms/update-partner/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
             h="18px"
             me="10px"
-            color="blue.500"
-            as={FaEye}
+            color="red.500"
+            as={FaTrash}
             cursor="pointer"
+            title="Delete Partner"
+            onClick={() => handleDelete(info.row.original.id)}
+            disabled={isLoadingDelete}
           />
         </Flex>
       ),
@@ -150,7 +193,7 @@ const Partners = () => {
   ];
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     state: {
       sorting,
@@ -158,11 +201,26 @@ const Partners = () => {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
   });
 
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" h="100px">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  if (error) {
+    return (
+      <Text color="red.500" textAlign="center" mt={4}>
+        Error: {error.message || 'Failed to load partners'}
+      </Text>
+    );
+  }
+
   return (
-    <div className="container">
+    <Box className="container">
       <Card
         flexDirection="column"
         w="100%"
@@ -176,7 +234,7 @@ const Partners = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            Partner Logos
+            Partners
           </Text>
           <Button
             variant='darkBrand'
@@ -187,9 +245,9 @@ const Partners = () => {
             px='24px'
             py='5px'
             onClick={() => navigate('/admin/add-partner')}
-            width={'200px'}
+            minW="200px"
+            leftIcon={<PlusSquareIcon />}
           >
-            <PlusSquareIcon me="10px" />
             Add New Partner
           </Button>
         </Flex>
@@ -230,34 +288,28 @@ const Partners = () => {
               ))}
             </Thead>
             <Tbody>
-              {table
-                .getRowModel()
-                .rows.map((row) => {
-                  return (
-                    <Tr key={row.id}>
-                      {row.getVisibleCells().map((cell) => {
-                        return (
-                          <Td
-                            key={cell.id}
-                            fontSize={{ sm: '14px' }}
-                            minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                            borderColor="transparent"
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </Td>
-                        );
-                      })}
-                    </Tr>
-                  );
-                })}
+              {table.getRowModel().rows.map((row) => (
+                <Tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <Td
+                      key={cell.id}
+                      fontSize={{ sm: '14px' }}
+                      minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                      borderColor="transparent"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </Td>
+                  ))}
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </Box>
       </Card>
-    </div>
+    </Box>
   );
 };
 

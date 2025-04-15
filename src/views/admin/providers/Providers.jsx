@@ -11,15 +11,7 @@ import {
   Thead,
   Tr,
   useColorModeValue,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   useDisclosure,
-  Checkbox,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -66,39 +58,12 @@ const Providers = () => {
     },
   ]);
 
-  const [selectedProviderId, setSelectedProviderId] = React.useState(null);
-  const [selectedClinics, setSelectedClinics] = React.useState([]);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
-
-  const clinics = [
-    { id: 1, name: 'Clinic A' },
-    { id: 2, name: 'Clinic B' },
-    { id: 3, name: 'Clinic C' },
-  ];
-
-  const handleAssignClick = (providerId) => {
-    setSelectedProviderId(providerId);
-    onOpen();
-  };
-
-  const handleClinicSelection = (clinicId) => {
-    if (selectedClinics.includes(clinicId)) {
-      setSelectedClinics(selectedClinics.filter((id) => id !== clinicId));
-    } else {
-      setSelectedClinics([...selectedClinics, clinicId]);
-    }
-  };
-
-  const handleAssignClinics = () => {
-    console.log(`Assigning clinics ${selectedClinics.join(', ')} to provider ${selectedProviderId}`);
-    onClose();
-    setSelectedClinics([]);
-  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -194,16 +159,6 @@ const Providers = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color={textColor}
-            as={CgAssign}
-            cursor="pointer"
-            title="Assign to clinic"
-            onClick={() => handleAssignClick(info.row.original.id)}
           />
         </Flex>
       ),
@@ -318,46 +273,6 @@ const Providers = () => {
           </Table>
         </Box>
       </Card>
-
-      {/* Modal for Assigning Clinics */}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Assign Clinics to Provider</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {clinics.map((clinic) => (
-              <Box key={clinic.id} mb={2}>
-                <Checkbox
-                  isChecked={selectedClinics.includes(clinic.id)}
-                  onChange={() => handleClinicSelection(clinic.id)}
-                  colorScheme="brandScheme"
-                >
-                  {clinic.name}
-                </Checkbox>
-              </Box>
-            ))}
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              variant="darkBrand"
-              color="white"
-              fontSize="sm"
-              fontWeight="500"
-              borderRadius="70px"
-              px="24px"
-              py="5px"
-              mr={3}
-              onClick={handleAssignClinics}
-            >
-              Assign
-            </Button>
-            <Button bg={useColorModeValue('gray.200', 'gray.600')} mr={3} onClick={onClose}>
-              Cancel
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </div>
   );
 };
