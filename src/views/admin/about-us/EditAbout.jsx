@@ -116,7 +116,7 @@ const EditAbout = () => {
 
         // Upload new image
         const formData = new FormData();
-        formData.append("file", image);
+        formData.append("img", image);
         const uploadResponse = await addFile(formData).unwrap();
         
         if (!uploadResponse.flag || !uploadResponse.url) {
@@ -144,7 +144,7 @@ const EditAbout = () => {
           confirmButtonText: "OK",
         });
         refetch();
-        navigate("/admin/cms/about");
+        navigate("/admin/undefined/cms/about-us");
       } else {
         throw new Error(response.message || "Failed to update about content");
       }

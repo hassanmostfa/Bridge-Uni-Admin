@@ -119,7 +119,7 @@ const EditAdmin = () => {
         duration: 5000,
         isClosable: true,
       });
-      navigate('/admin/admins');
+      navigate('/admin/undefined/admins');
     } catch (error) {
       console.error('Update error:', error);
       let errorMessage = 'Failed to update admin';

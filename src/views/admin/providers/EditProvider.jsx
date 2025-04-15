@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -13,14 +13,18 @@ import {
   FormLabel,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddProviderMutation } from "api/providerSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { useUpdateProviderMutation, useGetProviderQuery } from "api/providerSlice";
 import Swal from "sweetalert2";
 
-const AddProvider = () => {
+const EditProvider = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const [createProvider, { isLoading }] = useAddProviderMutation();
+  
+  // Fetch provider data
+  const { data: providerData, isLoading: isFetching } = useGetProviderQuery(id);
+  const [updateProvider, { isLoading: isUpdating }] = useUpdateProviderMutation();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -31,6 +35,16 @@ const AddProvider = () => {
   // Theme colors
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const cardBg = useColorModeValue("white", "navy.700");
+
+  // Populate form when data is loaded
+  useEffect(() => {
+    if (providerData?.data) {
+      setFormData({
+        title_ar: providerData.data.title_ar || "",
+        title_en: providerData.data.title_en || ""
+      });
+    }
+  }, [providerData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -55,22 +69,22 @@ const AddProvider = () => {
     }
 
     try {
-      await createProvider(formData).unwrap();
+      await updateProvider({ id, data:{...formData} }).unwrap();
       
       Swal.fire({
         icon: 'success',
         title: 'Success',
-        text: 'Provider created successfully',
+        text: 'Provider updated successfully',
         confirmButtonText: 'OK',
       }).then(() => {
         navigate('/admin/undefined/providers');
       });
       
     } catch (error) {
-      console.error("Create provider error:", error);
+      console.error("Update provider error:", error);
       const errorMessage = error.data?.context?.error?.errors?.[0]?.message || 
-                         error.data?.message || 
-                         'Failed to create provider';
+            error.data?.message || 
+            'Failed to update provider';
       
       toast({
         title: "Error",
@@ -83,18 +97,30 @@ const AddProvider = () => {
   };
 
   const handleReset = () => {
-    setFormData({
-      title_ar: "",
-      title_en: ""
-    });
+    if (providerData?.data) {
+      setFormData({
+        title_ar: providerData.data.title_ar || "",
+        title_en: providerData.data.title_en || ""
+      });
+    }
   };
+
+  if (isFetching) {
+    return (
+      <Box p={{ base: 4, md: 6 }} className="container">
+        <Card w="100%" bg={cardBg} borderRadius="lg" boxShadow="sm" p={6}>
+          <Text>Loading provider data...</Text>
+        </Card>
+      </Box>
+    );
+  }
 
   return (
     <Box p={{ base: 4, md: 6 }} className="container">
-      <Card  w="100%" bg={cardBg} borderRadius="lg" boxShadow="sm" p={6}>
+      <Card w="100%" bg={cardBg} borderRadius="lg" boxShadow="sm" p={6}>
         <Flex justify="space-between" align="center" mb={6}>
           <Text fontSize="2xl" fontWeight="bold" color={textColor}>
-            Add New Provider
+            Edit Provider
           </Text>
           <Button
             leftIcon={<IoMdArrowBack />}
@@ -143,10 +169,10 @@ const AddProvider = () => {
             <Button
               type="submit"
               colorScheme="blue"
-              isLoading={isLoading}
-              loadingText="Submitting"
+              isLoading={isUpdating}
+              loadingText="Updating"
             >
-              Save Provider
+              Update Provider
             </Button>
           </Flex>
         </form>
@@ -155,4 +181,4 @@ const AddProvider = () => {
   );
 };
 
-export default AddProvider;
+export default EditProvider;

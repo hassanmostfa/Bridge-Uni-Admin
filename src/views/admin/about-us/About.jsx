@@ -35,7 +35,9 @@ const columnHelper = createColumnHelper();
 const About = () => {
   const { data: aboutData, isLoading, isError, refetch } = useGetAllAboutQuery();
   console.log("About Data:", aboutData);
-  
+  React.useEffect(()=>{
+    refetch();
+  },[])
   const [deleteAbout] = useDeleteAboutMutation();
   const toast = useToast();
   const navigate = useNavigate();
@@ -218,7 +220,7 @@ const About = () => {
             cursor="pointer"
             onClick={() => navigate(`/admin/cms/edit-about/${info.row.original.id}`)}
           />
-          <Icon
+          {/* <Icon
             w="18px"
             h="18px"
             me="10px"
@@ -226,7 +228,7 @@ const About = () => {
             as={FaEye}
             cursor="pointer"
             onClick={() => navigate(`/admin/cms/view-about/${info.row.original.id}`)}
-          />
+          /> */}
         </Flex>
       ),
     }),

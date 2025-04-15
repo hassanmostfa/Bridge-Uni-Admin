@@ -26,39 +26,57 @@ import { FaTrash, FaWhatsapp } from 'react-icons/fa6';
 import { MdEmail, MdSupportAgent } from 'react-icons/md';
 import { BsTelephoneFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
+import { useGetAllContactsQuery, useDeleteContactMutation } from 'api/contactSlice';
+import Swal from 'sweetalert2';
 
 const columnHelper = createColumnHelper();
 
 const Contacts = () => {
-  const [data, setData] = React.useState([
-    {
-      id: 1,
-      chatSupportEmail: 'support@example.com',
-      email: 'info@example.com',
-      phoneNumber: '+201234567890',
-      whatsappNumber: '+201234567890',
-    },
-    {
-      id: 2,
-      chatSupportEmail: 'help@company.com',
-      email: 'contact@company.com',
-      phoneNumber: '+201112223344',
-      whatsappNumber: '+201112223344',
-    },
-    {
-      id: 3,
-      chatSupportEmail: 'assistance@service.org',
-      email: 'hello@service.org',
-      phoneNumber: '+201556677889',
-      whatsappNumber: '+201556677889',
-    },
-  ]);
-
+  const { data: contacts = [], isLoading, isError, refetch } = useGetAllContactsQuery();
+  
+  const [deleteContact] = useDeleteContactMutation();
+  React.useEffect(()=>{
+    refetch();
+  },[]);
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  // Handle delete contact
+  const handleDeleteContact = async (id) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
+      });
+
+      if (result.isConfirmed) {
+        await deleteContact(id).unwrap();
+        await refetch();
+        Swal.fire('Deleted!', 'The contact has been deleted.', 'success');
+      }
+    } catch (error) {
+      console.error('Failed to delete contact:', error);
+      Swal.fire('Error!', error.data?.message || 'Failed to delete the contact.', 'error');
+    }
+  };
+
+  // Handle add new contact
+  const handleAddContact = () => {
+    navigate('/admin/add-contact');
+  };
+
+  // Handle edit contact
+  const handleEditContact = (id) => {
+    navigate(`/admin/edit-contact/${id}`);
+  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -79,7 +97,7 @@ const Contacts = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('chatSupportEmail', {
+    columnHelper.accessor('chat_support_email', {
       id: 'chatSupportEmail',
       header: () => (
         <Text
@@ -117,7 +135,7 @@ const Contacts = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('phoneNumber', {
+    columnHelper.accessor('phone', {
       id: 'phoneNumber',
       header: () => (
         <Text
@@ -136,7 +154,7 @@ const Contacts = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('whatsappNumber', {
+    columnHelper.accessor('whatsapp', {
       id: 'whatsappNumber',
       header: () => (
         <Text
@@ -176,7 +194,7 @@ const Contacts = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
-            onClick={() => console.log('Delete', info.row.original.id)}
+            onClick={() => handleDeleteContact(info.row.original.id)}
           />
           <Icon
             w="18px"
@@ -185,7 +203,7 @@ const Contacts = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/edit-contact/${info.row.original.id}`)}
+            onClick={() => handleEditContact(info.row.original.id)}
           />
         </Flex>
       ),
@@ -193,7 +211,7 @@ const Contacts = () => {
   ];
 
   const table = useReactTable({
-    data,
+    data: contacts?.data?.data,
     columns,
     state: {
       sorting,
@@ -203,6 +221,22 @@ const Contacts = () => {
     getSortedRowModel: getSortedRowModel(),
     debugTable: true,
   });
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" p="20px" mt="80px">
+        <Text>Loading contacts...</Text>
+      </Flex>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Flex justify="center" p="20px" mt="80px">
+        <Text color="red.500">Error loading contacts</Text>
+      </Flex>
+    );
+  }
 
   return (
     <div className="container">
@@ -229,7 +263,7 @@ const Contacts = () => {
             borderRadius="70px"
             px="24px"
             py="5px"
-            onClick={() => navigate('/admin/add-contact')}
+            onClick={handleAddContact}
             width={'200px'}
           >
             <PlusSquareIcon me="10px" />

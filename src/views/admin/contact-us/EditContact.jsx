@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -10,17 +10,20 @@ import {
   FormControl,
   FormLabel,
   useToast,
+  Spinner,
 } from "@chakra-ui/react";
 import "./blog.css";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { MdEmail, MdSupportAgent } from "react-icons/md";
 import { BsTelephoneFill } from "react-icons/bs";
 import { FaWhatsapp } from "react-icons/fa6";
-import { useAddContactMutation } from "api/contactSlice";
+import { useGetAllContactsQuery, useUpdateContactMutation } from "api/contactSlice";
 
-const AddContact = () => {
-  const [addContact] = useAddContactMutation();
+const EditContact = () => {
+  const { id } = useParams();
+  const { data: contacts, isLoading, isError } = useGetAllContactsQuery();
+  const [updateContact] = useUpdateContactMutation();
   const toast = useToast();
   const navigate = useNavigate();
   
@@ -34,6 +37,21 @@ const AddContact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const textColor = useColorModeValue("secondaryGray.900", "white");
 
+  // Find and set the contact data when component mounts or contacts data changes
+  useEffect(() => {
+    if (contacts && id) {
+      const contactToEdit = contacts?.data?.data.find(contact => contact.id.toString() === id.toString());
+      if (contactToEdit) {
+        setFormData({
+          chat_support_email: contactToEdit.chat_support_email || "",
+          email: contactToEdit.email || "",
+          phone: contactToEdit.phone || "",
+          whatsapp: contactToEdit.whatsapp || ""
+        });
+      }
+    }
+  }, [contacts, id]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -43,12 +61,7 @@ const AddContact = () => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      chat_support_email: "",
-      email: "",
-      phone: "",
-      whatsapp: ""
-    });
+    navigate("/admin/undefined/contacts");
   };
 
   const handleSubmit = async (e) => {
@@ -56,10 +69,13 @@ const AddContact = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await addContact(formData).unwrap();
+      const response = await updateContact({
+        id,
+        data:{...formData}
+      }).unwrap();
       
       toast({
-        title: "Contact added successfully",
+        title: "Contact updated successfully",
         status: "success",
         duration: 5000,
         isClosable: true,
@@ -67,10 +83,10 @@ const AddContact = () => {
       
       navigate("/admin/undefined/contacts");
     } catch (err) {
-      console.error("Failed to add contact:", err);
+      console.error("Failed to update contact:", err);
       
       toast({
-        title: "Error adding contact",
+        title: "Error updating contact",
         description: err.data?.message || "Please try again",
         status: "error",
         duration: 5000,
@@ -80,6 +96,22 @@ const AddContact = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" minH="100vh">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Flex justify="center" align="center" minH="100vh">
+        <Text color="red.500">Error loading contact data</Text>
+      </Flex>
+    );
+  }
 
   return (
     <div className="container add-admin-container w-100">
@@ -92,7 +124,7 @@ const AddContact = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add Contact Information
+            Edit Contact Information
           </Text>
           <Button
             type="button"
@@ -106,12 +138,11 @@ const AddContact = () => {
         </div>
         <form onSubmit={handleSubmit}>
           {/* Chat Support Email Field */}
-          <FormControl mb={4} >
-            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
-              <Flex align="center" gap={2}>
-                <Icon as={MdSupportAgent} color="blue.500" />
-                <span>Chat Support Email <span style={{ color: "red" }}>*</span></span>
-              </Flex>
+          <FormControl mb={4}>
+            <FormLabel color={textColor} fontSize="sm" fontWeight="700" display="flex" alignItems="center" gap={2}>
+              <Icon as={MdSupportAgent} color="blue.500" />
+              Chat Support Email
+              <Text as="span" color="red.500" ml={1}>*</Text>
             </FormLabel>
             <Input
               name="chat_support_email"
@@ -124,12 +155,11 @@ const AddContact = () => {
           </FormControl>
 
           {/* Email Field */}
-          <FormControl mb={4} >
-            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
-              <Flex align="center" gap={2}>
-                <Icon as={MdEmail} color="red.500" />
-                <span>Email Address <span style={{ color: "red" }}>*</span></span>
-              </Flex>
+          <FormControl mb={4}>
+            <FormLabel color={textColor} fontSize="sm" fontWeight="700" display="flex" alignItems="center" gap={2}>
+              <Icon as={MdEmail} color="red.500" />
+              Email Address
+              <Text as="span" color="red.500" ml={1}>*</Text>
             </FormLabel>
             <Input
               name="email"
@@ -142,12 +172,11 @@ const AddContact = () => {
           </FormControl>
 
           {/* Phone Number Field */}
-          <FormControl mb={4} >
-            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
-              <Flex align="center" gap={2}>
-                <Icon as={BsTelephoneFill} color="green.500" />
-                <span>Phone Number <span style={{ color: "red" }}>*</span></span>
-              </Flex>
+          <FormControl mb={4}>
+            <FormLabel color={textColor} fontSize="sm" fontWeight="700" display="flex" alignItems="center" gap={2}>
+              <Icon as={BsTelephoneFill} color="green.500" />
+              Phone Number
+              <Text as="span" color="red.500" ml={1}>*</Text>
             </FormLabel>
             <Input
               name="phone"
@@ -160,12 +189,11 @@ const AddContact = () => {
           </FormControl>
 
           {/* WhatsApp Number Field */}
-          <FormControl mb={4} >
-            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
-              <Flex align="center" gap={2}>
-                <Icon as={FaWhatsapp} color="green.500" />
-                <span>WhatsApp Number <span style={{ color: "red" }}>*</span></span>
-              </Flex>
+          <FormControl mb={4}>
+            <FormLabel color={textColor} fontSize="sm" fontWeight="700" display="flex" alignItems="center" gap={2}>
+              <Icon as={FaWhatsapp} color="green.500" />
+              WhatsApp Number
+              <Text as="span" color="red.500" ml={1}>*</Text>
             </FormLabel>
             <Input
               name="whatsapp"
@@ -201,7 +229,7 @@ const AddContact = () => {
               isLoading={isSubmitting}
               loadingText="Saving..."
             >
-              Save
+              Update
             </Button>
           </Flex>
         </form>
@@ -210,4 +238,4 @@ const AddContact = () => {
   );
 };
 
-export default AddContact;
+export default EditContact;

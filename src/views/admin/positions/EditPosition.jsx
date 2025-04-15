@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -12,21 +12,35 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddPositionMutation } from "api/positionSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { useUpdatePositionMutation, useGetPositionQuery } from "api/positionSlice";
 import Swal from "sweetalert2";
 
-const AddPositions = () => {
-  const [createPosition, { isLoading }] = useAddPositionMutation();
+const EditPosition = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
   const textColor = useColorModeValue("secondaryGray.900", "white");
+
+  // Fetch position data
+  const { data: positionData, isLoading: isFetching } = useGetPositionQuery(id);
+  const [updatePosition, { isLoading: isUpdating }] = useUpdatePositionMutation();
 
   // Form state
   const [formData, setFormData] = useState({
     title_en: "",
     title_ar: ""
   });
+
+  // Populate form when data is loaded
+  useEffect(() => {
+    if (positionData?.data) {
+      setFormData({
+        title_en: positionData.data.title_en || "",
+        title_ar: positionData.data.title_ar || ""
+      });
+    }
+  }, [positionData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -37,10 +51,12 @@ const AddPositions = () => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      title_en: "",
-      title_ar: ""
-    });
+    if (positionData?.data) {
+      setFormData({
+        title_en: positionData.data.title_en || "",
+        title_ar: positionData.data.title_ar || ""
+      });
+    }
   };
 
   const handleSubmit = async () => {
@@ -56,12 +72,12 @@ const AddPositions = () => {
     }
 
     try {
-      await createPosition(formData).unwrap();
+      await updatePosition({ id, data:{...formData} }).unwrap();
       
       Swal.fire({
         icon: 'success',
         title: 'Success',
-        text: 'Position created successfully',
+        text: 'Position updated successfully',
         confirmButtonText: 'OK',
       }).then((result) => {
         if (result.isConfirmed) {
@@ -70,10 +86,10 @@ const AddPositions = () => {
       });
       
     } catch (error) {
-      console.error("Create position error:", error);
+      console.error("Update position error:", error);
       const errorMessage = error.data?.context?.error?.errors?.[0]?.message || 
                          error.data?.message || 
-                         'Failed to create position';
+                         'Failed to update position';
       
       toast({
         title: "Error",
@@ -84,6 +100,16 @@ const AddPositions = () => {
       });
     }
   };
+
+  if (isFetching) {
+    return (
+      <div className="container add-admin-container w-100">
+        <div className="add-admin-card shadow p-4 bg-white w-100">
+          <Text>Loading position data...</Text>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container add-admin-container w-100">
@@ -96,7 +122,7 @@ const AddPositions = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New Position
+            Edit Position
           </Text>
           <Button
             type="button"
@@ -150,7 +176,7 @@ const AddPositions = () => {
               onClick={handleCancel}
               width="120px"
             >
-              Cancel
+              Reset
             </Button>
             <Button
               variant="darkBrand"
@@ -162,10 +188,10 @@ const AddPositions = () => {
               py="5px"
               width="120px"
               onClick={handleSubmit}
-              isLoading={isLoading}
-              loadingText="Saving"
+              isLoading={isUpdating}
+              loadingText="Updating"
             >
-              Save
+              Update
             </Button>
           </Flex>
         </form>
@@ -174,4 +200,4 @@ const AddPositions = () => {
   );
 };
 
-export default AddPositions;
+export default EditPosition;

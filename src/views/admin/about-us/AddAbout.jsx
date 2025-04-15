@@ -91,7 +91,7 @@ const AddAbout = () => {
       // Upload image if exists
       if (image) {
         const formData = new FormData();
-        formData.append("file", image);
+        formData.append("img", image);
 
         const uploadResponse = await addFile(formData).unwrap();
         if (!uploadResponse.flag || !uploadResponse.url) {
@@ -117,7 +117,7 @@ const AddAbout = () => {
           icon: "success",
           confirmButtonText: "OK",
         });
-        navigate("/admin/cms/about");
+        navigate("/admin/undefined/cms/about-us");
       } else {
         toast({
           title: "Error",
@@ -128,6 +128,8 @@ const AddAbout = () => {
         });
       }
     } catch (error) {
+      console.log(error);
+      
       toast({
         title: "Error",
         description: error.data?.message || error.message || "Failed to create about content",

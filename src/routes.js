@@ -74,6 +74,9 @@ import ShortApps from 'views/admin/applications/ShortApps';
 import StudyAbroadApps from 'views/admin/applications/StudyAbroadApps';
 import EditPrivacy from 'views/admin/privcyAndPolicy/EditPrivacy';
 import EditAbout from 'views/admin/about-us/EditAbout';
+import EditProvider from 'views/admin/providers/EditProvider';
+import EditPosition from 'views/admin/positions/EditPosition';
+import EditContact from 'views/admin/contact-us/EditContact';
 
 const routes = [
   {
@@ -285,6 +288,13 @@ const routes = [
     component: <AddProvider />,
     showInSidebar: false,
   },
+  {
+    name: 'Providers',
+    layout: '/admin',
+    path: '/edit-provider/:id',
+    component: <EditProvider />,
+    showInSidebar: false,
+  },
   /* End Providers Routes */
   
 
@@ -472,6 +482,14 @@ const routes = [
     showInSidebar: false,
   },
   {
+    name: 'Add Contact',
+    layout: '/admin',
+    path: '/edit-contact/:id',
+    icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+    component: <EditContact />,
+    showInSidebar: false,
+  },
+  {
     name: 'Add blog',
     layout: '/admin',
     path: '/add-blog',
@@ -485,6 +503,14 @@ const routes = [
     path: '/cms/add-position',
     icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
     component: <AddPosition />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Add Position',
+    layout: '/admin', 
+    path: '/cms/edit-position/:id',
+    icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+    component: <EditPosition />,
     showInSidebar: false,
   },
   {
