@@ -9,6 +9,7 @@ import { apiService } from "api/userSlice";
 import { partnersApi } from "api/partners";
 import { joinUsApi } from "api/joinUs";
 import { inquiresApi } from "api/Inquiries";
+import { bannersApi } from "api/banners";
 // import { userApi, authReducer } from './userSlice';
 
 export const store = configureStore({
@@ -22,6 +23,7 @@ export const store = configureStore({
     [partnersApi.reducerPath]:partnersApi.reducer,
     [joinUsApi.reducerPath]:joinUsApi.reducer,
     [inquiresApi.reducerPath]:inquiresApi.reducer,
+    [bannersApi.reducerPath]:bannersApi.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -35,6 +37,7 @@ export const store = configureStore({
       partnersApi.middleware,
       joinUsApi.middleware,
       inquiresApi.middleware,
+      bannersApi.middleware,
     ),
 });
 

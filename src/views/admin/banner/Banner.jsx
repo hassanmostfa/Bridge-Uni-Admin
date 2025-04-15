@@ -11,6 +11,8 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  useToast,
+  Spinner,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -24,36 +26,75 @@ import Card from 'components/card/Card';
 import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
+import { useGetAllBannersQuery, useDeleteBannerMutation } from "../../../api/banners";
+import Swal from 'sweetalert2';
 
 const columnHelper = createColumnHelper();
 
 const Banner = () => {
-  const [data, setData] = React.useState([
-    {
-      id: 1,
-      image: 'https://th.bing.com/th/id/OIP.4NebaoMBQ1I-_Sk9KLW0DQHaFz?w=220&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
-      titleAR: 'إعلان',
-      titleEN: 'Ad',
-    },
-    {
-      id: 2,
-      image: 'https://th.bing.com/th/id/OIP.4NebaoMBQ1I-_Sk9KLW0DQHaFz?w=220&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
-      titleAR: 'إعلان ٢',
-      titleEN: 'Ad 2',
-    },
-    {
-      id: 3,
-      image: 'https://th.bing.com/th/id/OIP.4NebaoMBQ1I-_Sk9KLW0DQHaFz?w=220&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
-      titleAR: 'إعلان ٣',
-      titleEN: 'Ad 3',
-    },
-  ]);
-
+  const { data: apiResponse, isLoading, error, refetch } = useGetAllBannersQuery();
+  const [deleteBanner] = useDeleteBannerMutation();
+  const [tableData, setTableData] = React.useState([]);
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
+  const toast = useToast();
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  React.useEffect(() => {
+    if (apiResponse?.flag && apiResponse?.data?.data) {
+      const transformedData = apiResponse.data.data.map(item => ({
+        id: item.id,
+        image: item.image,
+        titleEN: item.title_en,
+        titleAR: item.title_ar
+      }));
+      setTableData(transformedData);
+    }
+  }, [apiResponse]);
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await deleteBanner(id).unwrap();
+        if (response.flag) {
+          await Swal.fire(
+            'Deleted!',
+            'Banner has been deleted.',
+            'success'
+          );
+          refetch();
+        } else {
+          toast({
+            title: 'Error',
+            description: response.message || 'Failed to delete banner.',
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: error?.data?.message || 'An unexpected error occurred.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    }
+  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -70,7 +111,9 @@ const Banner = () => {
       ),
       cell: (info) => (
         <Flex align="center">
-          <Text color={textColor}>{info.getValue()}</Text>
+          <Text color={textColor} fontSize="sm">
+            {info.getValue()}
+          </Text>
         </Flex>
       ),
     }),
@@ -86,7 +129,11 @@ const Banner = () => {
           Title (English)
         </Text>
       ),
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
+      cell: (info) => (
+        <Text color={textColor} fontSize="sm">
+          {info.getValue()}
+        </Text>
+      ),
     }),
     columnHelper.accessor('titleAR', {
       id: 'titleAR',
@@ -101,7 +148,7 @@ const Banner = () => {
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor} dir="rtl">
+        <Text color={textColor} dir="rtl" fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -119,13 +166,18 @@ const Banner = () => {
         </Text>
       ),
       cell: (info) => (
-        <img
-          src={info.getValue()}
-          alt="Banner"
-          width={70}
-          height={70}
-          style={{ borderRadius: '8px' }}
-        />
+        <Box maxW="100px">
+          <img
+            src={info.getValue()}
+            alt="Banner"
+            style={{ 
+              width: '100%',
+              height: 'auto',
+              maxHeight: '70px',
+              borderRadius: '8px'
+            }}
+          />
+        </Box>
       ),
     }),
     columnHelper.accessor('actions', {
@@ -146,28 +198,21 @@ const Banner = () => {
             w="18px"
             h="18px"
             me="10px"
-            color="red.500"
-            as={FaTrash}
-            cursor="pointer"
-            onClick={() => console.log('Delete', info.row.original.id)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
             color="green.500"
             as={EditIcon}
             cursor="pointer"
+            title="Edit Banner"
             onClick={() => navigate(`/admin/cms/edit-banner/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
             h="18px"
             me="10px"
-            color="blue.500"
-            as={FaEye}
+            color="red.500"
+            as={FaTrash}
             cursor="pointer"
-            onClick={() => navigate(`/admin/cms/view-banner/${info.row.original.id}`)}
+            title="Delete Banner"
+            onClick={() => handleDelete(info.row.original.id)}
           />
         </Flex>
       ),
@@ -175,7 +220,7 @@ const Banner = () => {
   ];
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     state: {
       sorting,
@@ -183,11 +228,26 @@ const Banner = () => {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
   });
 
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" h="100px">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  if (error) {
+    return (
+      <Text color="red.500" textAlign="center" mt={4}>
+        Error: {error.message || 'Failed to load banners'}
+      </Text>
+    );
+  }
+
   return (
-    <div className="container">
+    <Box className="container">
       <Card
         flexDirection="column"
         w="100%"
@@ -212,9 +272,9 @@ const Banner = () => {
             px="24px"
             py="5px"
             onClick={() => navigate('/admin/cms/add-banner')}
-            width={'200px'}
+            minW="200px"
+            leftIcon={<PlusSquareIcon />}
           >
-            <PlusSquareIcon me="10px" />
             Create New Banner
           </Button>
         </Flex>
@@ -255,32 +315,28 @@ const Banner = () => {
               ))}
             </Thead>
             <Tbody>
-              {table.getRowModel().rows.map((row) => {
-                return (
-                  <Tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <Td
-                          key={cell.id}
-                          fontSize={{ sm: '14px' }}
-                          minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                          borderColor="transparent"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </Td>
-                      );
-                    })}
-                  </Tr>
-                );
-              })}
+              {table.getRowModel().rows.map((row) => (
+                <Tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <Td
+                      key={cell.id}
+                      fontSize={{ sm: '14px' }}
+                      minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                      borderColor="transparent"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </Td>
+                  ))}
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </Box>
       </Card>
-    </div>
+    </Box>
   );
 };
 
