@@ -10,138 +10,214 @@ import {
   Flex,
   Box,
   Input,
+  Avatar,
+  Badge,
+  Divider,
+  Skeleton,
+  Stack,
+  useToast,
+  IconButton,
+  InputGroup,
+  InputRightElement,
 } from '@chakra-ui/react';
-import { ChevronDownIcon } from '@chakra-ui/icons';
-import './admins.css';
+import { ChevronDownIcon, ChevronLeftIcon, ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { useGetRolesQuery } from 'api/roleSlice';
-import Swal from 'sweetalert2';
+import { useGetAdminsQuery, useUpdateUserMutation } from 'api/userSlice';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useUpdateUserMutation } from 'api/userSlice';
-import { useGetUserProfileQuery } from 'api/userSlice';
+import Swal from 'sweetalert2';
 
 const EditAdmin = () => {
   const { id } = useParams();
-  const { data: roles, isLoading: isRolesLoading, isError: isRolesError } = useGetRolesQuery();
-  const { data: admin, isLoading: isAdminLoading, isError: isAdminError } = useGetUserProfileQuery(id);
-  const [editAdmin, { isLoading: isCreating }] = useUpdateUserMutation();
   const navigate = useNavigate();
+  const toast = useToast();
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const cardBg = useColorModeValue("white", "navy.700");
   const inputBg = useColorModeValue("gray.100", "gray.700");
   const inputBorder = useColorModeValue("gray.300", "gray.600");
-  const [selectedRole, setSelectedRole] = useState('Select a role');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    roleId: '',
-  });
 
-  // Update formData when admin data is available
+  // Fetch data
+  const { data: adminsResponse, isLoading: isAdminsLoading } = useGetAdminsQuery();
+  const { data: rolesResponse, isLoading: isRolesLoading } = useGetRolesQuery();
+  const [updateAdmin, { isLoading: isUpdating }] = useUpdateUserMutation();
+
+  // State management
+  const [formData, setFormData] = useState({
+    username: '',
+    phone: '',
+    email: '',
+    role_id: null,
+    password: '',
+  });
+  const [selectedRoleName, setSelectedRoleName] = useState('Select Role');
+  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
+
+  // Find the admin from the fetched admins list
+  const admin = adminsResponse?.data?.data?.find(a => a.id === parseInt(id));
+  
+  // Initialize form data when admin data is available
   useEffect(() => {
-    if (admin?.data) {
+    if (admin && rolesResponse?.data) {
+      // Find the primary role (assuming first permission is primary)
+      const primaryRoleId = admin.admin_permissions?.[0]?.admin_role_id;
+      const primaryRole = rolesResponse.data.data.find(r => r.id === primaryRoleId);
+
       setFormData({
-        name: admin.data.name,
-        email: admin.data.email,
-        password: '', // Password is not pre-filled for security reasons
-        roleId: admin.data.roleId,
+        username: admin.username || '',
+        phone: admin.phone || '',
+        email: admin.email || '',
+        role_id: primaryRoleId || null,
+        password: '',
       });
-      // Set the selected role name
-      const role = roles?.data?.find((r) => r.id === admin.data.roleId);
-      if (role) {
-        setSelectedRole(role.name);
-      }
+
+      setSelectedRoleName(primaryRole?.name || 'Select Role');
     }
-  }, [admin, roles]);
+  }, [admin, rolesResponse]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSelect = (role) => {
-    setSelectedRole(role.name);
-    setFormData({ ...formData, roleId: role.id });
+  const handleRoleSelect = (role) => {
+    setFormData(prev => ({ ...prev, role_id: role.id }));
+    setSelectedRoleName(role.name);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Create a copy of formData
-    const dataToSend = { ...formData };
-
-    // Remove the password field if it's empty
-    if (!dataToSend.password) {
-      delete dataToSend.password;
+    // Validate required fields
+    if (!formData.username || !formData.email || !formData.role_id) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Missing Information',
+        text: 'Please fill all required fields',
+        confirmButtonText: 'OK',
+      });
+      return;
     }
 
     try {
-      const response = await editAdmin({ id, user: dataToSend }).unwrap();
-      Swal.fire({
-        icon: 'success',
+      // Prepare the data to send (only include password if it's not empty)
+      const dataToSend = {
+        username: formData.username,
+        phone: formData.phone,
+        email: formData.email,
+        role_id: formData.role_id,
+        password: formData.password,
+      };
+
+      const response = await updateAdmin({ 
+        id, 
+        user: dataToSend 
+      }).unwrap();
+
+      toast({
         title: 'Success',
-        text: 'Admin updated successfully',
-        confirmButtonText: 'OK',
-        customClass: {
-          popup: 'custom-swal-popup', // Add a custom class for the popup
-          title: 'custom-swal-title', // Add a custom class for the title
-          content: 'custom-swal-content', // Add a custom class for the content
-          confirmButton: 'custom-swal-confirm-button', // Add a custom class for the confirm button
-        },
-      }).then((result) => {
-        if (result.isConfirmed) {
-          navigate(`/admin/undefined/admins`); // Redirect to the admins page after successful submission
-        }
+        description: 'Admin updated successfully',
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
       });
+      navigate('/admin/admins');
     } catch (error) {
+      console.error('Update error:', error);
+      let errorMessage = 'Failed to update admin';
+      
+      if (error.data?.context?.error?.errors[0]?.message) {
+        errorMessage = error.data.context.error.errors[0].message;
+      } else if (error.data?.message) {
+        errorMessage = error.data.message;
+      }
+
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: error.data?.message || 'Failed to update admin',
+        text: errorMessage,
         confirmButtonText: 'OK',
       });
     }
   };
 
-  if (isAdminLoading || isRolesLoading) {
-    return <div>Loading...</div>;
+  if (isAdminsLoading || isRolesLoading) {
+    return (
+      <Flex justify="center" p="20px" mt="80px">
+        <Stack spacing={4} w="100%">
+          <Skeleton height="40px" />
+          <Skeleton height="300px" />
+        </Stack>
+      </Flex>
+    );
   }
 
-  if (isAdminError || isRolesError) {
-    return <div>Error loading data</div>;
+  if (!admin) {
+    return (
+      <Flex justify="center" p="20px" mt="80px">
+        <Text color="red.500">Admin not found</Text>
+      </Flex>
+    );
   }
 
   return (
-    <Flex justify="center" p="20px" mt={"80px"}>
-      <Box w="100%" p="6" boxShadow="md" borderRadius="lg" bg={cardBg}>
-        <Text color={textColor} fontSize="22px" fontWeight="700" mb="20px">
+    <Flex direction="column" p="20px" mt="80px">
+      <Flex align="center" mb="20px">
+        <IconButton
+          icon={<ChevronLeftIcon />}
+          onClick={() => navigate(-1)}
+          mr="20px"
+          aria-label="Go back"
+        />
+        <Text color={textColor} fontSize="22px" fontWeight="700">
           Edit Admin
         </Text>
+      </Flex>
+
+      <Box w="100%" p="6" boxShadow="md" borderRadius="lg" bg={cardBg}>
+        <Flex align="center" mb="6">
+          <Avatar
+            size="xl"
+            name={admin.username}
+            src={admin.avatar}
+            mr="4"
+          />
+          <Box>
+            <Text fontSize="xl" fontWeight="bold" color={textColor}>
+              {admin.username}
+            </Text>
+            <Badge
+              colorScheme={admin.isBlocked === 'true' ? 'red' : 'green'}
+              fontSize="sm"
+              borderRadius="full"
+              px="3"
+              py="1"
+            >
+              {admin.isBlocked === 'true' ? 'Blocked' : 'Active'}
+            </Badge>
+          </Box>
+        </Flex>
+
+        <Divider mb="6" />
 
         <form onSubmit={handleSubmit}>
-          {/* Name Field */}
-          <Box mb="3" mt={"20px"}>
+          {/* Username Field */}
+          <Box mb="4">
             <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
-              Name <span style={{ color: "red" }}>*</span>
+              Username <span style={{ color: "red" }}>*</span>
             </Text>
             <Input
-              type="text"
-              name="name"
+              name="username"
               bg={inputBg}
               color={textColor}
               borderColor={inputBorder}
-              placeholder="Enter Admin Name"
-              value={formData.name}
+              placeholder="Enter username"
+              value={formData.username}
               onChange={handleInputChange}
               required
             />
           </Box>
 
           {/* Email Field */}
-          <Box mb="3">
+          <Box mb="4">
             <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
               Email <span style={{ color: "red" }}>*</span>
             </Text>
@@ -158,25 +234,53 @@ const EditAdmin = () => {
             />
           </Box>
 
-          {/* Password Field */}
-          <Box mb="3">
+          {/* Phone Field */}
+          <Box mb="4">
             <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
-              Password
+              Phone Number
             </Text>
             <Input
-              type="password"
-              name="password"
+              name="phone"
               bg={inputBg}
               color={textColor}
               borderColor={inputBorder}
-              placeholder="Enter new password (leave blank to keep current)"
-              value={formData.password}
+              placeholder="Enter phone number"
+              value={formData.phone}
               onChange={handleInputChange}
             />
           </Box>
 
-          {/* Role Dropdown */}
-          <Box mb="3">
+          {/* Password Field with show/hide toggle */}
+          <Box mb="4">
+            <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
+              Password
+            </Text>
+            <InputGroup>
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                bg={inputBg}
+                color={textColor}
+                borderColor={inputBorder}
+                placeholder="Enter new password (leave blank to keep current)"
+                value={formData.password}
+                onChange={handleInputChange}
+              />
+              <InputRightElement width="4.5rem">
+                <IconButton
+                  h="1.75rem"
+                  size="sm"
+                  onClick={() => setShowPassword(!showPassword)}
+                  icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  variant="ghost"
+                />
+              </InputRightElement>
+            </InputGroup>
+          </Box>
+
+          {/* Role Selection */}
+          <Box mb="6">
             <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
               Role <span style={{ color: "red" }}>*</span>
             </Text>
@@ -188,14 +292,18 @@ const EditAdmin = () => {
                 bg={inputBg}
                 borderColor={inputBorder}
                 borderRadius="md"
-                _hover={{ bg: "gray.200" }}
                 textAlign="left"
+                _hover={{ bg: inputBg }}
+                _active={{ bg: inputBg }}
               >
-                {selectedRole || "Select Role"}
+                {selectedRoleName}
               </MenuButton>
               <MenuList width="100%">
-                {roles?.data?.map((role) => (
-                  <MenuItem key={role.id} onClick={() => handleSelect(role)}>
+                {rolesResponse?.data?.data?.map((role) => (
+                  <MenuItem 
+                    key={role.id} 
+                    onClick={() => handleRoleSelect(role)}
+                  >
                     {role.name}
                   </MenuItem>
                 ))}
@@ -205,17 +313,11 @@ const EditAdmin = () => {
 
           {/* Submit Button */}
           <Button
-            variant="solid"
-            colorScheme="brandScheme"
-            color={"white"}
-            fontSize="sm"
-            fontWeight="500"
-            borderRadius="70px"
-            px="24px"
-            py="5px"
             type="submit"
-            isLoading={isCreating}
-            mt={"20px"}
+            colorScheme="blue"
+            isLoading={isUpdating}
+            loadingText="Updating..."
+            width="full"
           >
             Update Admin
           </Button>

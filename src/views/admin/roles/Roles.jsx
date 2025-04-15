@@ -39,7 +39,8 @@ const Roles = () => {
   const [page, setPage] = React.useState(1); // Current page
   const [limit, setLimit] = React.useState(10); // Items per page
   const [searchQuery, setSearchQuery] = React.useState(''); // Search query
-  const { data, refetch, isError, isLoading } = useGetRolesQuery({ page, limit });
+  const { data, refetch, isError, isLoading } = useGetRolesQuery();
+
   const [deleteRole, { isError: isDeleteError, isLoading: isDeleteLoading }] = useDeleteRoleMutation();
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
@@ -48,7 +49,7 @@ const Roles = () => {
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
   // Extract table data and pagination info
-  const tableData = data?.data || [];
+  const tableData = data?.data?.data || [];
   const pagination = data?.pagination || { page: 1, limit: 10, totalItems: 0, totalPages: 1 };
 
   const filteredData = React.useMemo(() => {

@@ -14,10 +14,11 @@ import * as React from 'react';
 import './roles.css';
 import { useNavigate } from 'react-router-dom';
 import { IoMdArrowBack } from 'react-icons/io';
- // Adjust the import path
-import { useGetModulesQuery } from 'api/roleSlice';
+
 import { useAddRoleMutation } from 'api/roleSlice';
 import Swal from 'sweetalert2';
+import { useGetRolesQuery } from 'api/roleSlice';
+import { useGetModulesQuery } from 'api/roleSlice';
 
 const AddRole = () => {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -26,83 +27,134 @@ const AddRole = () => {
   // Fetch modules data from the API
   const { data: apiData, isLoading, isError } = useGetModulesQuery();
 
-  // Mutation hook for adding a new role
+  
   const [addRole, { isLoading: isAdding }] = useAddRoleMutation();
 
-  // State for categories and subcategories
-  const [categories, setCategories] = React.useState([]);
+  // State for modules and submodules
+  const [modules, setModules] = React.useState([]);
 
   // Transform API data into the required structure
   React.useEffect(() => {
-    if (apiData && apiData.success) {
-      const transformedData = apiData.data.map((module) => ({
+    if (apiData && apiData.flag) {
+      const transformedData = apiData.data.data.map((module) => ({
         id: module.id,
         name: module.displayName,
-        subcategories: module.children.map((child) => ({
-          id: child.id,
-          name: child.displayName,
+        permissions: {
+          canView: false,
+          canAdd: false,
+          canEdit: false,
+          canDelete: false,
+        },
+        submodules: module.role_sub_modules ? module.role_sub_modules.map((submodule) => ({
+          id: submodule.id,
+          name: submodule.displayName,
           permissions: {
             canView: false,
             canAdd: false,
             canEdit: false,
             canDelete: false,
           },
-        })),
+        })) : [],
       }));
-      setCategories(transformedData);
+      setModules(transformedData);
     }
   }, [apiData]);
 
-  // Handle permission change
-  const handlePermissionChange = (categoryId, subcategoryId, permission) => {
-    const updatedCategories = categories.map((category) => {
-      if (category.id === categoryId) {
+  // Handle permission change for modules
+  const handleModulePermissionChange = (moduleId, permission) => {
+    const updatedModules = modules.map((module) => {
+      if (module.id === moduleId) {
         return {
-          ...category,
-          subcategories: category.subcategories.map((subcategory) => {
-            if (subcategory.id === subcategoryId) {
+          ...module,
+          permissions: {
+            ...module.permissions,
+            [permission]: !module.permissions[permission],
+          },
+        };
+      }
+      return module;
+    });
+    setModules(updatedModules);
+  };
+
+  // Handle permission change for submodules
+  const handleSubmodulePermissionChange = (moduleId, submoduleId, permission) => {
+    const updatedModules = modules.map((module) => {
+      if (module.id === moduleId) {
+        return {
+          ...module,
+          submodules: module.submodules.map((submodule) => {
+            if (submodule.id === submoduleId) {
               return {
-                ...subcategory,
+                ...submodule,
                 permissions: {
-                  ...subcategory.permissions,
-                  [permission]: !subcategory.permissions[permission],
+                  ...submodule.permissions,
+                  [permission]: !submodule.permissions[permission],
                 },
               };
             }
-            return subcategory;
+            return submodule;
           }),
         };
       }
-      return category;
+      return module;
     });
-    setCategories(updatedCategories);
+    setModules(updatedModules);
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Transform categories into the required API format
-    const permissions = categories.flatMap((category) =>
-      category.subcategories.map((subcategory) => ({
-        moduleId: subcategory.id,
-        canView: subcategory.permissions.canView,
-        canAdd: subcategory.permissions.canAdd,
-        canEdit: subcategory.permissions.canEdit,
-        canDelete: subcategory.permissions.canDelete,
-      })),
+    // Prepare module permissions (with submodule_id: 0)
+    const modulePermissions = modules
+      .filter(module => 
+        module.permissions.canView || 
+        module.permissions.canAdd || 
+        module.permissions.canEdit || 
+        module.permissions.canDelete
+      )
+      .map(module => ({
+        role_sub_module_id: 0,
+        role_module_id: module.id,
+        can_view: module.permissions.canView,
+        can_add: module.permissions.canAdd,
+        can_update: module.permissions.canEdit,
+        can_delete: module.permissions.canDelete,
+      }));
+
+    // Prepare submodule permissions
+    const submodulePermissions = modules.flatMap((module) =>
+      module.submodules
+        .filter(submodule => 
+          submodule.permissions.canView || 
+          submodule.permissions.canAdd || 
+          submodule.permissions.canEdit || 
+          submodule.permissions.canDelete
+        )
+        .map((submodule) => ({
+          role_sub_module_id: submodule.id,
+          role_module_id: module.id,
+          can_view: submodule.permissions.canView,
+          can_add: submodule.permissions.canAdd,
+          can_update: submodule.permissions.canEdit,
+          can_delete: submodule.permissions.canDelete,
+        }))
     );
+
+    // Combine both permissions
+    const admin_role = [...modulePermissions, ...submodulePermissions];
 
     // Prepare the payload
     const payload = {
       name: e.target.roleName.value,
-      platform: 'ADMIN', // Replace with the appropriate platform if dynamic
-      permissions,
+      admin_role,
     };
 
-    console.log('Payload:', payload); // Debugging
     try {
       // Send the data to the API
+
+      
       const response = await addRole(payload).unwrap();
      
       Swal.fire({
@@ -110,19 +162,18 @@ const AddRole = () => {
         title: 'Success',
         text: 'Role added successfully',
         confirmButtonText: 'OK',
-        onClose: () => {
-          navigate('/admin/undefined/rules'); // Redirect to the roles page after successful submission
-        }
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate('/admin/undefined/rules'); // Redirect to the roles page after successful submission
+          navigate('/admin/undefined/rules');
         }
       });
     } catch (error) {
+      console.log(error);
+      
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: error.data.message,
+        text: error.data?.message || 'Failed to add role',
         confirmButtonText: 'OK',
       });
     }
@@ -152,7 +203,7 @@ const AddRole = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            Add New Rule
+            Add New Role
           </Text>
           <Button
             type="button"
@@ -180,10 +231,10 @@ const AddRole = () => {
             />
           </Box>
 
-          {/* Categories and Subcategories */}
+          {/* Modules and Submodules */}
           <SimpleGrid columns={{ base: 1, md: 2, lg: 2 }} spacing="20px">
-            {categories.map((category) => (
-              <Card key={category.id} p="16px">
+            {modules.map((module) => (
+              <Card key={module.id} p="16px">
                 <Box
                   display={'flex'}
                   gap={'10px'}
@@ -197,78 +248,114 @@ const AddRole = () => {
                     mb="16px"
                     backdropBlur={'10px'}
                   >
-                    {category.name}
+                    {module.name}
                   </Text>
-                  <Checkbox>Add</Checkbox>
-                  <Checkbox>Edit</Checkbox>
-                  <Checkbox>View</Checkbox>
-                  <Checkbox>Delete</Checkbox>
+                  <Stack direction="row" spacing={4}>
+                    <Checkbox
+                      isChecked={module.permissions.canView}
+                      onChange={() =>
+                        handleModulePermissionChange(module.id, 'canView')
+                      }
+                    >
+                      View
+                    </Checkbox>
+                    <Checkbox
+                      isChecked={module.permissions.canAdd}
+                      onChange={() =>
+                        handleModulePermissionChange(module.id, 'canAdd')
+                      }
+                    >
+                      Add
+                    </Checkbox>
+                    <Checkbox
+                      isChecked={module.permissions.canEdit}
+                      onChange={() =>
+                        handleModulePermissionChange(module.id, 'canEdit')
+                      }
+                    >
+                      Edit
+                    </Checkbox>
+                    <Checkbox
+                      isChecked={module.permissions.canDelete}
+                      onChange={() =>
+                        handleModulePermissionChange(module.id, 'canDelete')
+                      }
+                    >
+                      Delete
+                    </Checkbox>
+                  </Stack>
                 </Box>
                 <hr />
-                {category.subcategories.map((subcategory) => (
-                  <Box
-                    key={subcategory.id}
-                    mb="12px"
-                    display={'flex'}
-                    alignItems={'center'}
-                    justifyContent={'space-between'}
-                  >
-                    <Text fontSize="md" fontWeight="600" mb="8px">
-                      {subcategory.name}
-                    </Text>
+                {module.submodules.length > 0 ? (
+                  module.submodules.map((submodule) => (
+                    <Box
+                      key={submodule.id}
+                      mb="12px"
+                      display={'flex'}
+                      alignItems={'center'}
+                      justifyContent={'space-between'}
+                    >
+                      <Text fontSize="md" fontWeight="600" mb="8px">
+                        {submodule.name}
+                      </Text>
 
-                    <Stack direction="row" spacing={4}>
-                      <Checkbox
-                        isChecked={subcategory.permissions.canView}
-                        onChange={() =>
-                          handlePermissionChange(
-                            category.id,
-                            subcategory.id,
-                            'canView',
-                          )
-                        }
-                      >
-                        View
-                      </Checkbox>
-                      <Checkbox
-                        isChecked={subcategory.permissions.canAdd}
-                        onChange={() =>
-                          handlePermissionChange(
-                            category.id,
-                            subcategory.id,
-                            'canAdd',
-                          )
-                        }
-                      >
-                        Add
-                      </Checkbox>
-                      <Checkbox
-                        isChecked={subcategory.permissions.canEdit}
-                        onChange={() =>
-                          handlePermissionChange(
-                            category.id,
-                            subcategory.id,
-                            'canEdit',
-                          )
-                        }
-                      >
-                        Edit
-                      </Checkbox>
-                      <Checkbox
-                        isChecked={subcategory.permissions.canDelete}
-                        onChange={() =>
-                          handlePermissionChange(
-                            category.id,
-                            subcategory.id,
-                            'canDelete',
-                          )
-                        }
-                      >
-                        Delete
-                      </Checkbox>
-                    </Stack>
-                  </Box>
-                ))}
+                      <Stack direction="row" spacing={4}>
+                        <Checkbox
+                          isChecked={submodule.permissions.canView}
+                          onChange={() =>
+                            handleSubmodulePermissionChange(
+                              module.id,
+                              submodule.id,
+                              'canView',
+                            )
+                          }
+                        >
+                          View
+                        </Checkbox>
+                        <Checkbox
+                          isChecked={submodule.permissions.canAdd}
+                          onChange={() =>
+                            handleSubmodulePermissionChange(
+                              module.id,
+                              submodule.id,
+                              'canAdd',
+                            )
+                          }
+                        >
+                          Add
+                        </Checkbox>
+                        <Checkbox
+                          isChecked={submodule.permissions.canEdit}
+                          onChange={() =>
+                            handleSubmodulePermissionChange(
+                              module.id,
+                              submodule.id,
+                              'canEdit',
+                            )
+                          }
+                        >
+                          Edit
+                        </Checkbox>
+                        <Checkbox
+                          isChecked={submodule.permissions.canDelete}
+                          onChange={() =>
+                            handleSubmodulePermissionChange(
+                              module.id,
+                              submodule.id,
+                              'canDelete',
+                            )
+                          }
+                        >
+                          Delete
+                        </Checkbox>
+                      </Stack>
+                    </Box>
+                  ))
+                ) : (
+                  <Text fontSize="sm" color="gray.500" mt="8px">
+                    No submodules available
+                  </Text>
+                )}
               </Card>
             ))}
           </SimpleGrid>

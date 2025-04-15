@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Define your base URL
-const baseUrl = "https://back.biopluskw.com/api/v1";
+const baseUrl = "https://back.bridgeuni.com/api";
 
 // Create the API slice using RTK Query
 export const roleApi = createApi({
@@ -14,7 +14,7 @@ export const roleApi = createApi({
 
       // If a token exists, add it to the headers
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set("authorization", `${token}`);
       }
 
       return headers;
@@ -23,14 +23,14 @@ export const roleApi = createApi({
 
   endpoints: (builder) => ({
     getRoles: builder.query({
-      query: () => '/admin/role',
+      query: () => '/role/adminRole',
     }),
     getModules: builder.query({
-      query: () => '/admin/module',
+      query: () => '/role/module',
     }),
     addRole: builder.mutation({
       query: (role) => ({
-        url: "/admin/role",
+        url: "/role/adminRole",
         method: "POST",
         body: role,
       }),

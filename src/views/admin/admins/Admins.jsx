@@ -16,6 +16,10 @@ import {
   InputLeftElement,
   IconButton,
   Select,
+  Avatar,
+  Badge,
+  Stack,
+  Skeleton,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -30,6 +34,7 @@ import { ChevronLeftIcon, ChevronRightIcon, EditIcon, PlusSquareIcon, SearchIcon
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { useGetAdminsQuery, useDeleteUserMutation } from 'api/userSlice';
 
 const columnHelper = createColumnHelper();
 
@@ -42,33 +47,28 @@ const Admins = () => {
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+  
+  // Fetch admins data from API with pagination
+  const { data: adminsResponse, isLoading, isError, refetch } = useGetAdminsQuery({
+    page,
+    limit,
+    search: searchQuery,
+  });
+  
+  const [deleteAdmin] = useDeleteUserMutation();
 
-  // Default data with name, email, and phone number
-  const defaultData = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', phone: '123-456-7890', roleName: 'Admin' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '234-567-8901', roleName: 'Editor' },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', phone: '345-678-9012', roleName: 'Viewer' },
-    { id: 4, name: 'Alice Williams', email: 'alice@example.com', phone: '456-789-0123', roleName: 'Admin' },
-    { id: 5, name: 'Charlie Brown', email: 'charlie@example.com', phone: '567-890-1234', roleName: 'Editor' },
-  ];
-
-  // Mock pagination info
-  const pagination = { page, limit, totalItems: defaultData.length, totalPages: Math.ceil(defaultData.length / limit) };
-
-  // Filter data based on search query (client-side)
-  const filteredData = React.useMemo(() => {
-    if (!searchQuery) return defaultData; // Return all data if no search query
-    return defaultData.filter((item) =>
-      Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    );
-  }, [searchQuery]);
+  // Extract admins data from response
+  const admins = adminsResponse?.data?.data || [];
+  const pagination = adminsResponse?.data || {
+    totalItems: 0,
+    totalPage: 0,
+    currentPage: 0,
+  };
 
   // Columns definition
   const columns = [
-    columnHelper.accessor('name', {
-      id: 'name',
+    columnHelper.accessor('username', {
+      id: 'username',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -76,12 +76,17 @@ const Admins = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          Name
+          Username
         </Text>
       ),
       cell: (info) => (
-        <Flex align="center">
-          <Text color={textColor}>
+        <Flex align="center" gap="2">
+          <Avatar 
+            size="sm" 
+            name={info.getValue()} 
+            src={info.row.original.avatar} 
+          />
+          <Text color={textColor} fontWeight="500">
             {info.getValue()}
           </Text>
         </Flex>
@@ -96,7 +101,7 @@ const Admins = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          EMAIL
+          Email
         </Text>
       ),
       cell: (info) => (
@@ -114,17 +119,17 @@ const Admins = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          PHONE
+          Phone
         </Text>
       ),
       cell: (info) => (
         <Text color={textColor}>
-          {info.getValue()}
+          {info.getValue() || 'N/A'}
         </Text>
       ),
     }),
-    columnHelper.accessor('roleName', {
-      id: 'roleName',
+    columnHelper.accessor('admin_permissions', {
+      id: 'role',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -132,13 +137,42 @@ const Admins = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-          ROLE
+          Role
+        </Text>
+      ),
+      cell: (info) => {
+        const roles = info.getValue();
+        const primaryRole = roles[0]?.admin_role?.name || 'No Role';
+        return (
+          <Text color={textColor}>
+            {primaryRole}
+            {roles.length > 1 && ` +${roles.length - 1}`}
+          </Text>
+        );
+      },
+    }),
+    columnHelper.accessor('isBlocked', {
+      id: 'status',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          Status
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
-          {info.getValue()}
-        </Text>
+        <Badge 
+          colorScheme={info.getValue() === 'true' ? 'red' : 'green'} 
+          fontSize="sm" 
+          borderRadius="full"
+          px="3"
+          py="1"
+        >
+          {info.getValue() === 'true' ? 'Blocked' : 'Active'}
+        </Badge>
       ),
     }),
     columnHelper.accessor('id', {
@@ -154,33 +188,30 @@ const Admins = () => {
         </Text>
       ),
       cell: (info) => (
-        <Flex align="center">
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="red.500"
-            as={FaTrash}
-            cursor="pointer"
-            onClick={() => handleDeleteAdmin(info.getValue())}
+        <Flex align="center" gap="2">
+          <IconButton
+            aria-label="View admin"
+            icon={<FaEye />}
+            size="sm"
+            variant="ghost"
+            colorScheme="blue"
+            onClick={() => navigate(`/admin/admin/details/${info.getValue()}`)}
           />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="green.500"
-            as={EditIcon}
-            cursor="pointer"
+          <IconButton
+            aria-label="Edit admin"
+            icon={<EditIcon />}
+            size="sm"
+            variant="ghost"
+            colorScheme="green"
             onClick={() => navigate(`/admin/edit-admin/${info.getValue()}`)}
           />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/admin/details/${info.getValue()}`)}
+          <IconButton
+            aria-label="Delete admin"
+            icon={<FaTrash />}
+            size="sm"
+            variant="ghost"
+            colorScheme="red"
+            onClick={() => handleDeleteAdmin(info.getValue())}
           />
         </Flex>
       ),
@@ -189,7 +220,7 @@ const Admins = () => {
 
   // Table instance
   const table = useReactTable({
-    data: filteredData, // Use filtered data
+    data: admins,
     columns,
     state: {
       sorting,
@@ -214,18 +245,19 @@ const Admins = () => {
       });
 
       if (result.isConfirmed) {
-        // In a real app, you would call an API here
-        Swal.fire('Deleted!', 'The Admin has been deleted.', 'success');
+        await deleteAdmin(id).unwrap();
+        await refetch();
+        Swal.fire('Deleted!', 'The admin has been deleted.', 'success');
       }
     } catch (error) {
       console.error('Failed to delete admin:', error);
-      Swal.fire('Error!', 'Failed to delete the admin.', 'error');
+      Swal.fire('Error!', error.data?.message || 'Failed to delete the admin.', 'error');
     }
   };
 
   // Pagination controls
   const handleNextPage = () => {
-    if (page < pagination.totalPages) {
+    if (page < pagination.totalPage) {
       setPage(page + 1);
     }
   };
@@ -240,6 +272,31 @@ const Admins = () => {
     setLimit(Number(e.target.value));
     setPage(1); // Reset to the first page when changing the limit
   };
+
+  // Handle search with debounce
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1); // Reset to first page when searching
+      refetch();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  if (isLoading) {
+    return (
+         <Flex justify="center" p="20px" mt="80px">
+           <Stack spacing={4} w="100%">
+             <Skeleton height="40px" />
+             <Skeleton height="300px" />
+           </Stack>
+         </Flex>
+       );
+  }
+
+  if (isError) {
+    return <div>Error loading admins</div>;
+  }
 
   return (
     <div className="container">
@@ -256,55 +313,38 @@ const Admins = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            Admins
+            Admins Management
           </Text>
-          <div className="search-container d-flex align-items-center gap-2">
-            <InputGroup w={{ base: "100", md: "400px" }}>
-              <InputLeftElement>
-                <IconButton
-                  bg="inherit"
-                  borderRadius="inherit"
-                  _hover="none"
-                  _active={{
-                    bg: "inherit",
-                    transform: "none",
-                    borderColor: "transparent",
-                  }}
-                  _focus={{
-                    boxShadow: "none",
-                  }}
-                  icon={<SearchIcon w="15px" h="15px" />}
-                />
+          <Flex gap="4" align="center">
+            <InputGroup w={{ base: "100%", md: "300px" }}>
+              <InputLeftElement pointerEvents="none">
+                <SearchIcon color="gray.400" />
               </InputLeftElement>
               <Input
-                variant="search"
-                fontSize="sm"
-                bg={useColorModeValue("secondaryGray.300", "gray.700")}
-                color={useColorModeValue("gray.700", "white")}
-                fontWeight="500"
-                _placeholder={{ color: "gray.400", fontSize: "14px" }}
-                borderRadius="30px"
-                placeholder="Search by name..."
+                type="text"
+                placeholder="Search admins..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                borderRadius="full"
               />
             </InputGroup>
-          </div>
-          <Button
-            variant='darkBrand'
-            color='white'
-            fontSize='sm'
-            fontWeight='500'
-            borderRadius='70px'
-            px='24px'
-            py='5px'
-            onClick={() => navigate('/admin/add-admin')}
-            width={'200px'}
-          >
-            Create New Admin
-          </Button>
+            <Button
+              variant='darkBrand'
+              color='white'
+              fontSize='sm'
+              fontWeight='500'
+              borderRadius='70px'
+              px='24px'
+              py='5px'
+              onClick={() => navigate('/admin/add-admin')}
+              leftIcon={<PlusSquareIcon />}
+            >
+              Add Admin
+            </Button>
+          </Flex>
         </Flex>
-        <Box>
+        
+        <Box overflowX="auto">
           <Table variant="simple" color="gray.500" mb="24px" mt="12px">
             <Thead>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -389,7 +429,7 @@ const Admins = () => {
             </Select>
           </Flex>
           <Text color={textColor} fontSize="sm">
-            Page {pagination.page} of {pagination.totalPages}
+            Page {pagination.currentPage} of {pagination.totalPage}
           </Text>
           <Flex>
             <Button
@@ -404,7 +444,7 @@ const Admins = () => {
             </Button>
             <Button
               onClick={handleNextPage}
-              disabled={page === pagination.totalPages}
+              disabled={page === pagination.totalPage}
               variant="outline"
               size="sm"
             >

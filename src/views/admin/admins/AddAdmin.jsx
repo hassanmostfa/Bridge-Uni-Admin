@@ -19,6 +19,7 @@ import { useGetRolesQuery } from 'api/roleSlice';
 import { useCreateUserMutation } from 'api/userSlice';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
+import { IoMdArrowBack } from 'react-icons/io';
 
 const AddAdmin = () => {
   const { data: roles, isLoading, isError } = useGetRolesQuery();
@@ -32,12 +33,12 @@ const AddAdmin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     phone: '',
-    roleId: '',
+    role_id: '',
     password: '',
-    confirmPassword: '',
+    
   });
 
   const handleInputChange = (e) => {
@@ -50,14 +51,14 @@ const AddAdmin = () => {
 
   const handleSelect = (role) => {
     setSelectedRole(role.name);
-    setFormData({ ...formData, roleId: role.id });
+    setFormData({ ...formData, role_id: role.id });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate role selection
-    if (!formData.roleId) {
+    if (!formData.role_id) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -68,15 +69,15 @@ const AddAdmin = () => {
     }
 
     // Validate password match
-    if (formData.password !== formData.confirmPassword) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Passwords do not match',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+    // if (formData.password !== formData.confirmPassword) {
+    //   Swal.fire({
+    //     icon: 'error',
+    //     title: 'Error',
+    //     text: 'Passwords do not match',
+    //     confirmButtonText: 'OK',
+    //   });
+    //   return;
+    // }
 
     // Validate password strength (optional)
     if (formData.password.length < 8) {
@@ -91,8 +92,9 @@ const AddAdmin = () => {
 
     try {
       // Create payload without confirmPassword
-      const { confirmPassword, ...payload } = formData;
-      const response = await createAdmin(payload).unwrap();
+      // const { confirmPassword, ...payload } = formData;
+      
+      const response = await createAdmin(formData).unwrap();
       Swal.fire({
         icon: 'success',
         title: 'Success',
@@ -104,10 +106,12 @@ const AddAdmin = () => {
         }
       });
     } catch (error) {
+      console.log(error);
+      
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: error.data?.message || 'Failed to add admin',
+        text: error.data?.context.error.errors[0].message || 'Failed to add admin',
         confirmButtonText: 'OK',
       });
     }
@@ -116,9 +120,26 @@ const AddAdmin = () => {
   return (
     <Flex justify="center" p="20px" mt={'80px'}>
       <Box w="100%" p="6" boxShadow="md" borderRadius="lg" bg={cardBg}>
-        <Text color={textColor} fontSize="22px" fontWeight="700" mb="20px">
-          Add New Admin
-        </Text>
+        <div className="mb-3 d-flex justify-content-between align-items-center">
+                 <Text
+                   color={textColor}
+                   fontSize="22px"
+                   fontWeight="700"
+                   mb="20px !important"
+                   lineHeight="100%"
+                 >
+                   Add New Admin
+                 </Text>
+                 <Button
+                   type="button"
+                   onClick={()=>navigate(-1)}
+                   colorScheme="teal"
+                   size="sm"
+                   leftIcon={<IoMdArrowBack />}
+                 >
+                   Back
+                 </Button>
+               </div>
 
         <form onSubmit={handleSubmit}>
           {/* Name Field */}
@@ -128,7 +149,7 @@ const AddAdmin = () => {
             </Text>
             <Input
               type="text"
-              name="name"
+              name="username"
               placeholder="Enter Admin Name"
               value={formData.name}
               onChange={handleInputChange}
@@ -214,36 +235,7 @@ const AddAdmin = () => {
             </InputGroup>
           </Box>
 
-          {/* Confirm Password Field */}
-          <Box mb="3">
-            <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
-              Confirm Password <span style={{ color: 'red' }}>*</span>
-            </Text>
-            <InputGroup>
-              <Input
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                placeholder="Confirm password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                bg={inputBg}
-                color={textColor}
-                borderColor={inputBorder}
-                required
-              />
-              <InputRightElement>
-                <Button
-                  size="sm"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  bg="transparent"
-                  _hover={{ bg: 'transparent' }}
-                >
-                  {showConfirmPassword ? <ViewOffIcon /> : <ViewIcon />}
-                </Button>
-              </InputRightElement>
-            </InputGroup>
-          </Box>
-
+         
           {/* Role Dropdown */}
           <Box mb="3">
             <Text color={textColor} fontSize="sm" fontWeight="700" mb="1">
@@ -270,7 +262,7 @@ const AddAdmin = () => {
                 ) : roles?.data?.length === 0 ? (
                   <MenuItem>No roles found</MenuItem>
                 ) : (
-                  roles.data?.map((role) => (
+                  roles.data?.data?.map((role) => (
                     <MenuItem
                       key={role.id}
                       onClick={() => handleSelect(role)}

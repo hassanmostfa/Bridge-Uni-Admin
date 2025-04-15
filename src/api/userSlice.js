@@ -17,7 +17,7 @@ export const apiService = createApi({
 
       // If a token exists, add it to the headers
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set("authorization", `${token}`);
       }
 
       return headers;
@@ -40,9 +40,8 @@ export const apiService = createApi({
       }),
     }),
     getAdmins: builder.query({
-      query: ({ page, limit }) => ({
-        url: '/admin/admin-user',
-        params: { page, limit }, // Pass page and limit as query parameters
+      query: () => ({
+        url: '/admin/admin',
       }),
     }),
     // You can add more endpoints here as needed
@@ -51,7 +50,7 @@ export const apiService = createApi({
     }),
     createUser: builder.mutation({
       query: (user) => ({
-        url: "/admin/admin-user",
+        url: "/admin",
         method: "POST",
         body: user,
       }),
@@ -59,7 +58,7 @@ export const apiService = createApi({
 
     updateUser: builder.mutation({
       query: ({id, user}) => ({
-        url: `/admin/admin-user/${id}`,
+        url: `/admin/${id}`,
         method: "PUT",
         body: user,
       }),
@@ -67,7 +66,7 @@ export const apiService = createApi({
 
     deleteUser: builder.mutation({
       query: (id) => ({
-        url: `/admin/admin-user/${id}`,
+        url: `/admin/${id}`,
         method: "DELETE",
       }),
     })
