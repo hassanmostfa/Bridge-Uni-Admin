@@ -47,6 +47,7 @@ import WhyUniBridge from 'views/admin/why/WhyUniBridge';
 import AddReason from 'views/admin/why/AddReason';
 import Partners from 'views/admin/partners/Partners';
 import AddPartner from 'views/admin/partners/AddPartner';
+import UpdatePartner from 'views/admin/partners/UpdatePartner';
 import ProtectedRoute from 'components/protectedRoute/ProtectedRoute';
 import EditRole from 'views/admin/roles/EditRole';
 import OnlineCourses from 'views/admin/courses/OnlineCourses';
@@ -173,7 +174,7 @@ const routes = [
       },
       {
         name: 'Join Us Requests',
-        path: '/pharmacy-requests',
+        path: '/joinUs/requests',
         icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
         component: <JoinUsRequests />,
         showInSidebar: true,
@@ -528,6 +529,13 @@ const routes = [
     layout: '/admin', 
     path: '/cms/add-why-unibridge',
     component: <AddReason />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Partners',
+    layout: '/admin', 
+    path: '/cms/update-partner/:id',
+    component: <UpdatePartner />,
     showInSidebar: false,
   },
 ];

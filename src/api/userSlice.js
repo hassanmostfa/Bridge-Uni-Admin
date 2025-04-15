@@ -17,7 +17,7 @@ export const apiService = createApi({
 
       // If a token exists, add it to the headers
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set("authorization", `${token}`);
       }
 
       return headers;

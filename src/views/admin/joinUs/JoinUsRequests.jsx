@@ -13,6 +13,8 @@ import {
   useColorModeValue,
   Link,
   IconButton,
+  useToast,
+  Spinner,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -25,42 +27,57 @@ import * as React from 'react';
 import Card from 'components/card/Card';
 import { FaFilePdf, FaDownload } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useGetAllJoinUsRequestsQuery } from "../../../api/joinUs";
 
 const columnHelper = createColumnHelper();
 
 const JoinUsRequests = () => {
-  const [data, setData] = React.useState([
-    {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      positionApplied: 'Frontend Developer',
-      jobTitle: 'Senior Developer',
-      cv: 'john_doe_cv.pdf',
-    },
-    {
-      id: 2,
-      firstName: 'Jane',
-      lastName: 'Smith',
-      positionApplied: 'Backend Developer',
-      jobTitle: 'Team Lead',
-      cv: 'jane_smith_cv.pdf',
-    },
-    {
-      id: 3,
-      firstName: 'Michael',
-      lastName: 'Johnson',
-      positionApplied: 'UX Designer',
-      jobTitle: 'Design Manager',
-      cv: 'michael_johnson_cv.pdf',
-    },
-  ]);
-
+  const { data: apiResponse, isLoading, error } = useGetAllJoinUsRequestsQuery();
+  const [tableData, setTableData] = React.useState([]);
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
+  const toast = useToast();
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  React.useEffect(() => {
+    if (apiResponse?.flag && apiResponse?.data?.data) {
+      const transformedData = apiResponse.data.data.map(item => ({
+        id: item.id,
+        firstName: item.first_name,
+        lastName: item.last_name,
+        positionApplied: item.position_applied,
+        jobTitle: item.job_title,
+        phone: item.phone,
+        cv: item.cv,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt
+      }));
+      setTableData(transformedData);
+    }
+  }, [apiResponse]);
+
+  const handleDownload = (cvUrl) => {
+    if (!cvUrl) {
+      toast({
+        title: 'Error',
+        description: 'No CV available for download',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+    
+    // Create a temporary anchor element to trigger download
+    const link = document.createElement('a');
+    link.href = cvUrl;
+    link.setAttribute('download', cvUrl.split('/').pop() || 'document.pdf');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const columns = [
     columnHelper.accessor('firstName', {
@@ -76,7 +93,7 @@ const JoinUsRequests = () => {
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -94,7 +111,7 @@ const JoinUsRequests = () => {
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -112,7 +129,7 @@ const JoinUsRequests = () => {
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -130,7 +147,25 @@ const JoinUsRequests = () => {
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColor}>
+        <Text color={textColor} fontSize="sm">
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('phone', {
+      id: 'phone',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          Phone
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColor} fontSize="sm">
           {info.getValue()}
         </Text>
       ),
@@ -150,9 +185,15 @@ const JoinUsRequests = () => {
       cell: (info) => (
         <Flex align="center">
           <Icon as={FaFilePdf} color="red.500" mr={2} />
-          <Text color={textColor}>
-            {info.getValue()}
-          </Text>
+          <Link 
+            color="blue.500" 
+            fontSize="sm"
+            href={info.getValue()} 
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View CV
+          </Link>
         </Flex>
       ),
     }),
@@ -173,6 +214,7 @@ const JoinUsRequests = () => {
           aria-label="Download CV"
           icon={<FaDownload />}
           colorScheme="green"
+          size="sm"
           onClick={() => handleDownload(info.row.original.cv)}
         />
       ),
@@ -180,7 +222,7 @@ const JoinUsRequests = () => {
   ];
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     state: {
       sorting,
@@ -188,20 +230,26 @@ const JoinUsRequests = () => {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
   });
 
-  // Handle download action
-  const handleDownload = (filename) => {
-    console.log(`Downloading CV: ${filename}`);
-    // Add your download logic here
-    // Example:
-    // const filePath = `/path/to/cvs/${filename}`;
-    // window.open(filePath, '_blank');
-  };
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" h="100px">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  if (error) {
+    return (
+      <Text color="red.500" textAlign="center" mt={4}>
+        Error: {error.message || 'Failed to load join us requests'}
+      </Text>
+    );
+  }
 
   return (
-    <div className="container">
+    <Box className="container">
       <Card
         flexDirection="column"
         w="100%"
@@ -255,34 +303,28 @@ const JoinUsRequests = () => {
               ))}
             </Thead>
             <Tbody>
-              {table
-                .getRowModel()
-                .rows.map((row) => {
-                  return (
-                    <Tr key={row.id}>
-                      {row.getVisibleCells().map((cell) => {
-                        return (
-                          <Td
-                            key={cell.id}
-                            fontSize={{ sm: '14px' }}
-                            minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                            borderColor="transparent"
-                          >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </Td>
-                        );
-                      })}
-                    </Tr>
-                  );
-                })}
+              {table.getRowModel().rows.map((row) => (
+                <Tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <Td
+                      key={cell.id}
+                      fontSize={{ sm: '14px' }}
+                      minW={{ sm: '150px', md: '200px', lg: 'auto' }}
+                      borderColor="transparent"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </Td>
+                  ))}
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </Box>
       </Card>
-    </div>
+    </Box>
   );
 };
 
