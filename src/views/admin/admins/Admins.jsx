@@ -192,7 +192,7 @@ const Admins = () => {
           <IconButton
             aria-label="View admin"
             icon={<FaEye />}
-            size="sm"
+            size="lg"
             variant="ghost"
             colorScheme="blue"
             onClick={() => navigate(`/admin/admin/details/${info.getValue()}`)}
@@ -200,7 +200,7 @@ const Admins = () => {
           <IconButton
             aria-label="Edit admin"
             icon={<EditIcon />}
-            size="sm"
+            size="lg"
             variant="ghost"
             colorScheme="green"
             onClick={() => navigate(`/admin/edit-admin/${info.getValue()}`)}
@@ -208,7 +208,7 @@ const Admins = () => {
           <IconButton
             aria-label="Delete admin"
             icon={<FaTrash />}
-            size="sm"
+            size="lg"
             variant="ghost"
             colorScheme="red"
             onClick={() => handleDeleteAdmin(info.getValue())}

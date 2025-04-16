@@ -97,9 +97,11 @@ const AddProvider = () => {
             Add New Provider
           </Text>
           <Button
-            leftIcon={<IoMdArrowBack />}
-            variant="outline"
+            type="button"
             onClick={() => navigate(-1)}
+            colorScheme="teal"
+            size="sm"
+            leftIcon={<IoMdArrowBack />}
           >
             Back
           </Button>
@@ -142,9 +144,16 @@ const AddProvider = () => {
             </Button>
             <Button
               type="submit"
-              colorScheme="blue"
               isLoading={isLoading}
               loadingText="Submitting"
+              variant="darkBrand"
+              color="white"
+              fontSize="sm"
+              fontWeight="500"
+              borderRadius="70px"
+              px="24px"
+              py="5px"
+              width={'200px'}
             >
               Save Provider
             </Button>

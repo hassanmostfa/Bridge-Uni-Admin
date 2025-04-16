@@ -64,6 +64,7 @@ import Contacts from 'views/admin/contact-us/Contacts';
 import AddContact from 'views/admin/contact-us/AddContact';
 import PopularMajors from 'views/admin/majors/PopularMajors';
 import AddMajor from 'views/admin/majors/AddMajor';
+import UpdateMajor from 'views/admin/majors/UpdateMajor';
 import AddTestimonial from 'views/admin/student/AddTestimonial';
 import ShortCourses from 'views/admin/courses/ShortCourses';
 import AddShortCourse from 'views/admin/courses/AddShortCourse';
@@ -110,8 +111,8 @@ const routes = [
         showInSidebar: true,
       },
       {
-        name: 'Rules',
-        path: '/rules',
+        name: 'Roles',
+        path: '/roles',
         icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
         component: <Roles />,
         showInSidebar: true,
@@ -570,6 +571,13 @@ const routes = [
     layout: '/admin', 
     path: 'cms/edit-banner/:id',
     component: <UpdateBanner />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Popular Majors',
+    layout: '/admin', 
+    path: 'cms/edit-major/:id',
+    component: <UpdateMajor />,
     showInSidebar: false,
   },
 ];

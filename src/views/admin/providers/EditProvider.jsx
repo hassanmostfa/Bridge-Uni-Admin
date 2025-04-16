@@ -123,9 +123,11 @@ const EditProvider = () => {
             Edit Provider
           </Text>
           <Button
-            leftIcon={<IoMdArrowBack />}
-            variant="outline"
+            type="button"
             onClick={() => navigate(-1)}
+            colorScheme="teal"
+            size="sm"
+            leftIcon={<IoMdArrowBack />}
           >
             Back
           </Button>
@@ -171,6 +173,14 @@ const EditProvider = () => {
               colorScheme="blue"
               isLoading={isUpdating}
               loadingText="Updating"
+              variant="darkBrand"
+              color="white"
+              fontSize="sm"
+              fontWeight="500"
+              borderRadius="70px"
+              px="24px"
+              py="5px"
+              width={'200px'}
             >
               Update Provider
             </Button>

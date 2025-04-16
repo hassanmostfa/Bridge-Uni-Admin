@@ -78,7 +78,7 @@ const UpdateBanner = () => {
   };
 
   const handleCancel = () => {
-    navigate('/admin/cms/banners');
+    navigate('/admin/undefined/cms/banners');
   };
 
   const handleSubmit = async () => {
