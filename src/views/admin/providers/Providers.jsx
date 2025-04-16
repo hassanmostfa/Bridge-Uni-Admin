@@ -197,7 +197,7 @@ const Providers = () => {
           <IconButton
             aria-label="Edit provider"
             icon={<EditIcon size={14} />}
-            size="sm"
+            size="lg"
             // variant="outline"
             color="green"
             onClick={() => navigate(`/admin/edit-provider/${info.getValue()}`)}
@@ -205,7 +205,7 @@ const Providers = () => {
           <IconButton
             aria-label="Delete provider"
             icon={<FaTrash size={14} />}
-            size="sm"
+            size="lg"
             // variant="outline"
             color="red"
             onClick={() => handleDeleteProvider(info.getValue())}
@@ -276,8 +276,14 @@ const Providers = () => {
             </InputGroup> */}
             
             <Button
-              colorScheme="blue"
-              leftIcon={<AddIcon />}
+              variant="darkBrand"
+              color="white"
+              fontSize="sm"
+              fontWeight="500"
+              borderRadius="70px"
+              px="24px"
+              py="5px"
+              width={'200px'}
               onClick={() => navigate('/admin/add-provider')}
             >
               Add Provider

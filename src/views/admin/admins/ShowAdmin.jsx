@@ -151,16 +151,6 @@ const ShowAdmin = () => {
               <Td>{admin.phone || 'N/A'}</Td>
             </Tr>
             <Tr>
-              <Th w="30%">Verification Status</Th>
-              <Td>
-                <Badge
-                  colorScheme={admin.isVerified === 'true' ? 'green' : 'orange'}
-                >
-                  {admin.isVerified === 'true' ? 'Verified' : 'Not Verified'}
-                </Badge>
-              </Td>
-            </Tr>
-            <Tr>
               <Th w="30%">Roles</Th>
               <Td>
                 {admin.admin_permissions?.length > 0 ? (

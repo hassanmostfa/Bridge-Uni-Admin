@@ -249,8 +249,8 @@ const Roles = () => {
             borderRadius="70px"
             px="24px"
             py="5px"
-            onClick={() => navigate('/admin/add-New-Rule')}
             width={'200px'}
+            onClick={() => navigate('/admin/add-New-Rule')}
           >
             Create New Rule
           </Button>

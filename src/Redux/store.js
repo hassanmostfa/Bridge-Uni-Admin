@@ -13,6 +13,7 @@ import { bannersApi } from "api/banners";
 import { providerApi } from "api/providerSlice";
 import { positionsApi } from "api/positionSlice";
 import { contactApi } from "api/contactSlice";
+import { popularMajors } from "api/popularMajors";
 // import { userApi, authReducer } from './userSlice';
 
 export const store = configureStore({
@@ -30,6 +31,7 @@ export const store = configureStore({
     [providerApi.reducerPath]:providerApi.reducer,
     [positionsApi.reducerPath]:positionsApi.reducer,
     [contactApi.reducerPath]:contactApi.reducer,
+    [popularMajors.reducerPath]:popularMajors.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -46,6 +48,7 @@ export const store = configureStore({
       providerApi.middleware,
       positionsApi.middleware,
       contactApi.middleware,
+      popularMajors.middleware,
     ),
 });
 

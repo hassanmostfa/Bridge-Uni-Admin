@@ -11,6 +11,7 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  Spinner
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -24,38 +25,68 @@ import Card from 'components/card/Card';
 import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
+import { useGetAllMajorsQuery, useDeleteMajorMutation } from "../../../api/popularMajors";
+import Swal from 'sweetalert2';
 
 const columnHelper = createColumnHelper();
 
 const PopularMajors = () => {
-  const [data, setData] = React.useState([
-    {
-      id: 1,
-      title: 'Computer Science',
-      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 2,
-      title: 'Business Administration',
-      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 3,
-      title: 'Medicine',
-      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 4,
-      title: 'Engineering',
-      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-  ]);
-
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
+  
+  // Fetch data from API
+  const { data: apiData, isLoading, isError, refetch } = useGetAllMajorsQuery();
+  const [deleteMajor, { isLoading: isDeleting }] = useDeleteMajorMutation();
+  
+  // Transform API data to match the expected format
+  const data = React.useMemo(() => {
+    return apiData?.data?.data || [];
+  }, [apiData]);
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+     // Trigger refetch when component mounts (navigates to)
+     React.useEffect(() => {
+      // Only trigger refetch if the data is not being loaded
+      if (!isLoading) {
+        refetch(); // Manually trigger refetch when component is mounted
+      }
+    }, [refetch, isLoading]); // Dependency array to ensure it only runs on mount
+    
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const result = await deleteMajor(id).unwrap();
+          if (result.flag) {
+            Swal.fire(
+              'Deleted!',
+              result.message,
+              'success'
+            );
+            refetch(); // Refresh the data after deletion
+          } else {
+            throw new Error(result.message);
+          }
+        } catch (err) {
+          Swal.fire(
+            'Error!',
+            err.message || 'Failed to delete major',
+            'error'
+          );
+        }
+      }
+    });
+  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -145,9 +176,8 @@ const PopularMajors = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
-            onClick={() => {
-              setData(data.filter(item => item.id !== info.row.original.id));
-            }}
+            onClick={() => handleDelete(info.row.original.id)}
+            disabled={isDeleting}
           />
           <Icon
             w="18px"
@@ -156,16 +186,7 @@ const PopularMajors = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/edit-major/${info.row.original.id}`)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/view-major/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/cms/edit-major/${info.row.original.id}`)}
           />
         </Flex>
       ),
@@ -183,6 +204,14 @@ const PopularMajors = () => {
     getSortedRowModel: getSortedRowModel(),
     debugTable: true,
   });
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  if (isError) {
+    return <Text>Error loading data</Text>;
+  }
 
   return (
     <div className="container">
