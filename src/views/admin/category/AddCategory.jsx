@@ -48,16 +48,18 @@ const AddCategory = () => {
     }
 
     // Convert the image file to a base64 string
-    const reader = new FileReader();
-    reader.readAsDataURL(image);
-    reader.onloadend = async () => {
-      const base64Image = reader.result.split(",")[1]; // Remove the data URL prefix
+    // const reader = new FileReader();
+    // reader.readAsDataURL(image);
+    // reader.onloadend = async () => {
+      // const base64Image = reader.result.split(",")[1]; // Remove the data URL prefix
 
       const payload = {
-        translations: [
-          { languageId: "en", name: enName }, // English translation
-          { languageId: "ar", name: arName }, // Arabic translation
-        ],
+        title_en: enName,
+        title_ar: arName,
+        // translations: [
+        //   { languageId: "en", name: enName }, // English translation
+        //   { languageId: "ar", name: arName }, // Arabic translation
+        // ],
         // categoryType: selectedCategoryType, // Include the category type
       };
 
@@ -69,7 +71,7 @@ const AddCategory = () => {
         console.error("Failed to add category:", error);
         Swal.fire("Error!", "Failed to add category.", "error");
       }
-    };
+    // };
   };
 
   return (

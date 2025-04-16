@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Define your base URL
-const baseUrl = "https://back.biopluskw.com/api/v1";
+const baseUrl = "https://back.bridgeuni.com/api";
 
 // Create the API slice using RTK Query
 export const CategoryApi = createApi({
@@ -14,7 +14,7 @@ export const CategoryApi = createApi({
 
       // If a token exists, add it to the headers
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set("authorization", `${token}`);
       }
 
       return headers;
@@ -23,28 +23,28 @@ export const CategoryApi = createApi({
 
   endpoints: (builder) => ({
     getCategories: builder.query({
-      query: ({ page, limit }) => ({
-        url: '/admin/categories',
-        params: { page, limit }, // Pass page and limit as query parameters
+      query: () => ({
+        url: '/category',
+        // params: { page, limit }, // Pass page and limit as query parameters
       }),
     }),
     addCategory: builder.mutation({
       query: (category) => ({
-        url: "/admin/categories",
+        url: "/category",
         method: "POST",
         body: category,
       }),
     }),
     updateCategory: builder.mutation({
       query: ({ id, category }) => ({
-        url: `/admin/categories/${id}`,
+        url: `/category/${id}`,
         method: "PUT",
         body: category,
       }),
     }),
     deleteCategory: builder.mutation({
       query: (id) => ({
-        url: `/admin/categories/${id}`,
+        url: `/category/${id}`,
         method: "DELETE",
       }),
     }),

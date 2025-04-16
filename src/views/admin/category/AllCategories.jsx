@@ -38,7 +38,7 @@ const AllCategories = () => {
   const [page, setPage] = React.useState(1); // Current page
   const [limit, setLimit] = React.useState(10); // Items per page
   const [searchQuery, setSearchQuery] = React.useState(''); // Search query
-  const { data: categoriesResponse, refetch, isError, isLoading } = useGetCategoriesQuery({ page, limit });
+  const { data: categoriesResponse, refetch, isError, isLoading } = useGetCategoriesQuery();
   const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
@@ -46,13 +46,18 @@ const AllCategories = () => {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
-  // Extract table data and pagination info
+  // Extract table data and pagination info from new API structure
   const tableData = categoriesResponse?.data?.data || [];
-  const pagination = categoriesResponse?.data?.pagination || { page: 1, limit: 10, totalItems: 0, totalPages: 1 };
+  const pagination = {
+    page: categoriesResponse?.data?.currentPage || 1,
+    limit: limit,
+    totalItems: categoriesResponse?.data?.totalItems || 0,
+    totalPages: categoriesResponse?.data?.totalPage || 1,
+  };
 
   // Filter data based on search query
   const filteredData = React.useMemo(() => {
-    if (!searchQuery) return tableData; // Return all data if no search query
+    if (!searchQuery) return tableData;
     return tableData.filter((item) =>
       Object.values(item).some((value) =>
         String(value).toLowerCase().includes(searchQuery.toLowerCase())
@@ -62,7 +67,7 @@ const AllCategories = () => {
 
   React.useEffect(() => {
     refetch();
-  }, [page, limit, refetch]);
+  }, []);
 
   const handleDelete = async (id) => {
     try {
@@ -77,8 +82,8 @@ const AllCategories = () => {
       });
 
       if (result.isConfirmed) {
-        await deleteCategory(id).unwrap(); // Delete the category
-        refetch(); // Refetch the data
+        await deleteCategory(id).unwrap();
+        refetch();
         Swal.fire('Deleted!', 'The category has been deleted.', 'success');
       }
     } catch (error) {
@@ -90,14 +95,13 @@ const AllCategories = () => {
   // Transform API data into table data format
   const transformedData = React.useMemo(() => {
     return filteredData.map((category, index) => ({
-      index: index + 1,
+      index: index + 1 + (page - 1) * limit, // Calculate correct index with pagination
       id: category.id,
-      en_name: category.translations.find((t) => t.languageId === 'en')?.name || 'N/A',
-      ar_name: category.translations.find((t) => t.languageId === 'ar')?.name || 'N/A',
-      category_type: 'N/A', // Replace with actual category type if available
-      image: category.image,
+      en_name: category.title_en || 'N/A',
+      ar_name: category.title_ar || 'N/A',
+      category_type: 'N/A', // You can add this if available in the new API
     }));
-  }, [filteredData]);
+  }, [filteredData, page, limit]);
 
   const columns = [
     columnHelper.accessor('index', {
@@ -118,7 +122,7 @@ const AllCategories = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('en_name', {
+    columnHelper.accessor('title_en', {
       id: 'en_name',
       header: () => (
         <Text
@@ -132,7 +136,7 @@ const AllCategories = () => {
       ),
       cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
     }),
-    columnHelper.accessor('ar_name', {
+    columnHelper.accessor('title_ar', {
       id: 'ar_name',
       header: () => (
         <Text
@@ -193,7 +197,7 @@ const AllCategories = () => {
   ];
 
   const table = useReactTable({
-    data: transformedData, // Use transformed data
+    data: transformedData,
     columns,
     state: {
       sorting,
@@ -219,7 +223,7 @@ const AllCategories = () => {
 
   const handleLimitChange = (e) => {
     setLimit(Number(e.target.value));
-    setPage(1); // Reset to the first page when changing the limit
+    setPage(1);
   };
 
   return (
@@ -260,8 +264,8 @@ const AllCategories = () => {
               <Input
                 variant="search"
                 fontSize="sm"
-                bg={useColorModeValue("secondaryGray.300", "gray.700")} // Light mode / Dark mode
-                color={useColorModeValue("gray.700", "white")} // Text color for light and dark mode
+                bg={useColorModeValue("secondaryGray.300", "gray.700")}
+                color={useColorModeValue("gray.700", "white")}
                 fontWeight="500"
                 _placeholder={{ color: "gray.400", fontSize: "14px" }}
                 borderRadius="30px"

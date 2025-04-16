@@ -36,12 +36,12 @@ export const roleApi = createApi({
       }),
     }),
     getRolePermissios:builder.query({
-        query:(id) => `/admin/role/${id}/permissions`
+        query:(id) => `/role/rolePermission/${id}`
     }),
 
     updateRole: builder.mutation({
       query: ({ id, role }) => ({
-        url: `/admin/role/${id}`,
+        url: `/role/adminRole/${id}`,
         method: "PUT",
         body: role,
       }),
@@ -49,7 +49,7 @@ export const roleApi = createApi({
 
     deleteRole: builder.mutation({
       query: (id) => ({
-        url: `/admin/role/${id}`,
+        url: `/role/adminRole/${id}`,
         method: "DELETE",
       }),
     }),
