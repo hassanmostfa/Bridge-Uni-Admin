@@ -134,20 +134,29 @@ const handleSubmit = async (e) => {
 
   // Prepare module permissions (only include if any permission is true)
   const modulePermissions = modules
-    .filter(module => 
-      module.permissions.canView || 
-      module.permissions.canAdd || 
-      module.permissions.canEdit || 
-      module.permissions.canDelete
-    )
-    .map(module => ({
+  .filter(module => 
+    module.permissions.canView || 
+    module.permissions.canAdd || 
+    module.permissions.canEdit || 
+    module.permissions.canDelete
+  )
+  .map(module => {
+    // Create base permission object
+    const permissionObj = {
       role_module_id: module.id,
-      role_sub_module_id: 0, // 0 indicates module-level permission
       can_view: module.permissions.canView,
       can_add: module.permissions.canAdd,
       can_update: module.permissions.canEdit,
       can_delete: module.permissions.canDelete,
-    }));
+    };
+
+    // Only include role_sub_module_id if there are submodules
+    if (module.submodules.length > 0) {
+      permissionObj.role_sub_module_id = null;
+    }
+
+    return permissionObj;
+  });
 
   // Prepare submodule permissions (only include if any permission is true)
   const submodulePermissions = modules.flatMap(module =>
@@ -188,7 +197,7 @@ const handleSubmit = async (e) => {
       confirmButtonText: 'OK',
     }).then((result) => {
       if (result.isConfirmed) {
-        navigate('/admin/undefined/rules');
+        navigate('/admin/undefined/roles');
       }
     });
   } catch (error) {

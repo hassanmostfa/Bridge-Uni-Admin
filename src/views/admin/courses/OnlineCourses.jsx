@@ -27,10 +27,14 @@ import { FaEye, FaTrash } from "react-icons/fa6";
 import { EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import Card from "components/card/Card";
 import { useNavigate } from "react-router-dom";
+import { useGetAllOnlineCourcesQuery } from "api/onlineCourseSlice";
 
 const columnHelper = createColumnHelper();
 
 const OnlineCourses = () => {
+  const {data:cources} = useGetAllOnlineCourcesQuery();
+  console.log(cources);
+  
   const navigate = useNavigate();
   const [data, setData] = useState([
     {

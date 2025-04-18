@@ -108,21 +108,33 @@ const AddRole = () => {
 
     // Prepare module permissions (with submodule_id: 0)
     const modulePermissions = modules
-      .filter(module => 
-        module.permissions.canView || 
-        module.permissions.canAdd || 
-        module.permissions.canEdit || 
-        module.permissions.canDelete
-      )
-      .map(module => ({
-        role_sub_module_id: 0,
+    .filter(module => 
+      module.permissions.canView || 
+      module.permissions.canAdd || 
+      module.permissions.canEdit || 
+      module.permissions.canDelete
+    )
+    .map(module => {
+      // Create base permission object
+      const permissionObj = {
         role_module_id: module.id,
         can_view: module.permissions.canView,
         can_add: module.permissions.canAdd,
         can_update: module.permissions.canEdit,
         can_delete: module.permissions.canDelete,
-      }));
+      };
 
+      // Only include role_sub_module_id if there are submodules
+      if (module.submodules.length > 0) {
+        permissionObj.role_sub_module_id = null;
+      }
+
+      return permissionObj;
+    });
+
+    console.log('Module Permissions:', modulePermissions);
+
+    
     // Prepare submodule permissions
     const submodulePermissions = modules.flatMap((module) =>
       module.submodules
@@ -164,7 +176,7 @@ const AddRole = () => {
         confirmButtonText: 'OK',
       }).then((result) => {
         if (result.isConfirmed) {
-          navigate('/admin/undefined/rules');
+          navigate('/admin/undefined/roles');
         }
       });
     } catch (error) {
