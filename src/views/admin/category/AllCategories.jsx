@@ -35,10 +35,10 @@ import Swal from 'sweetalert2';
 const columnHelper = createColumnHelper();
 
 const AllCategories = () => {
-  const [page, setPage] = React.useState(1); // Current page
+  const [page, setPage] = React.useState(0); // Current page (now 0-indexed to match API)
   const [limit, setLimit] = React.useState(10); // Items per page
   const [searchQuery, setSearchQuery] = React.useState(''); // Search query
-  const { data: categoriesResponse, refetch, isError, isLoading } = useGetCategoriesQuery();
+  const { data: categoriesResponse, refetch, isError, isLoading } = useGetCategoriesQuery({ page, limit });
   const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
@@ -46,13 +46,13 @@ const AllCategories = () => {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
-  // Extract table data and pagination info from new API structure
+  // Extract table data and pagination info from API response
   const tableData = categoriesResponse?.data?.data || [];
   const pagination = {
-    page: categoriesResponse?.data?.currentPage || 1,
+    page: categoriesResponse?.data?.currentPage || 0,
     limit: limit,
     totalItems: categoriesResponse?.data?.totalItems || 0,
-    totalPages: categoriesResponse?.data?.totalPage || 1,
+    totalPages: categoriesResponse?.data?.totalPages || 1,
   };
 
   // Filter data based on search query
@@ -67,7 +67,7 @@ const AllCategories = () => {
 
   React.useEffect(() => {
     refetch();
-  }, []);
+  }, [page, limit, refetch]);
 
   const handleDelete = async (id) => {
     try {
@@ -95,13 +95,12 @@ const AllCategories = () => {
   // Transform API data into table data format
   const transformedData = React.useMemo(() => {
     return filteredData.map((category, index) => ({
-      index: index + 1 + (page - 1) * limit, // Calculate correct index with pagination
+      index: index + 1 + (pagination.page * limit), // Calculate correct index with pagination
       id: category.id,
-      en_name: category.title_en || 'N/A',
-      ar_name: category.title_ar || 'N/A',
-      category_type: 'N/A', // You can add this if available in the new API
+      title_en: category.title_en || 'N/A',
+      title_ar: category.title_ar || 'N/A',
     }));
-  }, [filteredData, page, limit]);
+  }, [filteredData, pagination.page, limit]);
 
   const columns = [
     columnHelper.accessor('index', {
@@ -123,7 +122,7 @@ const AllCategories = () => {
       ),
     }),
     columnHelper.accessor('title_en', {
-      id: 'en_name',
+      id: 'title_en',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -137,7 +136,7 @@ const AllCategories = () => {
       cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
     }),
     columnHelper.accessor('title_ar', {
-      id: 'ar_name',
+      id: 'title_ar',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -182,15 +181,6 @@ const AllCategories = () => {
             cursor="pointer"
             onClick={() => navigate(`/admin/edit-category/${info.getValue()}`)}
           />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/edit-category/${info.getValue()}`)}
-          />
         </Flex>
       ),
     }),
@@ -210,21 +200,24 @@ const AllCategories = () => {
 
   // Pagination controls
   const handleNextPage = () => {
-    if (page < pagination.totalPages) {
-      setPage(page + 1);
+    if (pagination.page < pagination.totalPages - 1) {
+      setPage(pagination.page + 1);
     }
   };
 
   const handlePreviousPage = () => {
-    if (page > 1) {
-      setPage(page - 1);
+    if (pagination.page > 0) {
+      setPage(pagination.page - 1);
     }
   };
 
   const handleLimitChange = (e) => {
     setLimit(Number(e.target.value));
-    setPage(1);
+    setPage(0); // Reset to first page when changing limit
   };
+
+  if (isLoading) return <Text>Loading...</Text>;
+  if (isError) return <Text>Error loading categories</Text>;
 
   return (
     <div className="container">
@@ -264,8 +257,8 @@ const AllCategories = () => {
               <Input
                 variant="search"
                 fontSize="sm"
-                bg={useColorModeValue("secondaryGray.300", "gray.700")}
-                color={useColorModeValue("gray.700", "white")}
+                bg="secondaryGray.300"
+                color="gray.700"
                 fontWeight="500"
                 _placeholder={{ color: "gray.400", fontSize: "14px" }}
                 borderRadius="30px"
@@ -375,12 +368,12 @@ const AllCategories = () => {
             </Select>
           </Flex>
           <Text color={textColor} fontSize="sm">
-            Page {pagination.page} of {pagination.totalPages}
+            Page {pagination.page + 1} of {pagination.totalPages}
           </Text>
           <Flex>
             <Button
               onClick={handlePreviousPage}
-              disabled={page === 1}
+              disabled={pagination.page === 0}
               variant="outline"
               size="sm"
               mr="10px"
@@ -390,7 +383,7 @@ const AllCategories = () => {
             </Button>
             <Button
               onClick={handleNextPage}
-              disabled={page === pagination.totalPages}
+              disabled={pagination.page === pagination.totalPages - 1}
               variant="outline"
               size="sm"
             >

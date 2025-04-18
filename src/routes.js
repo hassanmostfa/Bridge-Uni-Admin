@@ -78,6 +78,7 @@ import EditAbout from 'views/admin/about-us/EditAbout';
 import EditProvider from 'views/admin/providers/EditProvider';
 import EditPosition from 'views/admin/positions/EditPosition';
 import EditContact from 'views/admin/contact-us/EditContact';
+import UpdateBlog from 'views/admin/blog/UpdateBlog';
 
 const routes = [
   {
@@ -578,6 +579,13 @@ const routes = [
     layout: '/admin', 
     path: 'cms/edit-major/:id',
     component: <UpdateMajor />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Blogs',
+    layout: '/admin', 
+    path: 'cms/edit-blog/:id',
+    component: <UpdateBlog />,
     showInSidebar: false,
   },
 ];

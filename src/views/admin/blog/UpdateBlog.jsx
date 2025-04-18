@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -18,38 +18,66 @@ import {
   Spinner,
   useToast
 } from "@chakra-ui/react";
-import "./blog.css";
 import { FaUpload } from "react-icons/fa6";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import Select from "react-select";
-import { useAddBlogMutation } from "../../../api/blogs";
+import { useNavigate, useParams } from "react-router-dom";
+import { useGetBlogByIdQuery, useUpdateBlogMutation } from "../../../api/blogs";
 import { useAddFileMutation } from "../../../api/filesSlice";
 import Swal from "sweetalert2";
 
-const AddBlog = () => {
+const UpdateBlog = () => {
+  const { id } = useParams();
+  const { data: response, isLoading: isBlogLoading , refetch } = useGetBlogByIdQuery(id);
+  const blogData = response?.data;
+  
+  const [updateBlog, { isLoading: isUpdating }] = useUpdateBlogMutation();
+  const [addFile] = useAddFileMutation();
+  const navigate = useNavigate();
+
+  // Form state
   const [englishTitle, setEnglishTitle] = useState("");
   const [arabicTitle, setArabicTitle] = useState("");
   const [englishDescription, setEnglishDescription] = useState("");
   const [arabicDescription, setArabicDescription] = useState("");
-  const [publishDate, setPublishDate] = useState(new Date().toISOString().split('T')[0]);
-  const [image, setImage] = useState(null);
+  const [publishDate, setPublishDate] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [newImage, setNewImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   const textColor = useColorModeValue("secondaryGray.900", "white");
-  const navigate = useNavigate();
-  const [addBlog, { isLoading: isAddingBlog }] = useAddBlogMutation();
-  const [addFile] = useAddFileMutation();
+
+  // Populate form with existing blog data
+  useEffect(() => {
+    if (blogData) {
+      setEnglishTitle(blogData.title_en || "");
+      setArabicTitle(blogData.title_ar || "");
+      setEnglishDescription(blogData.description_en || "");
+      setArabicDescription(blogData.description_ar || "");
+      setPublishDate(blogData.date?.split('T')[0] || new Date().toISOString().split('T')[0]);
+      setImageUrl(blogData.image || "");
+      
+      // Convert blog_tags array to simple tag strings
+      const tagNames = blogData.blog_tags?.map(tag => tag.name) || [];
+      setTags(tagNames);
+    }
+  }, [blogData]);
+
+     // Trigger refetch when component mounts (navigates to)
+     React.useEffect(() => {
+      // Only trigger refetch if the data is not being loaded
+      if (!isBlogLoading) {
+        refetch(); // Manually trigger refetch when component is mounted
+      }
+    }, [refetch, isBlogLoading]); // Dependency array to ensure it only runs on mount
 
   const toast = useToast();
   const handleImageUpload = async (files) => {
     if (files && files.length > 0) {
       const file = files[0];
-      setImage(file);
+      setNewImage(file);
       
       try {
         setIsUploading(true);
@@ -57,7 +85,7 @@ const AddBlog = () => {
         formData.append("img", file);
         
         const response = await addFile(formData).unwrap();
-        setImageUrl(response.url); // Assuming your API returns { url: "..." }
+        setImageUrl(response.url);
         
         toast({
           title: "Image uploaded successfully",
@@ -66,14 +94,9 @@ const AddBlog = () => {
           isClosable: true,
         });
       } catch (error) {
-        toast({
-          title: "Error uploading image",
-          description: error.message,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-        setImage(null);
+        console.error("Error uploading image:", error);
+        Swal.fire("Error!", "Failed to upload image", error);
+        setNewImage(null);
       } finally {
         setIsUploading(false);
       }
@@ -120,41 +143,45 @@ const AddBlog = () => {
   };
 
   const handleCancel = () => {
-    setEnglishTitle("");
-    setArabicTitle("");
-    setEnglishDescription("");
-    setArabicDescription("");
-    setPublishDate(new Date().toISOString().split('T')[0]);
-    setImage(null);
-    setImageUrl("");
-    setTags([]);
+    navigate("/admin/undefined/blogs");
   };
 
   const handleSubmit = async () => {
-    if (!englishTitle || !arabicTitle || !englishDescription || !arabicDescription || !publishDate || !imageUrl) {
+    if (!englishTitle || !arabicTitle || !englishDescription || !arabicDescription || !publishDate) {
       Swal.fire("Error!", "Please fill all required fields", "error");
       return;
     }
 
-    const blogData = {
+    // Format the date to ISO string
+    const formattedDate = new Date(publishDate).toISOString();
+
+    const updateData = {
       title_en: englishTitle,
       title_ar: arabicTitle,
       description_en: englishDescription,
       description_ar: arabicDescription,
-      date: publishDate,
+      date: formattedDate,
       image: imageUrl,
-      tags: tags,
+      tags: tags, // Array of strings
     };
 
     try {
-      await addBlog(blogData).unwrap();
-      Swal.fire("Success!", "Blog created successfully", "success");
+      await updateBlog({ id, blog: updateData }).unwrap();
+      Swal.fire("Success!", "Blog updated successfully", "success");
       navigate("/admin/undefined/blogs");
     } catch (error) {
-      console.error("Error creating blog:", error);
-      Swal.fire("Error!", "Failed to create blog", "error");
+      console.error("Error updating blog:", error);
+      Swal.fire("Error!", "Failed to update blog", "error");
     }
   };
+
+  if (isBlogLoading) {
+    return (
+      <Flex justify="center" align="center" minH="100vh">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
 
   return (
     <div className="container add-admin-container w-100">
@@ -167,7 +194,7 @@ const AddBlog = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New Blog
+            Update Blog
           </Text>
           <Button
             type="button"
@@ -264,9 +291,9 @@ const AddBlog = () => {
                 </InputRightElement>
               </InputGroup>
               <Flex mt={2} wrap="wrap" gap={2}>
-                {tags.map((tag) => (
+                {tags?.map((tag, index) => (
                   <Tag
-                    key={tag}
+                    key={index}
                     size="md"
                     borderRadius="full"
                     variant="solid"
@@ -315,7 +342,7 @@ const AddBlog = () => {
                   border="none"
                   onClick={() => document.getElementById('fileInput').click()}
                 >
-                  Upload Image
+                  {imageUrl ? "Change Image" : "Upload Image"}
                   <input
                     type="file"
                     id="fileInput"
@@ -339,7 +366,7 @@ const AddBlog = () => {
                       style={{ borderRadius: "md", objectFit: "cover" }}
                     />
                     <Text mt={2} fontSize="sm">
-                      {image?.name || "Uploaded image"}
+                      {newImage?.name || "Current image"}
                     </Text>
                   </Box>
                 )}
@@ -354,7 +381,7 @@ const AddBlog = () => {
               colorScheme="red" 
               onClick={handleCancel}
               width="120px"
-              isDisabled={isUploading || isAddingBlog}
+              isDisabled={isUploading || isUpdating}
             >
               Cancel
             </Button>
@@ -368,10 +395,10 @@ const AddBlog = () => {
               py='5px'
               width="120px"
               onClick={handleSubmit}
-              isLoading={isAddingBlog}
+              isLoading={isUpdating}
               isDisabled={isUploading}
             >
-              Save
+              Update
             </Button>
           </Flex>
         </form>
@@ -380,4 +407,4 @@ const AddBlog = () => {
   );
 };
 
-export default AddBlog;
+export default UpdateBlog;
