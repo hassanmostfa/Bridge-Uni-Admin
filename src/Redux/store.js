@@ -15,6 +15,7 @@ import { positionsApi } from "api/positionSlice";
 import { contactApi } from "api/contactSlice";
 import { popularMajors } from "api/popularMajors";
 import { onlineCourseApi } from "api/onlineCourseSlice";
+import { blogApi } from "api/blogs";
 // import { userApi, authReducer } from './userSlice';
 
 export const store = configureStore({
@@ -34,6 +35,8 @@ export const store = configureStore({
     [contactApi.reducerPath]:contactApi.reducer,
     [popularMajors.reducerPath]:popularMajors.reducer,
     [onlineCourseApi.reducerPath]:onlineCourseApi.reducer,
+    [blogApi.reducerPath]:blogApi.reducer,
+    
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -52,6 +55,7 @@ export const store = configureStore({
       contactApi.middleware,
       popularMajors.middleware,
       onlineCourseApi.middleware,
+      blogApi.middleware,
     ),
 });
 
