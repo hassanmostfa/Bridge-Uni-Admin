@@ -127,14 +127,14 @@ const EditAbout = () => {
 
       // Prepare update data
       const updateData = {
-        id: parseInt(id),
+       
         title_en: textEN,
         title_ar: textAR,
         image: imageUrl,
       };
 
       // Update about content
-      const response = await updateAbout(updateData).unwrap();
+      const response = await updateAbout({ id, data: updateData }).unwrap();
 
       if (response.flag) {
         await Swal.fire({

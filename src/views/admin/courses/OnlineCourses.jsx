@@ -15,6 +15,7 @@ import {
   Button,
   Badge,
   Image,
+  useToast,
 } from "@chakra-ui/react";
 import {
   createColumnHelper,
@@ -28,61 +29,85 @@ import { EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import Card from "components/card/Card";
 import { useNavigate } from "react-router-dom";
 import { useGetAllOnlineCourcesQuery } from "api/onlineCourseSlice";
+import { useDeleteCourseMutation } from "api/onlineCourseSlice";
 
 const columnHelper = createColumnHelper();
 
 const OnlineCourses = () => {
-  const {data:cources} = useGetAllOnlineCourcesQuery();
-  console.log(cources);
-  
+  const { data: coursesData, isLoading, isError, refetch } = useGetAllOnlineCourcesQuery();
+  // const [updateFeatured] = useUpdateCourseFeaturedMutation();
+  const [deleteCourse] = useDeleteCourseMutation();
   const navigate = useNavigate();
-  const [data, setData] = useState([
-    {
-      id: 1,
-      title_en: "Data Science Fundamentals",
-      title_ar: "أساسيات علم البيانات",
-      provider: "Coursera",
-      category: "Technology",
-      featured: true,
-      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 2,
-      title_en: "Business Administration",
-      title_ar: "إدارة الأعمال",
-      provider: "Udemy",
-      category: "Business",
-      featured: false,
-      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 3,
-      title_en: "Graphic Design Masterclass",
-      title_ar: "دورة متقدمة في التصميم الجرافيكي",
-      provider: "Skillshare",
-      category: "Design",
-      featured: true,
-      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-  ]);
+  const toast = useToast();
 
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
 
   // Toggle featured status
-  const toggleFeatured = (id) => {
-    setData((prevData) =>
-      prevData.map((course) =>
-        course.id === id ? { ...course, featured: !course.featured } : course
-      )
-    );
-  };
+  // const toggleFeatured = async (id, currentStatus) => {
+  //   try {
+  //     await updateFeatured({ id, featured: !currentStatus }).unwrap();
+  //     toast({
+  //       title: "Success",
+  //       description: "Course featured status updated",
+  //       status: "success",
+  //       duration: 3000,
+  //       isClosable: true,
+  //     });
+  //     refetch();
+  //   } catch (error) {
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to update featured status",
+  //       status: "error",
+  //       duration: 3000,
+  //       isClosable: true,
+  //     });
+  //   }
+  // };
 
   // Delete course
-  const handleDelete = (id) => {
-    setData((prevData) => prevData.filter((course) => course.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await deleteCourse(id).unwrap();
+      toast({
+        title: "Success",
+        description: "Course deleted successfully",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete course",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
+  // Format data for table
+  const formatTableData = () => {
+    if (!coursesData?.data?.data) return [];
+    
+    return coursesData.data.data.map(course => ({
+      id: course.id,
+      title_en: course.title_en,
+      title_ar: course.title_ar,
+      provider: course.provider?.title_en || 'N/A',
+      category: course.category?.title_en || 'N/A',
+      featured: course.featured_course,
+      coming_soon: course.coming_soon,
+      image: course.image,
+      originalData: course // Keep reference to original data
+    }));
+  };
+
+
+  
   const columns = [
     columnHelper.accessor("id", {
       id: "id",
@@ -100,6 +125,7 @@ const OnlineCourses = () => {
           borderRadius="md"
           objectFit="cover"
           alt="Course thumbnail"
+          // fallbackSrc="https://via.placeholder.com/80x45"
         />
       ),
     }),
@@ -138,7 +164,18 @@ const OnlineCourses = () => {
         <Switch
           colorScheme="teal"
           isChecked={info.getValue()}
-          onChange={() => toggleFeatured(info.row.original.id)}
+          // onChange={() => toggleFeatured(info.row.original.id, info.getValue())}
+        />
+      ),
+    }),
+    columnHelper.accessor("coming_soon", {
+      id: "coming_soon",
+      header: () => <Text color="gray.400">Comming Soon</Text>,
+      cell: (info) => (
+        <Switch
+          colorScheme="teal"
+          isChecked={info.getValue()}
+          // onChange={() => toggleFeatured(info.row.original.id, info.getValue())}
         />
       ),
     }),
@@ -154,7 +191,7 @@ const OnlineCourses = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
-            onClick={() => navigate(`/admin/courses/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/online-courses/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -163,7 +200,7 @@ const OnlineCourses = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/edit-course/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/edit-online-course/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -180,11 +217,31 @@ const OnlineCourses = () => {
   ];
 
   const table = useReactTable({
-    data,
+    data: formatTableData(),
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
+
+  if (isLoading) {
+    return (
+      <div className="container">
+        <Card flexDirection="column" w="100%" px="0px">
+          <Text>Loading courses...</Text>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="container">
+        <Card flexDirection="column" w="100%" px="0px">
+          <Text color="red.500">Error loading courses</Text>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -222,15 +279,23 @@ const OnlineCourses = () => {
               ))}
             </Thead>
             <Tbody>
-              {table.getRowModel().rows.map((row) => (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <Td key={cell.id} borderColor="transparent">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </Td>
-                  ))}
+              {table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => (
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <Td key={cell.id} borderColor="transparent">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </Td>
+                    ))}
+                  </Tr>
+                ))
+              ) : (
+                <Tr>
+                  <Td colSpan={columns.length} textAlign="center">
+                    No courses found
+                  </Td>
                 </Tr>
-              ))}
+              )}
             </Tbody>
           </Table>
         </Box>

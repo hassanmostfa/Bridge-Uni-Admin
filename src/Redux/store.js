@@ -16,6 +16,7 @@ import { contactApi } from "api/contactSlice";
 import { popularMajors } from "api/popularMajors";
 import { onlineCourseApi } from "api/onlineCourseSlice";
 import { blogApi } from "api/blogs";
+import { shortCourseApi } from "api/shortCourcesSlice";
 // import { userApi, authReducer } from './userSlice';
 
 export const store = configureStore({
@@ -36,6 +37,7 @@ export const store = configureStore({
     [popularMajors.reducerPath]:popularMajors.reducer,
     [onlineCourseApi.reducerPath]:onlineCourseApi.reducer,
     [blogApi.reducerPath]:blogApi.reducer,
+    [shortCourseApi.reducerPath]:shortCourseApi.reducer,
     
   },
   middleware: (getDefaultMiddleware) =>
@@ -56,6 +58,7 @@ export const store = configureStore({
       popularMajors.middleware,
       onlineCourseApi.middleware,
       blogApi.middleware,
+      shortCourseApi.middleware,
     ),
 });
 
