@@ -79,6 +79,8 @@ import EditProvider from 'views/admin/providers/EditProvider';
 import EditPosition from 'views/admin/positions/EditPosition';
 import EditContact from 'views/admin/contact-us/EditContact';
 import UpdateBlog from 'views/admin/blog/UpdateBlog';
+import ShowOnlineCourse from 'views/admin/courses/ShowOnlineCourse';
+import EditOnlineCourse from 'views/admin/courses/EditOnlineCourse';
 
 const routes = [
   {
@@ -386,6 +388,20 @@ const routes = [
     layout: '/admin',
     path: '/add-online-course',
     component: <AddOnlineCourse />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Online Courses',
+    layout: '/admin',
+    path: '/show-online-course/:id',
+    component: <ShowOnlineCourse />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Online Courses',
+    layout: '/admin',
+    path: '/edit-online-course/:id',
+    component: <EditOnlineCourse />,
     showInSidebar: false,
   },
 

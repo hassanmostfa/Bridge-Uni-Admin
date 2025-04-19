@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -19,85 +19,144 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddShortCourseMutation } from "api/shortCourcesSlice";
-import BasicInfoStep from "./addShortCourseSteps/BasicInfoStep";
-import MediaStep from "./addShortCourseSteps/MediaStep";
-import BenefitsStep from "./addShortCourseSteps/BenefitsStep";
-import StructureStep from "./addShortCourseSteps/StructureStep";
-import TutorsStep from "./addShortCourseSteps/TutorsStep";
-import ReviewStep from "./addShortCourseSteps/ReviewStep";
+import { useNavigate, useParams } from "react-router-dom";
+import BasicInfoStep from "./addSteps/BasicInfoStep";
+import MediaStep from "./addSteps/MediaStep";
+import OverviewStep from "./addSteps/OverviewStep";
+import WhyChooseStep from "./addSteps/WhyChooseStep";
+import StructureStep from "./addSteps/StructureStep";
+import VideosStep from "./addSteps/VideosStep";
+import ReviewStep from "./addSteps/ReviewStep";
+import {useGetCourseQuery } from "api/onlineCourseSlice";
+import { useUpdateCourseMutation } from "api/onlineCourseSlice";
 
 const steps = [
   { title: "Basic Info", description: "Course details" },
   { title: "Media", description: "Images & files" },
-  { title: "Benefits", description: "Program benefits" },
-  { title: "Structure", description: "Course structure" },
-  { title: "Tutors", description: "Course instructors" },
+  { title: "Overview", description: "Course specifications" },
+  { title: "Why Choose", description: "Benefits & features" },
+  { title: "Structure", description: "Course modules" },
+  { title: "Videos", description: "Course videos" },
   { title: "Review", description: "Confirm details" },
 ];
 
-const AddShortCourseForm = () => {
-  const [addShortCourse] = useAddShortCourseMutation();
+const EditOnlineCourse = () => {
+  const { id } = useParams();
+  const { data: courseData, isLoading, isError } = useGetCourseQuery(id);
+  const [editCourse] = useUpdateCourseMutation();
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  // Initialize form data with default values
   const [formData, setFormData] = useState({
     // Course Basic Information
     titleEn: "",
     titleAr: "",
     provider: 0,
     category: 0,
-    price: "",
-    duration: "",
-    startDate: "",
-    endDate: "",
     featured: false,
-    soon:false,
+    soon: false,
+    
     // Course Media
     courseImage: null,
-    brochure: null,
+    courseBanner: null,
+    studyGuide: null,
     
-    // Benefits of the Program
-    benefits: Array(6).fill().map((_, i) => ({ image: null, title: `Benefit ${i+1}` })),
+    // Course Overview
+    location: "",
+    modeOfStudy: "",
+    qualification: "",
+    studyDuration: "",
+    startDate: "",
+    awardingBody: "",
+    deliveredBy: "",
+    
+    // Why Choose Section
+    whyChooseTitles: [""],
+    benefits: Array(6).fill().map((_, i) => ({ image: null, title: "" })),
     
     // Course Structure
     structures: [{ name: "", image: null, text: "" }],
     
-    // Course Tutors
-    tutors: [{ 
-      name: "", 
-      image: null, 
-      rating: 0, 
-      courses: 0, 
-      students: 0, 
-      description: "" 
-    }]
+    // Course Videos
+    videos: [{ url: "", year: "" }]
   });
+
+  // Populate form when course data is loaded
+  useEffect(() => {
+    if (courseData?.data) {
+      const course = courseData.data;
+      setFormData({
+        titleEn: course.title_en || "",
+        titleAr: course.title_ar || "",
+        provider: course.provider_id || 0,
+        category: course.category_id || 0,
+        featured: course.featured_course || false,
+        soon: course.coming_soon || false,
+        
+        courseImage: course.image || null,
+        courseBanner: course.banner || null,
+        studyGuide: course.study_guide || null,
+        
+        location: course.location || "",
+        modeOfStudy: course.mode_of_study || "",
+        qualification: course.qualification || "",
+        studyDuration: course.study_duration || "",
+        startDate: course.start_date ? new Date(course.start_date).toISOString().split("T")[0] : "",
+        awardingBody: course.awarding_body || "",
+        deliveredBy: course.delivered_by || "",
+        
+        whyChooseTitles: course.why_courses?.map(w => w.title) || [""],
+        benefits: course.benefits?.length > 0 
+          ? course.benefits.map(b => ({ image: b.image, title: b.title }))
+          : Array(6).fill().map((_, i) => ({ image: null, title: "" })),
+        
+        structures: course.course_structures?.length > 0
+          ? course.course_structures.map(s => ({ 
+              name: s.name || "", 
+              image: s.image || null, 
+              text: s.text || "" 
+            }))
+          : [{ name: "", image: null, text: "" }],
+        
+        videos: course.course_videos?.length > 0
+          ? course.course_videos.map(v => ({ 
+              url: v.video || "", 
+              year: v.year ? v.year.split('-')[0] : "" 
+            }))
+          : [{ url: "", year: "" }]
+      });
+    }
+  }, [courseData]);
 
   const validationSchema = {
     titleEn: { required: true, minLength: 3, maxLength: 150 },
     titleAr: { required: true, minLength: 3, maxLength: 150 },
     provider: { required: true },
     category: { required: true },
-    price: { required: true },
-    duration: { required: true },
-    startDate: { required: true },
-    endDate: { required: true },
     courseImage: { required: true },
-    brochure: { required: true },
+    courseBanner: { required: true },
+    studyGuide: { required: true },
+    whyChooseTitles: { 
+      validate: (titles) => titles.some(title => title.trim().length > 0) 
+    },
+    location: { required: true },
+    modeOfStudy: { required: true },
+    qualification: { required: true },
+    studyDuration: { required: true },
+    startDate: { required: true },
+    awardingBody: { required: true },
+    deliveredBy: { required: true },
     benefits: {
-      validate: (benefits) => benefits.some(b => b.title.trim().length > 0 && b.image)
+      validate: (benefits) => benefits.every(b => b.title.trim().length > 0 && b.image)
     },
     structures: {
       validate: (structures) => structures.every(s => s.name && s.text)
     },
-    tutors: {
-      validate: (tutors) => tutors.every(t => 
-        t.name && t.image && t.description && t.rating > 0
-      )
+    videos: {
+      validate: (videos) => videos.every(v => v.url && v.year)
     }
   };
-
-  const navigate = useNavigate();
-  const toast = useToast();
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -127,7 +186,7 @@ const AddShortCourseForm = () => {
     if (rules.required && !value) {
       return `${fieldName} is required`;
     }
-  
+    
     if (rules.minLength && value.length < rules.minLength) {
       return `Must be at least ${rules.minLength} characters`;
     }
@@ -152,26 +211,34 @@ const AddShortCourseForm = () => {
         errors.titleAr = validateField('titleAr', formData.titleAr);
         errors.provider = validateField('provider', formData.provider);
         errors.category = validateField('category', formData.category);
-        errors.price = validateField('price', formData.price);
-        errors.duration = validateField('duration', formData.duration);
-        errors.startDate = validateField('startDate', formData.startDate);
-        errors.endDate = validateField('endDate', formData.endDate);
         break;
         
       case 1: // Media
         errors.courseImage = validateField('courseImage', formData.courseImage);
+        errors.courseBanner = validateField('courseBanner', formData.courseBanner);
+        errors.studyGuide = validateField('studyGuide', formData.studyGuide);
+        break;
+      case 2: // overview 
+        errors.location = validateField('location', formData.location);
+        errors.modeOfStudy = validateField('modeOfStudy', formData.modeOfStudy);
+        errors.qualification = validateField('qualification', formData.qualification);
+        errors.studyDuration = validateField('studyDuration', formData.studyDuration);
+        errors.startDate = validateField('startDate', formData.startDate);
+        errors.awardingBody = validateField('awardingBody', formData.awardingBody);
+        errors.deliveredBy = validateField('deliveredBy', formData.deliveredBy);
         break;
         
-      case 2: // Benefits
+      case 3: // Why Choose
+        errors.whyChooseTitles = validateField('whyChooseTitles', formData.whyChooseTitles);
         errors.benefits = validateField('benefits', formData.benefits);
         break;
         
-      case 3: // Structure
+      case 4: // Structure
         errors.structures = validateField('structures', formData.structures);
         break;
         
-      case 4: // Tutors
-        errors.tutors = validateField('tutors', formData.tutors);
+      case 5: // Videos
+        errors.videos = validateField('videos', formData.videos);
         break;
     }
   
@@ -180,7 +247,7 @@ const AddShortCourseForm = () => {
     );
   };
 
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
     let allErrors = {};
     steps.forEach((_, index) => {
       allErrors = { ...allErrors, ...validateStep(index) };
@@ -203,49 +270,60 @@ const AddShortCourseForm = () => {
       title_ar: formData.titleAr,
       provider_id: parseInt(formData.provider),
       category_id: parseInt(formData.category),
-      price: parseFloat(formData.price),
-      duration: formData.duration,
-      start_date: new Date(formData.startDate).toISOString(),
-      end_date: new Date(formData.endDate).toISOString(),
       featured_course: formData.featured,
+      coming_soon: formData.soon,
       image: formData.courseImage,
-      brochure: formData.brochure,
+      banner: formData.courseBanner,
+      study_guide: formData.studyGuide,
+      location: formData.location,
+      mode_of_study: formData.modeOfStudy,
+      qualification: formData.qualification,
+      study_duration: formData.studyDuration,
+      start_date: formData.startDate ? new Date(formData.startDate).toISOString() : null,
+      awarding_body: formData.awardingBody,
+      delivered_by: formData.deliveredBy,
+      titles: formData.whyChooseTitles.filter(title => title.trim() !== ""),
       benefits: formData.benefits
         .filter(benefit => benefit.title.trim() !== "")
         .map(benefit => ({
           image: benefit.image,
           title: benefit.title
         })),
-      course_structure: formData.structures.map(structure => ({
-        name: structure.name,
-        image: structure.image,
-        text: structure.text
-      })),
-      tutors: formData.tutors.map(tutor => ({
-        name: tutor.name,
-        image: tutor.image,
-        rating: parseFloat(tutor.rating),
-        courses: parseInt(tutor.courses),
-        students: parseInt(tutor.students),
-        description: tutor.description
-      }))
+      course_structure: formData.structures.map(structure => {
+        const result = {};
+        if (structure.name) {
+          result.name = structure.name;
+        }
+        if (structure.text) {
+          result.text = structure.text;
+        }
+        if (structure.image) {
+          result.image = structure.image;
+        }
+        return result;
+      }),
+      course_videos: formData.videos
+        .filter(video => video.url.trim() !== "")
+        .map(video => ({
+          video: video.url,
+          year: video.year ? new Date(video.year).toISOString() : null
+        }))
     };
 
-    console.log("API Data:", apiData);
     try {
-      await addShortCourse(apiData).unwrap();
+      await editCourse({ id, data: apiData }).unwrap();
       toast({
-        title: "Course Created",
-        description: "The short course has been successfully created",
+        title: "Course Updated",
+        description: "The course has been successfully updated",
         status: "success",
         duration: 5000,
         isClosable: true,
       });
-      navigate("/admin/short-courses");
+      navigate("/admin/online-courses");
     } catch (error) {
-      console.error("Failed to create course:", error);
+      console.error("Failed to update course:", error);
       toast({
-        title: "Error creating course",
+        title: "Error updating course",
         description: error.data?.message || "Please try again",
         status: "error",
         duration: 5000,
@@ -260,7 +338,6 @@ const AddShortCourseForm = () => {
   });
   
   const textColor = useColorModeValue("secondaryGray.900", "white");
-
   const [errors, setErrors] = useState({});
 
   const nextStep = () => {
@@ -276,7 +353,7 @@ const AddShortCourseForm = () => {
       setActiveStep(activeStep + 1);
     }
   };
-  
+
   const prevStep = () => {
     if (activeStep > 0) {
       setActiveStep(activeStep - 1);
@@ -297,17 +374,35 @@ const AddShortCourseForm = () => {
       case 1:
         return <MediaStep {...commonProps} />;
       case 2:
-        return <BenefitsStep {...commonProps} />;
+        return <OverviewStep {...commonProps} />;
       case 3:
-        return <StructureStep {...commonProps} />;
+        return <WhyChooseStep {...commonProps} />;
       case 4:
-        return <TutorsStep {...commonProps} />;
+        return <StructureStep {...commonProps} />;
       case 5:
+        return <VideosStep {...commonProps} />;
+      case 6:
         return <ReviewStep {...commonProps} />;
       default:
         return <BasicInfoStep {...commonProps} />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <Box p={4}>
+        <Text>Loading course data...</Text>
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Box p={4}>
+        <Text color="red.500">Error loading course data</Text>
+      </Box>
+    );
+  }
 
   return (
     <div className="container add-admin-container w-100">
@@ -320,7 +415,7 @@ const AddShortCourseForm = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New Short Course
+            Edit Course
           </Text>
           <Button
             type="button"
@@ -380,7 +475,7 @@ const AddShortCourseForm = () => {
               type="submit"
               onClick={handleSubmit}
             >
-              Submit Course
+              Update Course
             </Button>
           )}
         </Flex>
@@ -389,4 +484,4 @@ const AddShortCourseForm = () => {
   );
 };
 
-export default AddShortCourseForm;
+export default EditOnlineCourse;

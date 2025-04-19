@@ -236,7 +236,7 @@ const WhyChooseStep = ({ formData, handleChange, updateNestedState ,errors }) =>
             ))}
             {errors.benefits && (
               <Text color="red.500" fontSize="sm" mt={1}>
-                {errors.benefits}
+                {errors.benefits} (All fields are required)
               </Text>
             )}
           </SimpleGrid>

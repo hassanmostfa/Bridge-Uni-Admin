@@ -67,7 +67,7 @@ const AddCourseForm = () => {
     
     // Why Choose Section
     whyChooseTitles: [""],
-    benefits: Array(6).fill().map((_, i) => ({ image: null, title: `Benefit ${i+1}` })),
+    benefits: Array(6).fill().map((_, i) => ({ image: null, title: "" })),
     
     // Course Structure
     structures: [{ name: "", image: null, text: "" }],
@@ -81,18 +81,20 @@ const AddCourseForm = () => {
     provider: { required: true },
     category: { required: true },
     courseImage: { required: true },
+    courseBanner: { required: true },
+    studyGuide: { required: true },
     whyChooseTitles: { 
       validate: (titles) => titles.some(title => title.trim().length > 0) 
     },
-    location: { required: true, minLength: 3, maxLength: 100 },
-    modeOfStudy: { required: true, minLength: 3, maxLength: 100 },
-    qualification: { required: true, minLength: 3, maxLength: 100 },
-    studyDuration: { required: true, minLength: 3, maxLength: 100 },
+    location: { required: true,},
+    modeOfStudy: { required: true,  },
+    qualification: { required: true, },
+    studyDuration: { required: true, },
     startDate: { required: true },
-    awardingBody: { required: true, minLength: 3, maxLength: 100 },
-    deliveredBy: { required: true, minLength: 3, maxLength: 100 },
+    awardingBody: { required: true, },
+    deliveredBy: { required: true,  },
     benefits: {
-      validate: (benefits) => benefits.some(b => b.title.trim().length > 0 && b.image)
+      validate: (benefits) => benefits.every(b => b.title.trim().length > 0 && b.image)
     },
     structures: {
       validate: (structures) => structures.every(s => s.name && s.text)
@@ -133,7 +135,7 @@ const AddCourseForm = () => {
     if (rules.required && !value) {
       return `${fieldName} is required`;
     }
-  
+    
     if (rules.minLength && value.length < rules.minLength) {
       return `Must be at least ${rules.minLength} characters`;
     }
@@ -162,6 +164,8 @@ const AddCourseForm = () => {
         
       case 1: // Media
         errors.courseImage = validateField('courseImage', formData.courseImage);
+        errors.courseBanner = validateField('courseBanner', formData.courseBanner);
+        errors.studyGuide = validateField('studyGuide', formData.studyGuide);
         break;
       case 2: // overview 
         errors.location = validateField('location', formData.location);
@@ -172,7 +176,6 @@ const AddCourseForm = () => {
         errors.awardingBody = validateField('awardingBody', formData.awardingBody);
         errors.deliveredBy = validateField('deliveredBy', formData.deliveredBy);
         break;
-        
         
       case 3: // Why Choose
         errors.whyChooseTitles = validateField('whyChooseTitles', formData.whyChooseTitles);
@@ -235,11 +238,19 @@ const AddCourseForm = () => {
           image: benefit.image,
           title: benefit.title
         })),
-      course_structure: formData.structures.map(structure => ({
-        name: structure.name,
-        image: structure.image,
-        text: structure.text
-      })),
+      course_structure: formData.structures.map(structure => {
+        const result = {};
+        if (structure.name) {
+          result.name = structure.name;
+        }
+        if (structure.text) {
+          result.text = structure.text;
+        }
+        if (structure.image) {
+          result.image = structure.image;
+        }
+        return result;
+      }),
       course_videos: formData.videos
         .filter(video => video.url.trim() !== "")
         .map(video => ({

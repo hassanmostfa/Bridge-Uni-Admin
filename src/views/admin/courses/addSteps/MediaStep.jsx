@@ -57,6 +57,8 @@ const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerA
             uploadFile={uploadBannerAPI}
             onUploadStart={handleUploadStart}
             onUploadEnd={handleUploadEnd}
+            error={errors.courseBanner}
+            isRequired
           />
           <FileUploadField
             label="Study Guide (PDF)"
@@ -66,6 +68,8 @@ const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerA
             uploadFile={uploadPdfAPI}
             onUploadStart={handleUploadStart}
             onUploadEnd={handleUploadEnd}
+            error={errors.studyGuide}
+            isRequired
           />
         </Grid>
       </CardBody>

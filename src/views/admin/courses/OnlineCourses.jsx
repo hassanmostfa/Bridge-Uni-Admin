@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Flex,
@@ -30,12 +30,16 @@ import Card from "components/card/Card";
 import { useNavigate } from "react-router-dom";
 import { useGetAllOnlineCourcesQuery } from "api/onlineCourseSlice";
 import { useDeleteCourseMutation } from "api/onlineCourseSlice";
+import Swal from "sweetalert2";
 
 const columnHelper = createColumnHelper();
 
 const OnlineCourses = () => {
   const { data: coursesData, isLoading, isError, refetch } = useGetAllOnlineCourcesQuery();
   // const [updateFeatured] = useUpdateCourseFeaturedMutation();
+  // useEffect(() => {
+  //   refetch();
+  // },[]);
   const [deleteCourse] = useDeleteCourseMutation();
   const navigate = useNavigate();
   const toast = useToast();
@@ -43,77 +47,60 @@ const OnlineCourses = () => {
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
 
-  // Toggle featured status
-  // const toggleFeatured = async (id, currentStatus) => {
-  //   try {
-  //     await updateFeatured({ id, featured: !currentStatus }).unwrap();
-  //     toast({
-  //       title: "Success",
-  //       description: "Course featured status updated",
-  //       status: "success",
-  //       duration: 3000,
-  //       isClosable: true,
-  //     });
-  //     refetch();
-  //   } catch (error) {
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to update featured status",
-  //       status: "error",
-  //       duration: 3000,
-  //       isClosable: true,
-  //     });
-  //   }
-  // };
+  const [deletingId, setDeletingId] = useState(null); // Add this line
 
-  // Delete course
+  // Delete course - properly memoized
   const handleDelete = async (id) => {
-    try {
-      await deleteCourse(id).unwrap();
-      toast({
-        title: "Success",
-        description: "Course deleted successfully",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
+    // try {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!',
       });
-      refetch();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete course",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
 
-  // Format data for table
-  const formatTableData = () => {
-    if (!coursesData?.data?.data) return [];
-    
-    return coursesData.data.data.map(course => ({
-      id: course.id,
-      title_en: course.title_en,
-      title_ar: course.title_ar,
-      provider: course.provider?.title_en || 'N/A',
-      category: course.category?.title_en || 'N/A',
-      featured: course.featured_course,
-      coming_soon: course.coming_soon,
-      image: course.image,
-      originalData: course // Keep reference to original data
-    }));
+      if (result.isConfirmed) {
+        setDeletingId(id); // Set deleting state
+        // await deleteCourse(id).unwrap();
+        // refetch(); // Wait for refetch to complete
+        Swal.fire('Deleted!', 'The Delete non done Yet!.', 'success');
+      }
+    // } catch (error) {
+    //   console.error('Failed to delete Course:', error);
+    //   Swal.fire('Error!', 'Failed to delete the Course.', 'error');
+    // } finally {
+    //   setDeletingId(null); // Reset deleting state
+    // }
+  // }, [deleteCourse, refetch]);
   };
 
 
+// Memoized format function
+const formatTableData = useCallback(() => {
+  if (!coursesData?.data?.data) return [];
   
-  const columns = [
-    columnHelper.accessor("id", {
-      id: "id",
-      header: () => <Text color="gray.400">ID</Text>,
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
+  return coursesData.data.data.map(course => ({
+    id: course.id,
+    title_en: course.title_en,
+    title_ar: course.title_ar,
+    provider: course.provider?.title_en || 'N/A',
+    category: course.category?.title_en || 'N/A',
+    featured: course.featured_course,
+    coming_soon: course.coming_soon,
+    image: course.image,
+    originalData: course
+  }));
+}, [coursesData]);
+
+const columns = React.useMemo(() => [
+  columnHelper.accessor("id", {
+    id: "id",
+    header: () => <Text color="gray.400">ID</Text>,
+    cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
+  }),
     columnHelper.accessor("image", {
       id: "image",
       header: () => <Text color="gray.400">Image</Text>,
@@ -191,7 +178,7 @@ const OnlineCourses = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
-            onClick={() => navigate(`/admin/online-courses/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/show-online-course/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -209,12 +196,17 @@ const OnlineCourses = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
-            onClick={() => handleDelete(info.row.original.id)}
+            onClick={
+              deletingId === info.row.original.id 
+                ? undefined 
+                : () => handleDelete(info.row.original.id)
+            }
           />
         </Flex>
       ),
     }),
-  ];
+  ], [textColor, navigate, handleDelete]);
+
 
   const table = useReactTable({
     data: formatTableData(),

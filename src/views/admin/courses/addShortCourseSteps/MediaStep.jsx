@@ -50,9 +50,9 @@ const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerA
             error={errors.courseImage}
           />
           <FileUploadField
-            label="Study Guide (PDF)"
+            label="Brochure (PDF)"
             value={formData?.studyGuide}
-            setValue={(val) => handleChange("studyGuide", val)}
+            setValue={(val) => handleChange("brochure", val)}
             accept=".pdf"
             uploadFile={uploadPdfAPI}
             onUploadStart={handleUploadStart}

@@ -67,7 +67,7 @@ const OverviewStep = ({ formData, handleChange,errors }) => (
         </FormControl>
         <FormControl isInvalid={!!errors.studyDuration}>
           <Text fontSize="sm" fontWeight="700">
-            Study Duration <span className="text-danger">*</span>
+            Study Duration (in weeks) <span className="text-danger">*</span>
           </Text>
           <Input
             value={formData.studyDuration}
