@@ -4,8 +4,6 @@ import {
   Button,
   Flex,
   Icon,
-  Image,
-  Link,
   Menu,
   MenuButton,
   MenuItem,
@@ -21,10 +19,9 @@ import { SidebarResponsive } from 'components/sidebar/Sidebar';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { RiLogoutCircleLine } from "react-icons/ri";
-
+import { useNavigate } from 'react-router-dom';
 // Assets
-import navImage from 'assets/img/layout/Navbar.png';
-import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
+import { MdNotificationsNone } from 'react-icons/md';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
@@ -45,12 +42,13 @@ export default function HeaderLinks(props) {
     '14px 17px 40px 4px rgba(112, 144, 176, 0.18)',
     '14px 17px 40px 4px rgba(112, 144, 176, 0.06)',
   );
-  const borderButton = useColorModeValue('secondaryGray.500', 'whiteAlpha.200');
 
   // Logout User
   const [logoutUser] = useLogoutUserMutation();
    // Handle Logout
   // Handle Logout
+  const navigate = useNavigate();
+  
   const handleLogout = async () => {
     try {
       await logoutUser(); // if your logout endpoint requires a call
@@ -59,9 +57,9 @@ export default function HeaderLinks(props) {
     }
     // Remove token from localStorage
     localStorage.removeItem('token');
-    // Optionally redirect or reload
-    window.location.reload();
-    window.location.href = '/admin/auth/sign-in';
+    
+    // Redirect to login page
+    navigate('/admin/auth/sign-in');
     
   };
   return (

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -16,37 +17,54 @@ import {
   Image,
   Spinner,
   useToast,
-} from "@chakra-ui/react";
-import { FaUpload, FaTrash } from "react-icons/fa6";
-import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { StarIcon } from "@chakra-ui/icons";
-import { useAddStudentTestimonialMutation } from "../../../api/studentTestimonials";
-import { useAddFileMutation } from "../../../api/filesSlice";
-import Swal from "sweetalert2";
+} from '@chakra-ui/react';
+import { FaUpload, FaTrash } from 'react-icons/fa6';
+import { IoMdArrowBack } from 'react-icons/io';
+import { StarIcon } from '@chakra-ui/icons';
+import { useUpdateStudentTestimonialMutation, useGetStudentTestimonialByIdQuery } from '../../../api/studentTestimonials';
+import { useAddFileMutation } from '../../../api/filesSlice';
+import Swal from 'sweetalert2';
 
-const AddTestimonial = () => {
+const UpdateTestimonial = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const textColor = useColorModeValue("secondaryGray.900", "white");
+  const cardBg = useColorModeValue("white", "navy.700");
+  const inputBg = useColorModeValue("gray.100", "gray.700");
+
+  const toast = useToast();
+  // API Hooks
+  const { data: testimonialData, isLoading: isFetching } = useGetStudentTestimonialByIdQuery(id);
+  const [updateTestimonial] = useUpdateStudentTestimonialMutation();
+  const [addFile] = useAddFileMutation();
+
+  // State
   const [formData, setFormData] = useState({
-    name: "",
-    title: "",
-    stars: 5,
-    description: "",
+    student_name: '',
+    title: '',
+    rate: 5,
+    testimonial: '',
     image: null,
-    imageUrl: null,
+    imageUrl: '',
   });
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  
-  const textColor = useColorModeValue("secondaryGray.900", "white");
-  const cardBg = useColorModeValue("white", "navy.700");
-  const inputBg = useColorModeValue("gray.100", "gray.700");
-  const navigate = useNavigate();
 
-  const [addFile] = useAddFileMutation();
-  const [addTestimonial] = useAddStudentTestimonialMutation();
+  // Load existing testimonial data
+  useEffect(() => {
+    if (testimonialData?.data) {
+      setFormData({
+        student_name: testimonialData.data.student_name || '',
+        title: testimonialData.data.title || '',
+        rate: testimonialData.data.rate || 5,
+        testimonial: testimonialData.data.testimonial || '',
+        image: null,
+        imageUrl: testimonialData.data.image || '',
+      });
+    }
+  }, [testimonialData]);
 
-  const toast = useToast();
   const handleImageUpload = async (file) => {
     if (!file || !file.type.startsWith("image/")) {
       Swal.fire({
@@ -59,8 +77,7 @@ const AddTestimonial = () => {
     }
 
     setIsUploadingImage(true);
-    setFormData(prev => ({ ...prev, image: file }));
-
+    
     try {
       const fileFormData = new FormData();
       fileFormData.append("img", file);
@@ -71,13 +88,20 @@ const AddTestimonial = () => {
         throw new Error(fileResponse.message || "Failed to upload image");
       }
 
-      setFormData(prev => ({ ...prev, imageUrl: fileResponse.url }));
-      toast({
-        title: "Image uploaded successfully",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
+      setFormData(prev => ({ 
+        ...prev, 
+        image: file,
+        imageUrl: fileResponse.url 
+      }));
+
+     toast({
+       title: "Image uploaded successfully",
+       status: "success",
+       duration: 5000,
+       isClosable: true,
+       position: "top-right",
+       backgroundColor: "green.500",
+     })
     } catch (error) {
       Swal.fire({
         title: "Error!",
@@ -85,7 +109,7 @@ const AddTestimonial = () => {
         icon: "error",
         confirmButtonColor: "#3085d6",
       });
-      setFormData(prev => ({ ...prev, image: null, imageUrl: null }));
+      setFormData(prev => ({ ...prev, image: null, imageUrl: '' }));
     } finally {
       setIsUploadingImage(false);
     }
@@ -119,12 +143,12 @@ const AddTestimonial = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleStarsChange = (value) => {
-    setFormData(prev => ({ ...prev, stars: value }));
+  const handleRateChange = (value) => {
+    setFormData(prev => ({ ...prev, rate: value }));
   };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.title || !formData.description || !formData.imageUrl) {
+    if (!formData.student_name || !formData.title || !formData.testimonial || !formData.imageUrl) {
       Swal.fire({
         title: "Error!",
         text: "Please fill all required fields",
@@ -137,20 +161,24 @@ const AddTestimonial = () => {
     setIsSubmitting(true);
 
     try {
-      const testimonialResponse = await addTestimonial({
-        student_name: formData.name,
-        title: formData.title,
-        rate: formData.stars,
-        testimonial: formData.description,
-        image: formData.imageUrl
+      const response = await updateTestimonial({
+        id, // Correctly passing the id parameter
+        data: { // Wrapping the data in a 'data' object as per your RTK mutation
+          student_name: formData.student_name,
+          title: formData.title,
+          rate: formData.rate,
+          testimonial: formData.testimonial,
+          image: formData.imageUrl
+        }
       }).unwrap();
-      if (!testimonialResponse.flag) {
-        throw new Error(testimonialResponse.message || "Failed to add testimonial");
+
+      if (!response.flag) {
+        throw new Error(response.message || "Failed to update testimonial");
       }
 
       await Swal.fire({
         title: "Success!",
-        text: "Testimonial added successfully",
+        text: "Testimonial updated successfully",
         icon: "success",
         confirmButtonColor: "#3085d6",
       });
@@ -169,27 +197,16 @@ const AddTestimonial = () => {
   };
 
   const handleCancel = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You will lose all unsaved changes",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, cancel it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setFormData({
-          name: "",
-          title: "",
-          stars: "",
-          description: "",
-          image: null,
-          imageUrl: null,
-        });
-      }
-    });
+    navigate("/admin/student-testimonials");
   };
+
+  if (isFetching) {
+    return (
+      <Flex justify="center" align="center" height="100vh">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
 
   return (
     <Box w="100%" className="container">
@@ -201,11 +218,11 @@ const AddTestimonial = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            Add New Testimonial
+            Update Testimonial
           </Text>
           <Button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={handleCancel}
             colorScheme="teal"
             size="sm"
             leftIcon={<IoMdArrowBack />}
@@ -221,10 +238,10 @@ const AddTestimonial = () => {
               Student Name <Text as="span" color="red.500">*</Text>
             </Text>
             <Input
-              name="name"
+              name="student_name"
               type="text"
               placeholder="Enter student name"
-              value={formData.name}
+              value={formData.student_name}
               onChange={handleInputChange}
               required
               mt={2}
@@ -247,7 +264,7 @@ const AddTestimonial = () => {
             />
           </Box>
 
-          {/* Stars Rating */}
+          {/* Rating Field */}
           <Box mb={4}>
             <Text color={textColor} fontSize="sm" fontWeight="700">
               Rating <Text as="span" color="red.500">*</Text>
@@ -256,8 +273,8 @@ const AddTestimonial = () => {
               <NumberInput
                 min={1}
                 max={5}
-                value={formData.stars}
-                onChange={handleStarsChange}
+                value={formData.rate}
+                onChange={handleRateChange}
                 width="100px"
                 mr={4}
               >
@@ -271,7 +288,7 @@ const AddTestimonial = () => {
                 {[...Array(5)].map((_, i) => (
                   <StarIcon
                     key={i}
-                    color={i < formData.stars ? "yellow.400" : "gray.300"}
+                    color={i < formData.rate ? "yellow.400" : "gray.300"}
                     boxSize={5}
                     mx={0.5}
                   />
@@ -280,15 +297,15 @@ const AddTestimonial = () => {
             </Flex>
           </Box>
 
-          {/* Description Field */}
+          {/* Testimonial Field */}
           <Box mb={4}>
             <Text color={textColor} fontSize="sm" fontWeight="700">
               Testimonial <Text as="span" color="red.500">*</Text>
             </Text>
             <Textarea
-              name="description"
+              name="testimonial"
               placeholder="Enter testimonial description"
-              value={formData.description}
+              value={formData.testimonial}
               onChange={handleInputChange}
               required
               mt={2}
@@ -346,17 +363,17 @@ const AddTestimonial = () => {
                   </Button>
                 </>
               )}
-              {formData.image && !isUploadingImage && (
+              {(formData.image || formData.imageUrl) && !isUploadingImage && (
                 <Box mt={4}>
                   <Image
-                    src={formData.imageUrl || URL.createObjectURL(formData.image)}
+                    src={formData.image ? URL.createObjectURL(formData.image) : formData.imageUrl}
                     alt="Student photo preview"
                     maxW="100%"
                     maxH="150px"
                     borderRadius="8px"
                   />
                   <Text mt={2} fontSize="sm" color="gray.600">
-                    {formData.image.name}
+                    {formData.image?.name || "Current image"}
                   </Text>
                   <Button
                     leftIcon={<FaTrash />}
@@ -367,7 +384,7 @@ const AddTestimonial = () => {
                     onClick={() => setFormData(prev => ({ 
                       ...prev, 
                       image: null,
-                      imageUrl: null 
+                      imageUrl: '' 
                     }))}
                   >
                     Remove
@@ -399,11 +416,11 @@ const AddTestimonial = () => {
               py="5px"
               onClick={handleSubmit}
               isDisabled={isSubmitting || isUploadingImage || 
-                         !formData.name || !formData.title || 
-                         !formData.description || !formData.imageUrl}
+                         !formData.student_name || !formData.title || 
+                         !formData.testimonial || !formData.imageUrl}
               width="120px"
             >
-              {isSubmitting ? <Spinner size="sm" /> : 'Save'}
+              {isSubmitting ? <Spinner size="sm" /> : 'Update'}
             </Button>
           </Flex>
         </Box>
@@ -412,4 +429,4 @@ const AddTestimonial = () => {
   );
 };
 
-export default AddTestimonial;
+export default UpdateTestimonial;

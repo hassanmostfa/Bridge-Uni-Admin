@@ -79,8 +79,12 @@ import EditProvider from 'views/admin/providers/EditProvider';
 import EditPosition from 'views/admin/positions/EditPosition';
 import EditContact from 'views/admin/contact-us/EditContact';
 import UpdateBlog from 'views/admin/blog/UpdateBlog';
+
 import ShowOnlineCourse from 'views/admin/courses/ShowOnlineCourse';
 import EditOnlineCourse from 'views/admin/courses/EditOnlineCourse';
+
+import UpdateTestimonial from 'views/admin/student/UpdateTestimonila';
+
 
 const routes = [
   {
@@ -602,6 +606,13 @@ const routes = [
     layout: '/admin', 
     path: 'cms/edit-blog/:id',
     component: <UpdateBlog />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Student Testimonials',
+    layout: '/admin', 
+    path: 'cms/edit-student-testimonial/:id',
+    component: <UpdateTestimonial />,
     showInSidebar: false,
   },
 ];

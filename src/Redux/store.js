@@ -14,6 +14,7 @@ import { providerApi } from "api/providerSlice";
 import { positionsApi } from "api/positionSlice";
 import { contactApi } from "api/contactSlice";
 import { popularMajors } from "api/popularMajors";
+import { studentTestimonialApi } from "api/studentTestimonials";
 import { onlineCourseApi } from "api/onlineCourseSlice";
 import { blogApi } from "api/blogs";
 import { shortCourseApi } from "api/shortCourcesSlice";
@@ -38,6 +39,7 @@ export const store = configureStore({
     [onlineCourseApi.reducerPath]:onlineCourseApi.reducer,
     [blogApi.reducerPath]:blogApi.reducer,
     [shortCourseApi.reducerPath]:shortCourseApi.reducer,
+    [studentTestimonialApi.reducerPath]:studentTestimonialApi.reducer,
     
   },
   middleware: (getDefaultMiddleware) =>
@@ -59,6 +61,7 @@ export const store = configureStore({
       onlineCourseApi.middleware,
       blogApi.middleware,
       shortCourseApi.middleware,
+      studentTestimonialApi.middleware,
     ),
 });
 
