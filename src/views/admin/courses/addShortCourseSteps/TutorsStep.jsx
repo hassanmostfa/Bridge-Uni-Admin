@@ -20,6 +20,7 @@ import {
   NumberIncrementStepper,
   NumberDecrementStepper,
   useColorModeValue,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { FaUpload, FaTrash, FaPlus } from "react-icons/fa6";
 
@@ -86,7 +87,63 @@ const TutorsStep = ({ formData, updateNestedState, errors }) => {
                     placeholder="Enter tutor name"
                   />
                 </FormControl>
+            
                 <FormControl mb={4} isInvalid={errors.tutors}>
+                  <FormLabel>Rating (1-5) <span className="text-danger">*</span></FormLabel>
+                  <NumberInput 
+                    min={1} 
+                    max={5} 
+                    step={0.1} 
+                    precision={1}
+                    value={tutor.rating}
+                    onChange={(value) => updateNestedState("tutors", index, "rating", value)}
+                  >
+                    <NumberInputField placeholder="Enter rating" />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                </FormControl>
+                <FormControl mb={4} isInvalid={errors.tutors}>
+                  <FormLabel>Number of Courses <span className="text-danger">*</span></FormLabel>
+                  <NumberInput 
+                    min={0}
+                    value={tutor.courses}
+                    onChange={(value) => updateNestedState("tutors", index, "courses", value)}
+                  >
+                    <NumberInputField placeholder="Enter number" />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                </FormControl>
+                <FormControl mb={4} isInvalid={errors.tutors}>
+                  <FormLabel>Total Students <span className="text-danger">*</span></FormLabel>
+                  <NumberInput 
+                    min={0}
+                    value={tutor.students}
+                    onChange={(value) => updateNestedState("tutors", index, "students", value)}
+                  >
+                    <NumberInputField placeholder="Enter number" />
+                    <NumberInputStepper>
+                      <NumberIncrementStepper />
+                      <NumberDecrementStepper />
+                    </NumberInputStepper>
+                  </NumberInput>
+                </FormControl>
+              </SimpleGrid>
+              <FormControl isInvalid={errors.tutors}>
+                <FormLabel>Description <span className="text-danger">*</span></FormLabel>
+                <Textarea
+                  value={tutor.description}
+                  onChange={(e) => updateNestedState("tutors", index, "description", e.target.value)}
+                  placeholder="Enter tutor description"
+                  rows={3}
+                />
+              </FormControl>
+              <FormControl mt={4} isInvalid={errors.tutors}>
                   <FormLabel>Tutor Image <span className="text-danger">*</span></FormLabel>
                   <Box
                     border="1px dashed"
@@ -147,62 +204,10 @@ const TutorsStep = ({ formData, updateNestedState, errors }) => {
                       </>
                     )}
                   </Box>
+                  {errors.tutors && (
+                    <FormErrorMessage>{errors.tutors} (All fields are required)</FormErrorMessage>
+                  )}
                 </FormControl>
-                <FormControl mb={4} isInvalid={errors.tutors}>
-                  <FormLabel>Rating (1-5) <span className="text-danger">*</span></FormLabel>
-                  <NumberInput 
-                    min={1} 
-                    max={5} 
-                    step={0.1} 
-                    precision={1}
-                    value={tutor.rating}
-                    onChange={(value) => updateNestedState("tutors", index, "rating", value)}
-                  >
-                    <NumberInputField placeholder="Enter rating" />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
-                <FormControl mb={4} isInvalid={errors.tutors}>
-                  <FormLabel>Number of Courses <span className="text-danger">*</span></FormLabel>
-                  <NumberInput 
-                    min={0}
-                    value={tutor.courses}
-                    onChange={(value) => updateNestedState("tutors", index, "courses", value)}
-                  >
-                    <NumberInputField placeholder="Enter number" />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
-                <FormControl mb={4} isInvalid={errors.tutors}>
-                  <FormLabel>Total Students <span className="text-danger">*</span></FormLabel>
-                  <NumberInput 
-                    min={0}
-                    value={tutor.students}
-                    onChange={(value) => updateNestedState("tutors", index, "students", value)}
-                  >
-                    <NumberInputField placeholder="Enter number" />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
-              </SimpleGrid>
-              <FormControl isInvalid={errors.tutors}>
-                <FormLabel>Description <span className="text-danger">*</span></FormLabel>
-                <Textarea
-                  value={tutor.description}
-                  onChange={(e) => updateNestedState("tutors", index, "description", e.target.value)}
-                  placeholder="Enter tutor description"
-                  rows={3}
-                />
-              </FormControl>
             </CardBody>
           </Card>
         ))}

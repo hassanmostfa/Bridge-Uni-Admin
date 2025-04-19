@@ -53,10 +53,10 @@ const AddShortCourseForm = () => {
     soon:false,
     // Course Media
     courseImage: null,
-    brochure: null,
+    brochure: null, // PDF file
     
     // Benefits of the Program
-    benefits: Array(6).fill().map((_, i) => ({ image: null, title: `Benefit ${i+1}` })),
+    benefits: Array(6).fill().map((_, i) => ({ image: null, title: "" })),
     
     // Course Structure
     structures: [{ name: "", image: null, text: "" }],
@@ -84,7 +84,7 @@ const AddShortCourseForm = () => {
     courseImage: { required: true },
     brochure: { required: true },
     benefits: {
-      validate: (benefits) => benefits.some(b => b.title.trim().length > 0 && b.image)
+      validate: (benefits) => benefits.every(b => b.title.trim().length > 0 && b.image)
     },
     structures: {
       validate: (structures) => structures.every(s => s.name && s.text)
@@ -160,6 +160,7 @@ const AddShortCourseForm = () => {
         
       case 1: // Media
         errors.courseImage = validateField('courseImage', formData.courseImage);
+        errors.courseImage = validateField('brochure', formData.brochure);
         break;
         
       case 2: // Benefits

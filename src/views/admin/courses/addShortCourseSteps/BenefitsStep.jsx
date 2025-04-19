@@ -104,6 +104,11 @@ const BenefitsStep = ({ formData, updateNestedState, errors }) => {
                     placeholder="Enter benefit title"
                     mt={2}
                   />
+                  {errors.benefits && (
+                    <Text color="red.500" fontSize="sm" mt={1}>
+                      {errors.benefits} (All fields are required)
+                    </Text>
+                  )}
                 </FormControl>
               </CardBody>
             </Card>
