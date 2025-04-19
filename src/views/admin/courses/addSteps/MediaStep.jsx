@@ -16,7 +16,7 @@ import {
 import { FaUpload } from "react-icons/fa6";
 import FileUploadField from "./FileUploadField";
 
-const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerAPI, uploadPdfAPI }) => {
+const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerAPI, uploadPdfAPI,errors }) => {
   const [uploadCount, setUploadCount] = useState(0);
   const isAnyUploading = uploadCount > 0;
 
@@ -47,6 +47,7 @@ const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerA
             uploadFile={uploadCourseImageAPI}
             onUploadStart={handleUploadStart}
             onUploadEnd={handleUploadEnd}
+            error={errors.courseImage}
           />
           <FileUploadField
             label="Course Banner"

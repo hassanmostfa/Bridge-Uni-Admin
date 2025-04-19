@@ -16,6 +16,7 @@ import { useDeleteFileMutation } from "api/filesSlice";
 
 const FileUploadField = ({
   label,
+  error,
   value,
   setValue,
   accept,
@@ -92,7 +93,7 @@ const FileUploadField = ({
   };
 
   return (
-    <FormControl>
+    <FormControl isInvalid={!!error}>
       <Text fontSize="sm" fontWeight="700" mb="2">
         {label} {isRequired && <Text as="span" color="red.500">*</Text>}
       </Text>
@@ -180,6 +181,11 @@ const FileUploadField = ({
           </>
         )}
       </Box>
+      {error && (
+        <Text color="red.500" fontSize="sm" mt={1}>
+          {error}
+        </Text>
+      )}
     </FormControl>
   );
 };

@@ -9,16 +9,16 @@ import {
   Text,
 } from "@chakra-ui/react";
 
-const OverviewStep = ({ formData, handleChange }) => (
+const OverviewStep = ({ formData, handleChange,errors }) => (
   <Card mb={4}>
     <CardHeader bg="gray.100" p={3}>
       <Text fontWeight="bold">Course Overview</Text>
     </CardHeader>
     <CardBody>
       <SimpleGrid columns={2} spacing={4}>
-        <FormControl>
+        <FormControl isInvalid={!!errors.location}>
           <Text fontSize="sm" fontWeight="700">
-            Location
+            Location <span className="text-danger">*</span>
           </Text>
           <Input
             value={formData.location}
@@ -26,10 +26,16 @@ const OverviewStep = ({ formData, handleChange }) => (
             placeholder="Enter location"
             mt={2}
           />
+          {errors.location && (
+            <Text color="red.500" fontSize="sm" mt={1}>
+              {errors.location}
+            </Text>
+          )}
+
         </FormControl>
-        <FormControl>
+        <FormControl isInvalid={!!errors.modeOfStudy}>
           <Text fontSize="sm" fontWeight="700">
-            Mode of Study
+            Mode of Study <span className="text-danger">*</span>
           </Text>
           <Input
             value={formData.modeOfStudy}
@@ -37,10 +43,15 @@ const OverviewStep = ({ formData, handleChange }) => (
             placeholder="Enter mode of study"
             mt={2}
           />
+          {errors.modeOfStudy && (
+            <Text color="red.500" fontSize="sm" mt={1}>
+              {errors.modeOfStudy}
+            </Text>
+          )}
         </FormControl>
-        <FormControl>
+        <FormControl isInvalid={!!errors.qualification}>
           <Text fontSize="sm" fontWeight="700">
-            Qualification
+            Qualification <span className="text-danger">*</span>
           </Text>
           <Input
             value={formData.qualification}
@@ -48,10 +59,15 @@ const OverviewStep = ({ formData, handleChange }) => (
             placeholder="Enter qualification"
             mt={2}
           />
+          {errors.qualification && (
+            <Text color="red.500" fontSize="sm" mt={1}>
+              {errors.qualification}
+            </Text>
+          )}
         </FormControl>
-        <FormControl>
+        <FormControl isInvalid={!!errors.studyDuration}>
           <Text fontSize="sm" fontWeight="700">
-            Study Duration
+            Study Duration <span className="text-danger">*</span>
           </Text>
           <Input
             value={formData.studyDuration}
@@ -59,10 +75,15 @@ const OverviewStep = ({ formData, handleChange }) => (
             placeholder="Enter study duration"
             mt={2}
           />
+          {errors.studyDuration && (
+            <Text color="red.500" fontSize="sm" mt={1}>
+              {errors.studyDuration}
+            </Text>
+          )}
         </FormControl>
-        <FormControl>
+        <FormControl isInvalid={!!errors.startDate}>
           <Text fontSize="sm" fontWeight="700">
-            Start Date
+            Start Date <span className="text-danger">*</span>
           </Text>
           <Input
             value={formData.startDate}
@@ -71,10 +92,15 @@ const OverviewStep = ({ formData, handleChange }) => (
             mt={2}
             type="date"
           />
+          {errors.startDate && (
+            <Text color="red.500" fontSize="sm" mt={1}>
+              {errors.startDate}
+            </Text>
+          )}
         </FormControl>
-        <FormControl>
+        <FormControl isInvalid={!!errors.awardingBody}>
           <Text fontSize="sm" fontWeight="700">
-            Awarding Body
+            Awarding Body <span className="text-danger">*</span>
           </Text>
           <Input
             value={formData.awardingBody}
@@ -82,10 +108,15 @@ const OverviewStep = ({ formData, handleChange }) => (
             placeholder="Enter awarding body"
             mt={2}
           />
+          {errors.awardingBody && (
+            <Text color="red.500" fontSize="sm" mt={1}>
+              {errors.awardingBody}
+            </Text>
+          )}
         </FormControl>
-        <FormControl>
+        <FormControl isInvalid={!!errors.deliveredBy}>
           <Text fontSize="sm" fontWeight="700">
-            Delivered By
+            Delivered By <span className="text-danger">*</span>
           </Text>
           <Input
             value={formData.deliveredBy}
@@ -93,6 +124,11 @@ const OverviewStep = ({ formData, handleChange }) => (
             placeholder="Enter delivered by"
             mt={2}
           />
+          {errors.deliveredBy && (
+            <Text color="red.500" fontSize="sm" mt={1}>
+              {errors.deliveredBy}
+            </Text>
+          )}
         </FormControl>
       </SimpleGrid>
     </CardBody>

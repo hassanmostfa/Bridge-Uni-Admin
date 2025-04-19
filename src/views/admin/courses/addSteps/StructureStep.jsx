@@ -18,7 +18,7 @@ import { FaPlus, FaTrash, FaUpload } from "react-icons/fa6";
 import { useAddFileMutation } from "api/filesSlice";
 import { useDeleteFileMutation } from "api/filesSlice";
 
-const StructureStep = ({ formData, handleChange, updateNestedState }) => {
+const StructureStep = ({ formData, handleChange, updateNestedState, errors }) => {
   const [addFile] = useAddFileMutation();
   const [deleteFile] = useDeleteFileMutation();
   const [uploadingIndices, setUploadingIndices] = useState([]);
@@ -98,7 +98,7 @@ const StructureStep = ({ formData, handleChange, updateNestedState }) => {
               </Flex>
             </CardHeader>
             <CardBody>
-              <FormControl mb={4}>
+              <FormControl mb={4} isInvalid={!structure.name}>
                 <Text fontSize="sm" fontWeight="700">
                   Structure Name
                 </Text>
@@ -108,6 +108,11 @@ const StructureStep = ({ formData, handleChange, updateNestedState }) => {
                   placeholder="Enter structure name"
                   mt={2}
                 />
+                {errors.structures && (
+                  <Text color="red.500" fontSize="sm" mt={1}>
+                    {errors.structures} (Name is required)
+                  </Text>
+                )}
               </FormControl>
 
               <FormControl mb={4}>
@@ -199,7 +204,7 @@ const StructureStep = ({ formData, handleChange, updateNestedState }) => {
                 </Box>
               </FormControl>
 
-              <FormControl>
+              <FormControl isInvalid={!structure.text}>
                 <Text fontSize="sm" fontWeight="700">
                   Text *
                 </Text>
@@ -210,6 +215,11 @@ const StructureStep = ({ formData, handleChange, updateNestedState }) => {
                   rows={4}
                   mt={2}
                 />
+                {errors.structures && (
+                  <Text color="red.500" fontSize="sm" mt={1}>
+                    {errors.structures} (Text is required)
+                  </Text>
+                )}
               </FormControl>
             </CardBody>
           </Card>

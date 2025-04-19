@@ -75,6 +75,32 @@ const AddCourseForm = () => {
     // Course Videos
     videos: [{ url: "", year: "" }]
   });
+  const validationSchema = {
+    titleEn: { required: true, minLength: 3, maxLength: 150 },
+    titleAr: { required: true, minLength: 3, maxLength: 150 },
+    provider: { required: true },
+    category: { required: true },
+    courseImage: { required: true },
+    whyChooseTitles: { 
+      validate: (titles) => titles.some(title => title.trim().length > 0) 
+    },
+    location: { required: true, minLength: 3, maxLength: 100 },
+    modeOfStudy: { required: true, minLength: 3, maxLength: 100 },
+    qualification: { required: true, minLength: 3, maxLength: 100 },
+    studyDuration: { required: true, minLength: 3, maxLength: 100 },
+    startDate: { required: true },
+    awardingBody: { required: true, minLength: 3, maxLength: 100 },
+    deliveredBy: { required: true, minLength: 3, maxLength: 100 },
+    benefits: {
+      validate: (benefits) => benefits.some(b => b.title.trim().length > 0 && b.image)
+    },
+    structures: {
+      validate: (structures) => structures.every(s => s.name && s.text)
+    },
+    videos: {
+      validate: (videos) => videos.every(v => v.url && v.year)
+    }
+  };
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -100,8 +126,90 @@ const AddCourseForm = () => {
     });
   };
 
+  const validateField = (fieldName, value) => {
+    const rules = validationSchema[fieldName];
+    if (!rules) return true;
+  
+    if (rules.required && !value) {
+      return `${fieldName} is required`;
+    }
+  
+    if (rules.minLength && value.length < rules.minLength) {
+      return `Must be at least ${rules.minLength} characters`;
+    }
+  
+    if (rules.maxLength && value.length > rules.maxLength) {
+      return `Cannot exceed ${rules.maxLength} characters`;
+    }
+  
+    if (rules.validate && !rules.validate(value)) {
+      return `Invalid ${fieldName} value`;
+    }
+  
+    return null;
+  };
+  
+  const validateStep = (stepIndex) => {
+    const errors = {};
+    
+    switch(stepIndex) {
+      case 0: // Basic Info
+        errors.titleEn = validateField('titleEn', formData.titleEn);
+        errors.titleAr = validateField('titleAr', formData.titleAr);
+        errors.provider = validateField('provider', formData.provider);
+        errors.category = validateField('category', formData.category);
+        break;
+        
+      case 1: // Media
+        errors.courseImage = validateField('courseImage', formData.courseImage);
+        break;
+      case 2: // overview 
+        errors.location = validateField('location', formData.location);
+        errors.modeOfStudy = validateField('modeOfStudy', formData.modeOfStudy);
+        errors.qualification = validateField('qualification', formData.qualification);
+        errors.studyDuration = validateField('studyDuration', formData.studyDuration);
+        errors.startDate = validateField('startDate', formData.startDate);
+        errors.awardingBody = validateField('awardingBody', formData.awardingBody);
+        errors.deliveredBy = validateField('deliveredBy', formData.deliveredBy);
+        break;
+        
+        
+      case 3: // Why Choose
+        errors.whyChooseTitles = validateField('whyChooseTitles', formData.whyChooseTitles);
+        errors.benefits = validateField('benefits', formData.benefits);
+        break;
+        
+      case 4: // Structure
+        errors.structures = validateField('structures', formData.structures);
+        break;
+        
+      case 5: // Videos
+        errors.videos = validateField('videos', formData.videos);
+        break;
+    }
+  
+    return Object.fromEntries(
+      Object.entries(errors).filter(([_, value]) => value !== null)
+    );
+  };
+
   const handleSubmit = async() => {
-    console.log(formData.provider);
+    let allErrors = {};
+    steps.forEach((_, index) => {
+      allErrors = { ...allErrors, ...validateStep(index) };
+    });
+  
+    if (Object.keys(allErrors).length > 0) {
+      setErrors(allErrors);
+      toast({
+        title: "Validation Error",
+        description: "Please fill all Required Fields before submitting",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
     
     const apiData = {
       title_en: formData.titleEn,
@@ -142,15 +250,26 @@ const AddCourseForm = () => {
 
     console.log("API Data:", apiData);
     console.log("Course Data:", formData);
-    await addOnlineCource(apiData).unwrap();
-    toast({
-      title: "Course Created",
-      description: "The course has been successfully created",
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-    });
-    // navigate("/admin/courses");
+    try {
+      await addOnlineCource(apiData).unwrap();
+      toast({
+        title: "Course Created",
+        description: "The course has been successfully created",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      navigate("/admin/online-courses");
+    } catch (error) {
+      console.error("Failed to create course:", error);
+      toast({
+        title: "Error creating course",
+        description: error.data?.message || "Please try again",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   const { activeStep, setActiveStep } = useSteps({
@@ -160,13 +279,21 @@ const AddCourseForm = () => {
   
   const textColor = useColorModeValue("secondaryGray.900", "white");
 
+  const [errors, setErrors] = useState({});
 
   const nextStep = () => {
+    const stepErrors = validateStep(activeStep);
+    
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      return;
+    }
+    
+    setErrors({});
     if (activeStep < steps.length - 1) {
       setActiveStep(activeStep + 1);
     }
   };
-
   const prevStep = () => {
     if (activeStep > 0) {
       setActiveStep(activeStep - 1);
@@ -178,6 +305,7 @@ const AddCourseForm = () => {
       formData,
       handleChange,
       updateNestedState,
+      errors
     };
 
     switch (activeStep) {

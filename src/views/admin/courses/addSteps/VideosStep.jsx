@@ -12,11 +12,12 @@ import {
   Icon,
   Image,
   Spinner,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { FaPlus, FaTrash, FaUpload } from "react-icons/fa6";
 import { useAddFileMutation } from "api/filesSlice";
 
-const VideosStep = ({ formData, handleChange, updateNestedState }) => {
+const VideosStep = ({ formData, handleChange, updateNestedState ,errors }) => {
   const [addFile] = useAddFileMutation();
   const [uploadingIndices, setUploadingIndices] = useState([]);
 
@@ -94,7 +95,7 @@ const VideosStep = ({ formData, handleChange, updateNestedState }) => {
               </Flex>
             </CardHeader>
             <CardBody>
-              <FormControl mb={4}>
+              <FormControl mb={4} isInvalid={!video.url}>
                 <Text fontSize="sm" fontWeight="700">
                   Video File
                 </Text>
@@ -187,9 +188,14 @@ const VideosStep = ({ formData, handleChange, updateNestedState }) => {
                     </>
                   )}
                 </Box>
+                {errors.videos && (
+                  <Text color="red.500" fontSize="sm" mt={1}>
+                    {errors.videos} (Video is required)
+                  </Text>
+                )}
               </FormControl>
 
-              <FormControl>
+              <FormControl  mb={4} isInvalid={!video.year}>
                 <Text fontSize="sm" fontWeight="700">
                   Video Year
                 </Text>
@@ -200,6 +206,10 @@ const VideosStep = ({ formData, handleChange, updateNestedState }) => {
                   mt={2}
                   type="number"
                 />
+
+                {errors.videos && (
+                  <FormErrorMessage>{errors.videos} (Year is required)</FormErrorMessage>
+                )}
               </FormControl>
             </CardBody>
           </Card>

@@ -18,7 +18,7 @@ import { FaPlus, FaMinus, FaUpload, FaTrash } from "react-icons/fa6";
 import { useAddFileMutation } from "api/filesSlice";
 import { useDeleteFileMutation } from "api/filesSlice";
 
-const WhyChooseStep = ({ formData, handleChange, updateNestedState }) => {
+const WhyChooseStep = ({ formData, handleChange, updateNestedState ,errors }) => {
   const [addFile] = useAddFileMutation();
   const [deleteFile] = useDeleteFileMutation();
   const [uploadingIndex, setUploadingIndex] = useState(null);
@@ -88,7 +88,7 @@ const WhyChooseStep = ({ formData, handleChange, updateNestedState }) => {
         <Text fontWeight="bold">Why Choose This Course</Text>
       </CardHeader>
       <CardBody>
-        <FormControl mb={4}>
+        <FormControl mb={4} isInvalid={!!errors.whyChooseTitles}>
           <Text fontSize="sm" fontWeight="700">
             Titles
           </Text>
@@ -98,6 +98,7 @@ const WhyChooseStep = ({ formData, handleChange, updateNestedState }) => {
                 value={title}
                 onChange={(e) => updateWhyChooseTitle(index, e.target.value)}
                 placeholder="Enter title"
+                isInvalid={errors.whyChooseTitles && errors.whyChooseTitles[index]}
               />
               <Button
                 ml={2}
@@ -108,6 +109,11 @@ const WhyChooseStep = ({ formData, handleChange, updateNestedState }) => {
               </Button>
             </Flex>
           ))}
+          {errors.whyChooseTitles && (
+            <Text color="red.500" fontSize="sm" mt={1}>
+              {errors.whyChooseTitles}
+            </Text>
+          )}
           <Button 
             colorScheme="purple" 
             onClick={addWhyChooseTitle} 
@@ -118,7 +124,7 @@ const WhyChooseStep = ({ formData, handleChange, updateNestedState }) => {
           </Button>
         </FormControl>
 
-        <FormControl>
+        <FormControl isInvalid={!!errors.benefits}>
           <Text fontSize="sm" fontWeight="700">
             Benefits
           </Text>
@@ -223,10 +229,16 @@ const WhyChooseStep = ({ formData, handleChange, updateNestedState }) => {
                     onChange={(e) => updateNestedState("benefits", index, "title", e.target.value)}
                     placeholder="Enter benefit title"
                     mt={2}
+                    isInvalid={errors.benefits && errors.benefits[index]}
                   />
                 </CardBody>
               </Card>
             ))}
+            {errors.benefits && (
+              <Text color="red.500" fontSize="sm" mt={1}>
+                {errors.benefits}
+              </Text>
+            )}
           </SimpleGrid>
         </FormControl>
       </CardBody>
