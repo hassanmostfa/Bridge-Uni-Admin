@@ -13,6 +13,9 @@ import {
   useColorModeValue,
   Select,
   Badge,
+  Image,
+  Spinner,
+  useToast,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -27,6 +30,7 @@ import { ChevronLeftIcon, ChevronRightIcon, EditIcon, PlusSquareIcon, StarIcon }
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { useGetAllStudentTestimonialsQuery, useDeleteStudentTestimonialMutation } from "../../../api/studentTestimonials";
 
 const columnHelper = createColumnHelper();
 
@@ -35,46 +39,32 @@ const StudentTestimonials = () => {
   const [limit, setLimit] = React.useState(10);
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
+  const toast = useToast();
 
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
-  // Default testimonial data
-  const [testimonials, setTestimonials] = React.useState([
-    {
-      id: 1,
-      name: 'Ahmed Mohamed',
-      title: 'Computer Science Graduate',
-      stars: 5,
-      description: 'The program provided excellent practical experience and industry connections.',
-    },
-    {
-      id: 2,
-      name: 'Sarah Johnson',
-      title: 'Business Administration',
-      stars: 4,
-      description: 'Great faculty and curriculum that prepared me well for my career.',
-    },
-    {
-      id: 3,
-      name: 'Mohammed Ali',
-      title: 'Engineering Student',
-      stars: 5,
-      description: 'State-of-the-art facilities and hands-on learning opportunities.',
-    },
-    {
-      id: 4,
-      name: 'Fatima Abdullah',
-      title: 'Medical Student',
-      stars: 4,
-      description: 'The clinical rotations were incredibly valuable for my professional development.',
-    },
-  ]);
+  // API Calls
+  const { 
+    data: testimonialsData, 
+    isLoading, 
+    isError, 
+    refetch 
+  } = useGetAllStudentTestimonialsQuery({ page: page - 1, limit });
+  
+     // Trigger refetch when component mounts (navigates to)
+     React.useEffect(() => {
+      // Only trigger refetch if the data is not being loaded
+      if (!isLoading) {
+        refetch(); // Manually trigger refetch when component is mounted
+      }
+    }, [refetch, isLoading]); // Dependency array to ensure it only runs on mount
+  const [deleteTestimonial] = useDeleteStudentTestimonialMutation();
 
-  // Pagination logic
-  const totalItems = testimonials.length;
-  const totalPages = Math.ceil(totalItems / limit);
-  const paginatedData = testimonials.slice((page - 1) * limit, page * limit);
+  // Transform API data to match our table structure
+  const testimonials = testimonialsData?.data?.data || [];
+  const totalItems = testimonialsData?.data?.totalItems || 0;
+  const totalPages = testimonialsData?.data?.totalPages || 1;
 
   // Handle delete testimonial
   const handleDelete = async (id) => {
@@ -90,12 +80,30 @@ const StudentTestimonials = () => {
       });
 
       if (result.isConfirmed) {
-        setTestimonials(testimonials.filter(item => item.id !== id));
-        Swal.fire('Deleted!', 'The testimonial has been deleted.', 'success');
+        const response = await deleteTestimonial(id).unwrap();
+        
+        if (response.flag) {
+          toast({
+            title: 'Success',
+            description: response.message || 'Testimonial deleted successfully',
+            status: 'success',
+            duration: 5000,
+            isClosable: true,
+          });
+          refetch();
+        } else {
+          throw new Error(response.message || 'Failed to delete testimonial');
+        }
       }
     } catch (error) {
       console.error('Failed to delete testimonial:', error);
-      Swal.fire('Error!', 'Failed to delete the testimonial.', 'error');
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete the testimonial',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -118,7 +126,30 @@ const StudentTestimonials = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('name', {
+    columnHelper.accessor('image', {
+      id: 'image',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          Photo
+        </Text>
+      ),
+      cell: (info) => (
+        <Image
+          src={info.getValue()}
+          alt="Student"
+          w={'70px'}
+          h={'30px'}
+          borderRadius="full"
+          objectFit={'cover'}
+        />
+      ),
+    }),
+    columnHelper.accessor('student_name', {
       id: 'name',
       header: () => (
         <Text
@@ -146,7 +177,7 @@ const StudentTestimonials = () => {
       ),
       cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
     }),
-    columnHelper.accessor('stars', {
+    columnHelper.accessor('rate', {
       id: 'stars',
       header: () => (
         <Text
@@ -174,7 +205,7 @@ const StudentTestimonials = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('description', {
+    columnHelper.accessor('testimonial', {
       id: 'description',
       header: () => (
         <Text
@@ -222,16 +253,7 @@ const StudentTestimonials = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/edit-testimonial/${info.getValue()}`)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/testimonial/${info.getValue()}`)}
+            onClick={() => navigate(`/admin/cms/edit-student-testimonial/${info.getValue()}`)}
           />
         </Flex>
       ),
@@ -239,7 +261,7 @@ const StudentTestimonials = () => {
   ];
 
   const table = useReactTable({
-    data: paginatedData,
+    data: testimonials,
     columns,
     state: {
       sorting,
@@ -267,6 +289,22 @@ const StudentTestimonials = () => {
     setLimit(Number(e.target.value));
     setPage(1);
   };
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" height="100vh">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Flex justify="center" align="center" height="100vh">
+        <Text color="red.500">Error loading testimonials</Text>
+      </Flex>
+    );
+  }
 
   return (
     <div className="container">
