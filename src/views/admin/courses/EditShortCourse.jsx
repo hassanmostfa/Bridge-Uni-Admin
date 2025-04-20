@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -19,8 +19,8 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddShortCourseMutation } from "api/shortCourcesSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { useGetShortCourseQuery, useUpdateShortCourseMutation } from "api/shortCourcesSlice";
 import BasicInfoStep from "./addShortCourseSteps/BasicInfoStep";
 import MediaStep from "./addShortCourseSteps/MediaStep";
 import BenefitsStep from "./addShortCourseSteps/BenefitsStep";
@@ -38,8 +38,14 @@ const steps = [
   { title: "Review", description: "Confirm details" },
 ];
 
-const AddShortCourseForm = () => {
-  const [addShortCourse] = useAddShortCourseMutation();
+const EditShortCourse = () => {
+  const { id } = useParams();
+  const { data: courseData, isLoading } = useGetShortCourseQuery(id);
+  const [updateCourse] = useUpdateShortCourseMutation();
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  // Initialize form data with empty values
   const [formData, setFormData] = useState({
     // Course Basic Information
     titleEn: "",
@@ -51,17 +57,14 @@ const AddShortCourseForm = () => {
     startDate: "",
     endDate: "",
     featured: false,
-    soon:false,
+    soon: false,
     // Course Media
     courseImage: null,
-    brochure: null, // PDF file
-    
+    brochure: null,
     // Benefits of the Program
     benefits: Array(6).fill().map((_, i) => ({ image: null, title: "" })),
-    
     // Course Structure
     structures: [{ name: "", image: null, text: "" }],
-    
     // Course Tutors
     tutors: [{ 
       name: "", 
@@ -72,6 +75,47 @@ const AddShortCourseForm = () => {
       description: "" 
     }]
   });
+
+  // Populate form with course data when loaded
+  useEffect(() => {
+    if (courseData?.data) {
+      const course = courseData.data;
+      setFormData({
+        titleEn: course.title_en || "",
+        titleAr: course.title_ar || "",
+        provider: course.provider_id || 0,
+        category: course.category_id || 0,
+        price: course.price || "",
+        duration: course.duration?.toString() || "",
+        startDate: course.start_date ? new Date(course.start_date).toISOString().split('T')[0] : "",
+        endDate: course.end_date ? new Date(course.end_date).toISOString().split('T')[0] : "",
+        featured: course.featured_course || false,
+        soon: course.coming_soon || false,
+        courseImage: course.image || null,
+        brochure: course.brochure || null,
+        benefits: course.benefits?.length > 0 
+          ? course.benefits.map(b => ({ image: b.image, title: b.title }))
+          : Array(6).fill().map((_, i) => ({ image: null, title: "" })),
+        structures: course.course_structures?.length > 0
+          ? course.course_structures.map(s => ({ 
+              name: s.name, 
+              image: s.image, 
+              text: s.text 
+            }))
+          : [{ name: "", image: null, text: "" }],
+        tutors: course.course_tutors?.length > 0
+          ? course.course_tutors.map(t => ({
+              name: t.name,
+              image: t.image,
+              rating: t.rate,
+              courses: t.number_of_courses,
+              students: t.total_students,
+              description: t.Description
+            }))
+          : [{ name: "", image: null, rating: 0, courses: 0, students: 0, description: "" }]
+      });
+    }
+  }, [courseData]);
 
   const validationSchema = {
     titleEn: { required: true, minLength: 3, maxLength: 150 },
@@ -96,9 +140,6 @@ const AddShortCourseForm = () => {
       )
     }
   };
-
-  const navigate = useNavigate();
-  const toast = useToast();
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -161,7 +202,7 @@ const AddShortCourseForm = () => {
         
       case 1: // Media
         errors.courseImage = validateField('courseImage', formData.courseImage);
-        errors.courseImage = validateField('brochure', formData.brochure);
+        errors.brochure = validateField('brochure', formData.brochure);
         break;
         
       case 2: // Benefits
@@ -182,7 +223,7 @@ const AddShortCourseForm = () => {
     );
   };
 
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
     let allErrors = {};
     steps.forEach((_, index) => {
       allErrors = { ...allErrors, ...validateStep(index) };
@@ -206,7 +247,7 @@ const AddShortCourseForm = () => {
       provider_id: parseInt(formData.provider),
       category_id: parseInt(formData.category),
       price: parseFloat(formData.price),
-      duration: formData.duration,
+      duration: parseInt(formData.duration),
       start_date: new Date(formData.startDate).toISOString(),
       end_date: new Date(formData.endDate).toISOString(),
       featured_course: formData.featured,
@@ -219,12 +260,11 @@ const AddShortCourseForm = () => {
           image: benefit.image,
           title: benefit.title
         })),
-      course_structure: formData.structures.map(structure => Object.keys(structure).reduce((obj, key) => {
-        if (structure[key] !== null) {
-          obj[key] = structure[key];
-        }
-        return obj;
-      }, {})),
+      course_structure: formData.structures.map(structure => ({
+        name: structure.name,
+        text: structure.text,
+        image: structure.image
+      })),
       course_tutors: formData.tutors.map(tutor => ({
         Description: tutor.description,
         total_students: parseInt(tutor.students),
@@ -235,21 +275,20 @@ const AddShortCourseForm = () => {
       }))
     };
 
-    console.log("API Data:", apiData);
     try {
-      await addShortCourse(apiData).unwrap();
+      await updateCourse({ id, data: apiData }).unwrap();
       toast({
-        title: "Course Created",
-        description: "The short course has been successfully created",
+        title: "Course Updated",
+        description: "The short course has been successfully updated",
         status: "success",
         duration: 5000,
         isClosable: true,
       });
       navigate("/admin/short-courses");
     } catch (error) {
-      console.error("Failed to create course:", error);
+      console.error("Failed to update course:", error);
       toast({
-        title: "Error creating course",
+        title: "Error updating course",
         description: error.data?.message || "Please try again",
         status: "error",
         duration: 5000,
@@ -264,7 +303,6 @@ const AddShortCourseForm = () => {
   });
   
   const textColor = useColorModeValue("secondaryGray.900", "white");
-
   const [errors, setErrors] = useState({});
 
   const nextStep = () => {
@@ -313,6 +351,14 @@ const AddShortCourseForm = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" minH="100vh">
+        <Text>Loading course data...</Text>
+      </Flex>
+    );
+  }
+
   return (
     <div className="container add-admin-container w-100">
       <div className="add-admin-card shadow p-4 bg-white w-100">
@@ -324,7 +370,7 @@ const AddShortCourseForm = () => {
             mb="20px !important"
             lineHeight="100%"
           >
-            Add New Short Course
+            Edit Short Course
           </Text>
           <Button
             type="button"
@@ -384,7 +430,7 @@ const AddShortCourseForm = () => {
               type="submit"
               onClick={handleSubmit}
             >
-              Submit Course
+              Update Course
             </Button>
           )}
         </Flex>
@@ -393,4 +439,4 @@ const AddShortCourseForm = () => {
   );
 };
 
-export default AddShortCourseForm;
+export default EditShortCourse;

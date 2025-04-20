@@ -43,7 +43,6 @@ const WhyChooseStep = ({ formData, handleChange, updateNestedState ,errors }) =>
 
   const handleImageUpload = async (file, index) => {
     if (!file) return;
-    
     try {
       setUploadingIndex(index);
       const formData = new FormData();
@@ -88,8 +87,8 @@ const WhyChooseStep = ({ formData, handleChange, updateNestedState ,errors }) =>
         <Text fontWeight="bold">Why Choose This Course</Text>
       </CardHeader>
       <CardBody>
-        <FormControl mb={4} isInvalid={!!errors.whyChooseTitles}>
-          <Text fontSize="sm" fontWeight="700">
+        {/* <FormControl mb={4} isInvalid={!!errors.whyChooseTitles}> */}
+          {/* <Text fontSize="sm" fontWeight="700">
             Titles
           </Text>
           {formData.whyChooseTitles.map((title, index) => (
@@ -122,7 +121,7 @@ const WhyChooseStep = ({ formData, handleChange, updateNestedState ,errors }) =>
           >
             Add Title
           </Button>
-        </FormControl>
+        </FormControl> */}
 
         <FormControl isInvalid={!!errors.benefits}>
           <Text fontSize="sm" fontWeight="700">

@@ -16,6 +16,7 @@ import {
   Badge,
   Image,
   useToast,
+  Spinner,
 } from "@chakra-ui/react";
 import {
   createColumnHelper,
@@ -219,6 +220,18 @@ const columns = React.useMemo(() => [
     return (
       <div className="container">
         <Card flexDirection="column" w="100%" px="0px">
+          <Flex align="center" justify="center" py="10">
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+            />
+            <Text fontWeight="500" fontSize="20px" ml="3">
+              Loading courses...
+            </Text>
+          </Flex>
           <Text>Loading courses...</Text>
         </Card>
       </div>

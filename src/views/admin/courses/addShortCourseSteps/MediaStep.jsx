@@ -24,6 +24,7 @@ const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerA
   const handleUploadStart = () => setUploadCount((prev) => prev + 1);
   const handleUploadEnd = () => setUploadCount((prev) => Math.max(prev - 1, 0));
 
+  
   return (
     <Card mb={4}>
       <CardHeader bg="gray.100" p={3}>
@@ -51,7 +52,7 @@ const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerA
           />
           <FileUploadField
             label="Brochure (PDF)"
-            value={formData?.studyGuide}
+            value={formData?.brochure}
             setValue={(val) => handleChange("brochure", val)}
             accept=".pdf"
             uploadFile={uploadPdfAPI}

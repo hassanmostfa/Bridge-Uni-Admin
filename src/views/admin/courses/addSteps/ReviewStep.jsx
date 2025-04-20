@@ -7,9 +7,12 @@ import {
   SimpleGrid,
   Box,
   Image,
+  Button,
 } from "@chakra-ui/react";
 import { useGetProviderQuery } from "api/providerSlice";
 import { useGetCategoriesQuery } from "api/categorySlice";
+import { Link } from "react-router-dom";
+import { FaEye } from "react-icons/fa6";
 
 const ReviewStep = ({ formData }) => {
   const {data:provider} = useGetProviderQuery(formData.provider);
@@ -81,7 +84,15 @@ const ReviewStep = ({ formData }) => {
         </Box>
         <Box>
           <Text fontWeight="bold">Study Guide:</Text>
-          <Text>{formData.studyGuide ? formData.studyGuide.name : "Not provided"}</Text>
+          {formData.studyGuide ? (
+            <Link href={formData.studyGuide} isExternal>
+              <Button variant="link" rightIcon={<FaEye />}>
+                Preview
+              </Button>
+            </Link>
+          ) : (
+            <Text>Not provided</Text>
+          )}
         </Box>
       </SimpleGrid>
 

@@ -15,6 +15,7 @@ import {
   Button,
   Badge,
   Image,
+  Spinner,
 } from "@chakra-ui/react";
 import {
   createColumnHelper,
@@ -27,98 +28,48 @@ import { FaEye, FaTrash } from "react-icons/fa6";
 import { EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import Card from "components/card/Card";
 import { useNavigate } from "react-router-dom";
+import { useGetAllShortCourcesQuery } from "api/shortCourcesSlice";
 
 const columnHelper = createColumnHelper();
 
 const ShortCourses = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState([
-    {
-      id: 1,
-      title_en: "Data Science Fundamentals",
-      title_ar: "أساسيات علم البيانات",
-      provider: "Coursera",
-      category: "Technology",
-      price: 75.500,
-      duration: "8 Weeks",
-      start_date: "2023-11-01",
-      end_date: "2023-12-20",
-      brochure: "course-brochure.pdf",
-      benefits: [
-        { image: "benefit1.jpg", title: "Hands-on Projects" },
-        { image: "benefit2.jpg", title: "Expert Instructors" },
-        // ...4 more benefits
-      ],
-      tutors: [
-        {
-          name: "Dr. Ahmed",
-          image: "tutor1.jpg",
-          rating: 4.8,
-          courses: 12,
-          students: 1500,
-          description: "PhD in Computer Science..."
-        }
-      ],
-      featured: true,
-      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 2,
-      title_en: "Business Administration",
-      title_ar: "إدارة الأعمال",
-      provider: "Udemy",
-      category: "Business",
-      price: 60.000,
-      duration: "6 Weeks",
-      start_date: "2023-10-15",
-      end_date: "2023-11-26",
-      brochure: "business-course.pdf",
-      benefits: [
-        // 6 benefits...
-      ],
-      tutors: [
-        // Tutors data...
-      ],
-      featured: false,
-      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 3,
-      title_en: "Graphic Design Masterclass",
-      title_ar: "دورة متقدمة في التصميم الجرافيكي",
-      provider: "Skillshare",
-      category: "Design",
-      price: 85.750,
-      duration: "10 Weeks",
-      start_date: "2023-12-01",
-      end_date: "2024-02-09",
-      brochure: "design-course.pdf",
-      benefits: [
-        // 6 benefits...
-      ],
-      tutors: [
-        // Tutors data...
-      ],
-      featured: true,
-      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-  ]);
-
+  const { data: apiData, isLoading } = useGetAllShortCourcesQuery();
+  
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
 
-  // Toggle featured status
-  const toggleFeatured = (id) => {
-    setData((prevData) =>
-      prevData.map((course) =>
-        course.id === id ? { ...course, featured: !course.featured } : course
-      )
-    );
+  // Transform API data to match our table structure
+  const transformData = (apiData) => {
+    if (!apiData?.data?.data) return [];
+    
+    return apiData.data.data.map(course => ({
+      id: course.id,
+      title_en: course.title_en,
+      title_ar: course.title_ar,
+      provider: course.provider?.title_en || "N/A",
+      category: course.category?.title_en || "N/A",
+      price: course.price,
+      duration: `${course.duration} Weeks`,
+      start_date: new Date(course.start_date).toLocaleDateString(),
+      end_date: new Date(course.end_date).toLocaleDateString(),
+      brochure: course.brochure,
+      featured: course.featured_course,
+      image: course.image,
+      originalData: course // Keep original data for reference
+    }));
   };
 
-  // Delete course
-  const handleDelete = (id) => {
-    setData((prevData) => prevData.filter((course) => course.id !== id));
+  // Toggle featured status - you'll need to implement API call here
+  const toggleFeatured = async (id) => {
+    // Implement API call to update featured status
+    console.log("Toggle featured for course:", id);
+  };
+
+  // Delete course - you'll need to implement API call here
+  const handleDelete = async (id) => {
+    // Implement API call to delete course
+    console.log("Delete course:", id);
   };
 
   const columns = [
@@ -195,6 +146,17 @@ const ShortCourses = () => {
         />
       ),
     }),
+    columnHelper.accessor("coming_soon", {
+      id: "coming_soon",
+      header: () => <Text color="gray.400">Comming Soon</Text>,
+      cell: (info) => (
+        <Switch
+          colorScheme="teal"
+          isChecked={info.getValue()}
+          // onChange={() => toggleFeatured(info.row.original.id, info.getValue())}
+        />
+      ),
+    }),
     columnHelper.accessor("actions", {
       id: "actions",
       header: () => <Text color="gray.400">Actions</Text>,
@@ -207,7 +169,7 @@ const ShortCourses = () => {
             color="blue.500"
             as={FaEye}
             cursor="pointer"
-            onClick={() => navigate(`/admin/courses/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/show-short-course/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -216,7 +178,7 @@ const ShortCourses = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-            onClick={() => navigate(`/admin/edit-course/${info.row.original.id}`)}
+            onClick={() => navigate(`/admin/edit-short-course/${info.row.original.id}`)}
           />
           <Icon
             w="18px"
@@ -232,12 +194,22 @@ const ShortCourses = () => {
     }),
   ];
 
+  const tableData = transformData(apiData);
+  
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" h="100vh">
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
 
   return (
     <div className="container">
@@ -262,30 +234,34 @@ const ShortCourses = () => {
           </Button>
         </Flex>
         <Box>
-          <Table variant="simple" color="gray.500" mb="24px" mt="12px">
-            <Thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <Tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <Th key={header.id} borderColor={borderColor}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </Th>
-                  ))}
-                </Tr>
-              ))}
-            </Thead>
-            <Tbody>
-              {table.getRowModel().rows.map((row) => (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <Td key={cell.id} borderColor="transparent">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </Td>
-                  ))}
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+          {tableData.length === 0 ? (
+            <Text textAlign="center" py={10}>No courses found</Text>
+          ) : (
+            <Table variant="simple" color="gray.500" mb="24px" mt="12px">
+              <Thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <Tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <Th key={header.id} borderColor={borderColor}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </Th>
+                    ))}
+                  </Tr>
+                ))}
+              </Thead>
+              <Tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <Tr key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <Td key={cell.id} borderColor="transparent">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </Td>
+                    ))}
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          )}
         </Box>
       </Card>
     </div>

@@ -23,11 +23,9 @@ import { useGetAllProviderQuery } from 'api/providerSlice';
 const BasicInfoStep = ({ formData, handleChange, errors }) => {
   // Mock data for dropdowns
   const { data: categoriesResponse } = useGetCategoriesQuery();
-
   const { data: providersResponse } = useGetAllProviderQuery();
   const providers = providersResponse?.data?.data ?? [];
   const categories = categoriesResponse?.data?.data ?? [];
-
   const textColor = 'secondaryGray.900';
 
   return (
@@ -118,12 +116,14 @@ const BasicInfoStep = ({ formData, handleChange, errors }) => {
             <Text color={textColor} fontSize="sm" fontWeight="700">
               Price (KWD) <span className="text-danger">*</span>
             </Text>
-            <NumberInput precision={3} step={0.1} min={0} mt={2}>
-              <NumberInputField
-                value={formData.price}
-                onChange={(e) => handleChange('price', e.target.value)}
-                placeholder="Enter price"
-              />
+            <NumberInput 
+              precision={3}
+              step={1}
+              min={0}
+              value={formData.price}
+              onChange={(valueString) => handleChange('price', valueString)}
+            >
+              <NumberInputField placeholder="Enter price" />
               <NumberInputStepper>
                 <NumberIncrementStepper />
                 <NumberDecrementStepper />

@@ -84,6 +84,8 @@ import ShowOnlineCourse from 'views/admin/courses/ShowOnlineCourse';
 import EditOnlineCourse from 'views/admin/courses/EditOnlineCourse';
 
 import UpdateTestimonial from 'views/admin/student/UpdateTestimonila';
+import ShowShortCourse from 'views/admin/courses/ShowShortCourse';
+import EditShortCourse from 'views/admin/courses/EditShortCourse';
 
 
 const routes = [
@@ -423,6 +425,20 @@ const routes = [
     layout: '/admin',
     path: '/add-short-course',
     component: <AddShortCourse />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Short Courses',
+    layout: '/admin',
+    path: '/show-short-course/:id',
+    component: <ShowShortCourse />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Short Courses',
+    layout: '/admin',
+    path: '/edit-short-course/:id',
+    component: <EditShortCourse />,
     showInSidebar: false,
   },
 
