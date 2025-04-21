@@ -19,7 +19,8 @@ import {
   HStack,
   Stack,
   Heading,
-  AspectRatio
+  AspectRatio,
+  Spinner
 } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import { useGetCourseQuery } from "api/onlineCourseSlice";
@@ -40,9 +41,9 @@ const ShowOnlineCourse = () => {
 
   if (!course) {
     return (
-      <Box p={4}>
-        <Text>Loading course details...</Text>
-      </Box>
+      <Flex justify="center" align="center" h="100vh">
+        <Spinner size="xl" />
+      </Flex>
     );
   }
 

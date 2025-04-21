@@ -29,16 +29,20 @@ import { EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
 import Card from "components/card/Card";
 import { useNavigate } from "react-router-dom";
 import { useGetAllShortCourcesQuery } from "api/shortCourcesSlice";
+import { useDeleteShortCourseMutation } from "api/shortCourcesSlice";
+import Swal from "sweetalert2";
 
 const columnHelper = createColumnHelper();
 
 const ShortCourses = () => {
   const navigate = useNavigate();
-  const { data: apiData, isLoading } = useGetAllShortCourcesQuery();
-  
+  const { data: apiData,refetch, isLoading } = useGetAllShortCourcesQuery();
+  const [deleteCourse] = useDeleteShortCourseMutation();
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
-
+  // React.useEffect(() => {
+  //   refetch();
+  // }, []);
   // Transform API data to match our table structure
   const transformData = (apiData) => {
     if (!apiData?.data?.data) return [];
@@ -68,11 +72,29 @@ const ShortCourses = () => {
 
   // Delete course - you'll need to implement API call here
   const handleDelete = async (id) => {
-    // Implement API call to delete course
-    console.log("Delete course:", id);
+     try {
+         const result = await Swal.fire({
+           title: 'Are you sure?',
+           text: "You won't be able to revert this!",
+           icon: 'warning',
+           showCancelButton: true,
+           confirmButtonColor: '#3085d6',
+           cancelButtonColor: '#d33',
+           confirmButtonText: 'Yes, delete it!',
+         });
+   
+         if (result.isConfirmed) {
+           await deleteCourse(id).unwrap();
+           refetch();
+           Swal.fire('Deleted!', 'The Short Course has been deleted.', 'success');
+         }
+       } catch (error) {
+         console.error('Failed to delete category:', error);
+         Swal.fire('Error!', 'Failed to delete the Short Course.', 'error');
+       }
   };
 
-  const columns = [
+  const columns =  React.useMemo(() => [
     columnHelper.accessor("id", {
       id: "id",
       header: () => <Text color="gray.400">ID</Text>,
@@ -192,9 +214,9 @@ const ShortCourses = () => {
         </Flex>
       ),
     }),
-  ];
+  ], [textColor]);
 
-  const tableData = transformData(apiData);
+  const tableData = React.useMemo(() => transformData(apiData), [apiData]);
   
   const table = useReactTable({
     data: tableData,

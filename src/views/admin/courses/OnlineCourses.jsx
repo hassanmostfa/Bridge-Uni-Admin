@@ -65,8 +65,8 @@ const OnlineCourses = () => {
 
       if (result.isConfirmed) {
         setDeletingId(id); // Set deleting state
-        // await deleteCourse(id).unwrap();
-        // refetch(); // Wait for refetch to complete
+        await deleteCourse(id).unwrap();
+        refetch(); // Wait for refetch to complete
         Swal.fire('Deleted!', 'The Delete non done Yet!.', 'success');
       }
     // } catch (error) {
@@ -80,7 +80,7 @@ const OnlineCourses = () => {
 
 
 // Memoized format function
-const formatTableData = useCallback(() => {
+const formatTableData = (coursesData) => {
   if (!coursesData?.data?.data) return [];
   
   return coursesData.data.data.map(course => ({
@@ -94,7 +94,7 @@ const formatTableData = useCallback(() => {
     image: course.image,
     originalData: course
   }));
-}, [coursesData]);
+};
 
 const columns = React.useMemo(() => [
   columnHelper.accessor("id", {
@@ -206,11 +206,11 @@ const columns = React.useMemo(() => [
         </Flex>
       ),
     }),
-  ], [textColor, navigate, handleDelete]);
+  ], [textColor]);
 
-
+  const tableData = React.useMemo(() => formatTableData(coursesData), [coursesData]);
   const table = useReactTable({
-    data: formatTableData(),
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -232,7 +232,6 @@ const columns = React.useMemo(() => [
               Loading courses...
             </Text>
           </Flex>
-          <Text>Loading courses...</Text>
         </Card>
       </div>
     );

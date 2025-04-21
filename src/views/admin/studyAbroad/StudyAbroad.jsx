@@ -1,266 +1,442 @@
 import React, { useState } from "react";
 import {
   Box,
-  Flex,
-  Icon,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  useColorModeValue,
-  Switch,
   Button,
-  Badge,
-  Image,
+  Flex,
+  Text,
+  useColorModeValue,
+  Stepper,
+  Step,
+  StepIndicator,
+  StepStatus,
+  StepIcon,
+  StepNumber,
+  StepTitle,
+  StepDescription,
+  StepSeparator,
+  useSteps,
+  useToast,
+  VStack,
 } from "@chakra-ui/react";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { FaEye, FaTrash } from "react-icons/fa6";
-import { EditIcon, PlusSquareIcon } from "@chakra-ui/icons";
-import Card from "components/card/Card";
+import { IoMdArrowBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import BasicInfoStep from "./addSteps/BasicInfoStep";
+import MediaStep from "./addSteps/MediaStep";
+import AllAboutStep from "./addSteps/AllAboutStep";
+import ProofStep from "./addSteps/ProofStep";
+import VisaStep from "./addSteps/VisaStep";
+import FinancialStep from "./addSteps/FinancialStep";
+import SummaryStep from "./addSteps/SummaryStep";
+import ReviewStep from "./addSteps/ReviewStep";
 
-const columnHelper = createColumnHelper();
+const steps = [
+  { title: "Basic Info", description: "Program details" },
+  { title: "Media", description: "Images & gallery" },
+  { title: "All About", description: "Program overview" },
+  { title: "Proof", description: "Evidence section" },
+  { title: "Visa Info", description: "Visa details" },
+  { title: "Financial", description: "Cost information" },
+  { title: "Summary", description: "Final details" },
+  { title: "Review", description: "Confirm information" },
+];
 
-const StudyAbroad = () => {
+const AddProgramForm = () => {
+  const [formData, setFormData] = useState({
+    // Basic Information
+    titleEn: "",
+    titleAr: "",
+    mainImage: null,
+    galleryImages: [],
+    innerTitle: "",
+    description: "",
+    featured: false,
+    
+    // All About Section
+    allAboutTitle: "",
+    numUniversities: 0,
+    numMajors: 0,
+    topUniversities: [{ image: null, name: "" }],
+    popularMajors: [],
+    
+    // Proof Section
+    proofDescription: "",
+    proofImages: [],
+    requirements: [""],
+    
+    // Visa Information
+    visaDescription: "",
+    visaImage: null,
+    visaAttributes: [{ name: "", image: null }],
+    
+    // Financial Information
+    programLevel: "",
+    programLength: "",
+    tuition: "",
+    costOfLiving: "",
+    applicationFee: "",
+    
+    // Summary Section
+    summary: "",
+    programRequirements: [""]
+  });
+
+  const validationSchema = {
+    titleEn: { required: true, minLength: 3, maxLength: 150 },
+    titleAr: { required: true, minLength: 3, maxLength: 150 },
+    mainImage: { required: true },
+    description: { required: true, minLength: 50 },
+    allAboutTitle: { required: true },
+    numUniversities: { required: true, min: 1 },
+    numMajors: { required: true, min: 1 },
+    topUniversities: {
+      validate: (universities) => universities.every(u => u.name && u.image)
+    },
+    popularMajors: {
+      validate: (majors) => majors.length > 0
+    },
+    proofDescription: { required: true },
+    proofImages: {
+      validate: (images) => images.length > 0
+    },
+    requirements: {
+      validate: (reqs) => reqs.every(r => r.trim().length > 0)
+    },
+    visaDescription: { required: true },
+    visaImage: { required: true },
+    visaAttributes: {
+      validate: (attrs) => attrs.every(a => a.name && a.image)
+    },
+    programLevel: { required: true },
+    programLength: { required: true },
+    tuition: { required: true, min: 0 },
+    costOfLiving: { required: true, min: 0 },
+    applicationFee: { required: true, min: 0 },
+    summary: { required: true },
+    programRequirements: {
+      validate: (reqs) => reqs.every(r => r.trim().length > 0)
+    }
+  };
+
   const navigate = useNavigate();
-  const [data, setData] = useState([
-    {
-      id: 1,
-      title_en: "Study in United States",
-      title_ar: "الدراسة في الولايات المتحدة",
-      universities_count: 150,
-      majors_count: 520,
-      top_universities: "Harvard, MIT, Stanford",
-      featured: true,
-      image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 2,
-      title_en: "Study in United Kingdom",
-      title_ar: "الدراسة في المملكة المتحدة",
-      universities_count: 95,
-      majors_count: 340,
-      top_universities: "Oxford, Cambridge, Imperial",
-      featured: true,
-      image: 'https://images.unsplash.com/photo-1526129318478-62ed807ebdf9?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 3,
-      title_en: "Study in Australia",
-      title_ar: "الدراسة في أستراليا",
-      universities_count: 43,
-      majors_count: 280,
-      top_universities: "Melbourne, Sydney, ANU",
-      featured: false,
-      image: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 4,
-      title_en: "Study in Canada",
-      title_ar: "الدراسة في كندا",
-      universities_count: 57,
-      majors_count: 310,
-      top_universities: "Toronto, McGill, UBC",
-      featured: true,
-      image: 'https://images.unsplash.com/photo-1590114538379-38ce627039d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-    {
-      id: 5,
-      title_en: "Study in Germany",
-      title_ar: "الدراسة في ألمانيا",
-      universities_count: 80,
-      majors_count: 270,
-      top_universities: "TU Munich, Heidelberg, LMU Munich",
-      featured: false,
-      image: 'https://images.unsplash.com/photo-1554072675-66db59dba46f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
-    },
-  ]);
+  const toast = useToast();
+  const [errors, setErrors] = useState({});
 
-  const textColor = useColorModeValue("secondaryGray.900", "white");
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
+  const handleChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-  // Toggle featured status
-  const toggleFeatured = (id) => {
-    setData((prevData) =>
-      prevData.map((program) =>
-        program.id === id ? { ...program, featured: !program.featured } : program
-      )
+  const updateNestedState = (parentField, index, field, value) => {
+    setFormData(prev => {
+      const updatedArray = [...prev[parentField]];
+      updatedArray[index] = {
+        ...updatedArray[index],
+        [field]: value
+      };
+      return {
+        ...prev,
+        [parentField]: updatedArray
+      };
+    });
+  };
+
+  const validateField = (fieldName, value) => {
+    const rules = validationSchema[fieldName];
+    if (!rules) return true;
+  
+    if (rules.required && !value) {
+      return `${fieldName} is required`;
+    }
+    
+    if (rules.minLength && value.length < rules.minLength) {
+      return `Must be at least ${rules.minLength} characters`;
+    }
+  
+    if (rules.maxLength && value.length > rules.maxLength) {
+      return `Cannot exceed ${rules.maxLength} characters`;
+    }
+  
+    if (rules.min !== undefined && value < rules.min) {
+      return `Must be at least ${rules.min}`;
+    }
+  
+    if (rules.validate && !rules.validate(value)) {
+      return `Invalid ${fieldName} value`;
+    }
+  
+    return null;
+  };
+  
+  const validateStep = (stepIndex) => {
+    const errors = {};
+    
+    switch(stepIndex) {
+      case 0: // Basic Info
+        errors.titleEn = validateField('titleEn', formData.titleEn);
+        errors.titleAr = validateField('titleAr', formData.titleAr);
+        errors.description = validateField('description', formData.description);
+        break;
+        
+      case 1: // Media
+        errors.mainImage = validateField('mainImage', formData.mainImage);
+        break;
+        
+      case 2: // All About
+        errors.allAboutTitle = validateField('allAboutTitle', formData.allAboutTitle);
+        errors.numUniversities = validateField('numUniversities', formData.numUniversities);
+        errors.numMajors = validateField('numMajors', formData.numMajors);
+        errors.topUniversities = validateField('topUniversities', formData.topUniversities);
+        errors.popularMajors = validateField('popularMajors', formData.popularMajors);
+        break;
+        
+      case 3: // Proof
+        errors.proofDescription = validateField('proofDescription', formData.proofDescription);
+        errors.proofImages = validateField('proofImages', formData.proofImages);
+        errors.requirements = validateField('requirements', formData.requirements);
+        break;
+        
+      case 4: // Visa
+        errors.visaDescription = validateField('visaDescription', formData.visaDescription);
+        errors.visaImage = validateField('visaImage', formData.visaImage);
+        errors.visaAttributes = validateField('visaAttributes', formData.visaAttributes);
+        break;
+        
+      case 5: // Financial
+        errors.programLevel = validateField('programLevel', formData.programLevel);
+        errors.programLength = validateField('programLength', formData.programLength);
+        errors.tuition = validateField('tuition', formData.tuition);
+        errors.costOfLiving = validateField('costOfLiving', formData.costOfLiving);
+        errors.applicationFee = validateField('applicationFee', formData.applicationFee);
+        break;
+        
+      case 6: // Summary
+        errors.summary = validateField('summary', formData.summary);
+        errors.programRequirements = validateField('programRequirements', formData.programRequirements);
+        break;
+    }
+  
+    return Object.fromEntries(
+      Object.entries(errors).filter(([_, value]) => value !== null)
     );
   };
 
-  // Delete program
-  const handleDelete = (id) => {
-    setData((prevData) => prevData.filter((program) => program.id !== id));
+  const handleSubmit = async () => {
+    let allErrors = {};
+    steps.forEach((_, index) => {
+      allErrors = { ...allErrors, ...validateStep(index) };
+    });
+  
+    if (Object.keys(allErrors).length > 0) {
+      setErrors(allErrors);
+      toast({
+        title: "Validation Error",
+        description: "Please fill all required fields before submitting",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+    
+    // Prepare the data for API submission
+    const programData = {
+      title_en: formData.titleEn,
+      title_ar: formData.titleAr,
+      main_image: formData.mainImage,
+      gallery_images: formData.galleryImages,
+      inner_title: formData.innerTitle,
+      description: formData.description,
+      featured: formData.featured,
+      all_about: {
+        title: formData.allAboutTitle,
+        num_universities: formData.numUniversities,
+        num_majors: formData.numMajors,
+        top_universities: formData.topUniversities,
+        popular_majors: formData.popularMajors
+      },
+      proof: {
+        description: formData.proofDescription,
+        images: formData.proofImages,
+        requirements: formData.requirements
+      },
+      visa: {
+        description: formData.visaDescription,
+        image: formData.visaImage,
+        attributes: formData.visaAttributes
+      },
+      financials: {
+        program_level: formData.programLevel,
+        program_length: formData.programLength,
+        tuition: formData.tuition,
+        cost_of_living: formData.costOfLiving,
+        application_fee: formData.applicationFee
+      },
+      summary: {
+        text: formData.summary,
+        requirements: formData.programRequirements
+      }
+    };
+
+    console.log("Program Data:", programData);
+    // Here you would typically call your API to submit the data
+    try {
+      // await submitProgram(programData).unwrap();
+      toast({
+        title: "Program Created",
+        description: "The study abroad program has been successfully created",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      navigate("/admin/programs");
+    } catch (error) {
+      console.error("Failed to create program:", error);
+      toast({
+        title: "Error creating program",
+        description: error.data?.message || "Please try again",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
-  const columns = [
-    columnHelper.accessor("id", {
-      id: "id",
-      header: () => <Text color="gray.400">ID</Text>,
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor("image", {
-      id: "image",
-      header: () => <Text color="gray.400">Image</Text>,
-      cell: (info) => (
-        <Image
-          src={info.getValue()}
-          w="80px"
-          h="45px"
-          borderRadius="md"
-          objectFit="cover"
-          alt="Study abroad thumbnail"
-        />
-      ),
-    }),
-    columnHelper.accessor("title_en", {
-      id: "title_en",
-      header: () => <Text color="gray.400">Destination (EN)</Text>,
-      cell: (info) => <Text fontWeight="500">{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor("title_ar", {
-      id: "title_ar",
-      header: () => <Text color="gray.400">Destination (AR)</Text>,
-      cell: (info) => (
-        <Text dir="rtl" fontFamily="Tahoma">
-          {info.getValue()}
-        </Text>
-      ),
-    }),
-    columnHelper.accessor("universities_count", {
-      id: "universities_count",
-      header: () => <Text color="gray.400">Universities</Text>,
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor("majors_count", {
-      id: "majors_count",
-      header: () => <Text color="gray.400">Majors</Text>,
-      cell: (info) => <Text color={textColor}>{info.getValue()}</Text>,
-    }),
-    columnHelper.accessor("top_universities", {
-      id: "top_universities",
-      header: () => <Text color="gray.400">Top Universities</Text>,
-      cell: (info) => (
-        <Badge colorScheme="purple" px="2" py="1" borderRadius="6px">
-          {info.getValue()}
-        </Badge>
-      ),
-    }),
-    columnHelper.accessor("featured", {
-      id: "featured",
-      header: () => <Text color="gray.400">Featured</Text>,
-      cell: (info) => (
-        <Switch
-          colorScheme="teal"
-          isChecked={info.getValue()}
-          onChange={() => toggleFeatured(info.row.original.id)}
-        />
-      ),
-    }),
-    columnHelper.accessor("actions", {
-      id: "actions",
-      header: () => <Text color="gray.400">Actions</Text>,
-      cell: (info) => (
-        <Flex>
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/study-abroad/${info.row.original.id}`)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="green.500"
-            as={EditIcon}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/edit-study-abroad/${info.row.original.id}`)}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="red.500"
-            as={FaTrash}
-            cursor="pointer"
-            onClick={() => handleDelete(info.row.original.id)}
-          />
-        </Flex>
-      ),
-    }),
-  ];
-
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+  const { activeStep, setActiveStep } = useSteps({
+    index: 0,
+    count: steps.length,
   });
+  
+  const textColor = useColorModeValue("secondaryGray.900", "white");
+
+  const nextStep = () => {
+    const stepErrors = validateStep(activeStep);
+    
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      return;
+    }
+    
+    setErrors({});
+    if (activeStep < steps.length - 1) {
+      setActiveStep(activeStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (activeStep > 0) {
+      setActiveStep(activeStep - 1);
+    }
+  };
+
+  const renderStep = () => {
+    const commonProps = {
+      formData,
+      handleChange,
+      updateNestedState,
+      errors
+    };
+
+    switch (activeStep) {
+      case 0:
+        return <BasicInfoStep {...commonProps} />;
+      case 1:
+        return <MediaStep {...commonProps} />;
+      case 2:
+        return <AllAboutStep {...commonProps} />;
+      case 3:
+        return <ProofStep {...commonProps} />;
+      case 4:
+        return <VisaStep {...commonProps} />;
+      case 5:
+        return <FinancialStep {...commonProps} />;
+      case 6:
+        return <SummaryStep {...commonProps} />;
+      case 7:
+        return <ReviewStep {...commonProps} />;
+      default:
+        return <BasicInfoStep {...commonProps} />;
+    }
+  };
 
   return (
-    <div className="container">
-      <Card flexDirection="column" w="100%" px="0px" overflowX="auto">
-        <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
-          <Text color={textColor} fontSize="22px" fontWeight="700">
-            Study Abroad Programs
+    <div className="container add-admin-container w-100">
+      <div className="add-admin-card shadow p-4 bg-white w-100">
+        <div className="mb-3 d-flex justify-content-between align-items-center">
+          <Text
+            color={textColor}
+            fontSize="22px"
+            fontWeight="700"
+            mb="20px !important"
+            lineHeight="100%"
+          >
+            Add New Study Abroad Program
           </Text>
           <Button
-            variant="darkBrand"
-            color="white"
-            fontSize="sm"
-            fontWeight="500"
-            borderRadius="70px"
-            px="24px"
-            py="5px"
-            onClick={() => navigate("/admin/add-study-abroad")}
-            width={"200px"}
+            type="button"
+            onClick={() => navigate(-1)}
+            colorScheme="teal"
+            size="sm"
+            leftIcon={<IoMdArrowBack />}
           >
-            <PlusSquareIcon me="10px" />
-            Add Program
+            Back
           </Button>
+        </div>
+
+        <Stepper index={activeStep} mb={8} orientation="horizontal" size="lg" flexWrap="no-wrap">
+          {steps.map((step, index) => (
+            <Step key={index} flex="1" minW={{ base: "100px", sm: "120px", md: "150px" }}>
+              <VStack spacing={2} textAlign="center">
+                <StepIndicator>
+                  <StepStatus
+                    complete={<StepIcon />}
+                    incomplete={<StepNumber />}
+                    active={<StepNumber />}
+                  />
+                </StepIndicator>
+
+                <Box>
+                  <StepTitle fontSize="sm">{step.title}</StepTitle>
+                  <StepDescription fontSize="xs">{step.description}</StepDescription>
+                </Box>
+              </VStack>
+
+              <StepSeparator />
+            </Step>
+          ))}
+        </Stepper>
+
+        {renderStep()}
+
+        <Flex justify="space-between" mt={6}>
+          <Button
+            onClick={prevStep}
+            isDisabled={activeStep === 0}
+            leftIcon={<IoMdArrowBack />}
+          >
+            Previous
+          </Button>
+
+          {activeStep < steps.length - 1 ? (
+            <Button
+              colorScheme="blue"
+              onClick={nextStep}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button
+              colorScheme="green"
+              onClick={handleSubmit}
+            >
+              Submit Program
+            </Button>
+          )}
         </Flex>
-        <Box>
-          <Table variant="simple" color="gray.500" mb="24px" mt="12px">
-            <Thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <Tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <Th key={header.id} borderColor={borderColor}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </Th>
-                  ))}
-                </Tr>
-              ))}
-            </Thead>
-            <Tbody>
-              {table.getRowModel().rows.map((row) => (
-                <Tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <Td key={cell.id} borderColor="transparent">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </Td>
-                  ))}
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </Box>
-      </Card>
+      </div>
     </div>
   );
 };
 
-export default StudyAbroad;
+export default AddProgramForm;

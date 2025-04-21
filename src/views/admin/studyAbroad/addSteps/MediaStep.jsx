@@ -15,12 +15,17 @@ import {
 } from "@chakra-ui/react";
 import { FaUpload } from "react-icons/fa6";
 import FileUploadField from "./FileUploadField";
-
-const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerAPI, uploadPdfAPI,errors }) => {
+import MultiFileUpload from "./MultiFileUpload";
+const MediaStep = ({ 
+  formData, 
+  handleChange, 
+  uploadMainImageAPI, 
+  uploadGalleryImagesAPI, 
+  errors 
+}) => {
   const [uploadCount, setUploadCount] = useState(0);
   const isAnyUploading = uploadCount > 0;
 
-    
   const handleUploadStart = () => setUploadCount((prev) => prev + 1);
   const handleUploadEnd = () => setUploadCount((prev) => Math.max(prev - 1, 0));
 
@@ -33,43 +38,31 @@ const MediaStep = ({ formData, handleChange, uploadCourseImageAPI, uploadBannerA
         {isAnyUploading && (
           <Box mb={4}>
             <Spinner size="md" color="blue.500" mr={2} />
-            <Text as="span">Uploading file...</Text>
+            <Text as="span">Uploading file(s)...</Text>
           </Box>
         )}
 
-        <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4}>
           <FileUploadField
-            label="Course Image"
-            value={formData?.courseImage}
-            setValue={(val) => handleChange("courseImage", val)}
+            label="Main Program Image"
+            value={formData.mainImage}
+            setValue={(val) => handleChange("mainImage", val)}
             accept="image/*"
             isRequired
-            uploadFile={uploadCourseImageAPI}
+            uploadFile={uploadMainImageAPI}
             onUploadStart={handleUploadStart}
             onUploadEnd={handleUploadEnd}
-            error={errors.courseImage}
+            error={errors.mainImage}
           />
-          <FileUploadField
-            label="Course Banner"
-            value={formData?.courseBanner}
-            setValue={(val) => handleChange("courseBanner", val)}
+
+          <MultiFileUpload
+            label="Gallery Images"
+            files={formData.galleryImages}
+            setValue={(files) => handleChange("galleryImages", files)}
             accept="image/*"
-            uploadFile={uploadBannerAPI}
+            uploadFile={uploadGalleryImagesAPI}
             onUploadStart={handleUploadStart}
             onUploadEnd={handleUploadEnd}
-            error={errors.courseBanner}
-            isRequired
-          />
-          <FileUploadField
-            label="Study Guide (PDF)"
-            value={formData?.studyGuide}
-            setValue={(val) => handleChange("studyGuide", val)}
-            accept=".pdf"
-            uploadFile={uploadPdfAPI}
-            onUploadStart={handleUploadStart}
-            onUploadEnd={handleUploadEnd}
-            error={errors.studyGuide}
-            
           />
         </Grid>
       </CardBody>

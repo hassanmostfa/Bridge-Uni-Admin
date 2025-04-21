@@ -18,6 +18,7 @@ import { studentTestimonialApi } from "api/studentTestimonials";
 import { onlineCourseApi } from "api/onlineCourseSlice";
 import { blogApi } from "api/blogs";
 import { shortCourseApi } from "api/shortCourcesSlice";
+import { studyAbroadApi } from "api/studyAbroadSlice";
 // import { userApi, authReducer } from './userSlice';
 
 export const store = configureStore({
@@ -40,6 +41,7 @@ export const store = configureStore({
     [blogApi.reducerPath]:blogApi.reducer,
     [shortCourseApi.reducerPath]:shortCourseApi.reducer,
     [studentTestimonialApi.reducerPath]:studentTestimonialApi.reducer,
+    [studyAbroadApi.reducerPath]:studyAbroadApi.reducer,
     
   },
   middleware: (getDefaultMiddleware) =>
@@ -62,6 +64,7 @@ export const store = configureStore({
       blogApi.middleware,
       shortCourseApi.middleware,
       studentTestimonialApi.middleware,
+      studyAbroadApi.middleware,
     ),
 });
 
