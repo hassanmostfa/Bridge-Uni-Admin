@@ -88,7 +88,7 @@ import ShowShortCourse from 'views/admin/courses/ShowShortCourse';
 import EditShortCourse from 'views/admin/courses/EditShortCourse';
 import ShowAbroadCourse from 'views/admin/studyAbroad/ShowAbroadCourse';
 import UpdateWhy from 'views/admin/why/UpdateWhy';
-
+import EditProgram from 'views/admin/studyAbroad/EditProgram';
 
 const routes = [
   {
@@ -467,6 +467,13 @@ const routes = [
     layout: '/admin',
     path: '/show-study-abroad/:id',
     component: <ShowAbroadCourse />,
+    showInSidebar: false,
+  },
+  {
+    name: 'Study Abroad',
+    layout: '/admin',
+    path: '/edit-study-abroad/:id',
+    component: <EditProgram />,
     showInSidebar: false,
   },
   /* End Study Abroad Routes */
