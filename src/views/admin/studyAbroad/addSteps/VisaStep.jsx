@@ -15,8 +15,10 @@ import {
 } from "@chakra-ui/react";
 import { FaTrash, FaPlus, FaUpload } from "react-icons/fa6";
 import FileUploadField from "./FileUploadField";
+import { useAddFileMutation } from "api/filesSlice";
 
 const VisaStep = ({ formData, handleChange, updateNestedState, errors }) => {
+  const [addFile] = useAddFileMutation();
   const addVisaAttribute = () => {
     handleChange("visaAttributes", [...formData.visaAttributes, { name: "", image: null }]);
   };
@@ -28,6 +30,13 @@ const VisaStep = ({ formData, handleChange, updateNestedState, errors }) => {
       handleChange("visaAttributes", updated);
     }
   };
+  const handleUploadAttribute =async (file,index) => {
+    const fileFormData = new FormData();
+    fileFormData.append('img', file);
+    // Upload file to API and get URL
+    const fileUrl = await addFile(fileFormData).unwrap();
+    updateNestedState("visaAttributes", index, "image", fileUrl?.url)
+  }
 
   return (
     <Card mb={4}>
@@ -50,7 +59,7 @@ const VisaStep = ({ formData, handleChange, updateNestedState, errors }) => {
         </FormControl>
         <FileUploadField
           label="Visa Image"
-          file={formData.visaImage}
+          value={formData.visaImage}
           setValue={(file) => handleChange("visaImage", file)}
           accept="image/*"
           isRequired
@@ -107,7 +116,7 @@ const VisaStep = ({ formData, handleChange, updateNestedState, errors }) => {
                   {attribute.image ? (
                     <>
                       <Image
-                        src={URL.createObjectURL(attribute.image)}
+                        src={attribute.image}
                         alt={`Attribute ${index + 1}`}
                         maxH="80px"
                         maxW="80px"
@@ -148,7 +157,7 @@ const VisaStep = ({ formData, handleChange, updateNestedState, errors }) => {
                         id={`attributeImage-${index}`}
                         hidden
                         accept="image/*"
-                        onChange={(e) => updateNestedState("visaAttributes", index, "image", e.target.files[0])}
+                        onChange={(e) => handleUploadAttribute(e.target.files[0], index)}
                       />
                     </>
                   )}

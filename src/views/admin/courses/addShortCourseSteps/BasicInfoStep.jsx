@@ -137,12 +137,12 @@ const BasicInfoStep = ({ formData, handleChange, errors }) => {
           </FormControl>
           <FormControl isInvalid = {!!errors.duration}>
             <Text color={textColor} fontSize="sm" fontWeight="700">
-              Duration <span className="text-danger">*</span>
+              Duration (in weeks)<span className="text-danger">*</span>
             </Text>
             <Input
               value={formData.duration}
               onChange={(e) => handleChange('duration', e.target.value)}
-              placeholder="e.g. 8 Weeks"
+              placeholder="e.g. 8"
               mt={2}
             />
             {errors.duration && (

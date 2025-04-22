@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import FileUploadField from "./FileUploadField";
+import MultiFileUpload from "./MultiFileUpload";
 
 const ProofStep = ({ formData, handleChange, updateNestedState, errors }) => {
   const addRequirement = () => {
@@ -54,9 +55,9 @@ const ProofStep = ({ formData, handleChange, updateNestedState, errors }) => {
             <Text color="red.500" fontSize="sm">{errors.proofDescription}</Text>
           )}
         </FormControl>
-        <FileUploadField
+        <MultiFileUpload
           label="Proof Images"
-          files={formData.proofImages}
+          value={formData.proofImages}
           setValue={(files) => handleChange("proofImages", files)}
           accept="image/*"
           isRequired

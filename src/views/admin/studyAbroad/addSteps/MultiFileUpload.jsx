@@ -33,6 +33,7 @@ const MultiFileUpload = ({
   const [uploadingFiles, setUploadingFiles] = useState([]);
   const [addFile] = useAddFileMutation();
   const [deleteFile] = useDeleteFileMutation();
+  const [urls,setUrls] = useState([]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -51,14 +52,15 @@ const MultiFileUpload = ({
 
   const handleFileInputChange = (e) => {
     const files = e.target.files;
-    handleFileChange(files);
+    if (files && files.length > 0) {
+      handleFileChange(files);
+    }
     e.target.value = ''; // Clear input to allow selecting the same files again
   };
 
   const handleFileChange = async (files) => {
     if (!files || files.length === 0) return;
     
-    // Filter files by accepted types
     const validFiles = Array.from(files).filter(file => {
       if (accept === "image/*") return file.type.startsWith("image/");
       if (accept === ".pdf") return file.type === "application/pdf";
@@ -71,49 +73,56 @@ const MultiFileUpload = ({
       onUploadStart?.();
       const newUploadingFiles = validFiles.map(file => ({
         name: file.name,
+        file, // Store the actual file object
         progress: 0
       }));
       setUploadingFiles(prev => [...prev, ...newUploadingFiles]);
 
       const uploadedUrls = [];
       
-      // Upload files sequentially
-      for (let i = 0; i < validFiles.length; i++) {
-        const file = validFiles[i];
+      for (let i = 0; i < newUploadingFiles.length; i++) {
+        const { name, file } = newUploadingFiles[i];
         try {
           const fileFormData = new FormData();
           fileFormData.append('img', file);
           
-          // Upload file to API
           const result = await addFile(fileFormData).unwrap();
           if (result?.url) {
             uploadedUrls.push(result.url);
+            
+            
           }
+        
           
-          // Update uploading state
-          setUploadingFiles(prev => prev.filter(f => f.name !== file.name));
         } catch (err) {
-          console.error(`Failed to upload ${file.name}:`, err);
-          setUploadingFiles(prev => prev.filter(f => f.name !== file.name));
+          console.error(`Failed to upload ${name}:`, err);
+        } finally {
+          // Remove this file from uploading state
+          setUploadingFiles(prev => prev.filter(f => f.name !== name));
         }
       }
 
-      // Add all successfully uploaded URLs to the value array
       if (uploadedUrls.length > 0) {
-        setValue(prev => [...prev, ...uploadedUrls]);
+        setValue(uploadedUrls);
+        console.log(value);
+        
+        setUrls(uploadedUrls);
       }
+    } catch (error) {
+      console.error("Upload error:", error);
     } finally {
       onUploadEnd?.();
     }
+    
+    
   };
 
-  const handleRemoveFile = async (url, index) => {
+  const handleRemoveFile = async (url) => {
     try {
-      // Remove from server
-      await deleteFile(url).unwrap();
+      // await deleteFile(url).unwrap();
+      console.log(url);
       
-      // Remove from local state
-      setValue(prev => prev.filter((_, i) => i !== index));
+      setValue(value.filter(u => u !== url));      
     } catch (err) {
       console.error("Failed to delete file:", err);
     }
@@ -124,6 +133,7 @@ const MultiFileUpload = ({
       <Text fontSize="sm" fontWeight="700" mb="2">
         {label} {isRequired && <Text as="span" color="red.500">*</Text>}
       </Text>
+      
       <Box
         border="1px dashed"
         borderColor={isDragging ? "blue.500" : "gray.200"}
@@ -136,7 +146,6 @@ const MultiFileUpload = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         transition="all 0.2s"
-        position="relative"
       >
         {uploadingFiles.length > 0 ? (
           <Flex direction="column" align="center" justify="center" minH="120px">
@@ -173,24 +182,36 @@ const MultiFileUpload = ({
       </Box>
 
       {/* Uploaded files list */}
-      {(value.length > 0 || uploadingFiles.length > 0) && (
+      {(value?.length > 0 || uploadingFiles.length > 0) && (
         <Box mt={4}>
           <Text fontSize="sm" mb={2}>
-            {value.length > 0 ? "Uploaded files:" : "Uploading files:"}
+            {value?.length > 0 ? "Uploaded files:" : "Uploading files:"}
           </Text>
           <List spacing={2}>
-            {value.map((url, index) => (
-              <ListItem key={index} display="flex" alignItems="center">
+            
+            {(Array.isArray(value)) && value?.map((url, index) => (
+              <ListItem 
+                key={url} // Using URL as key is better than index
+                display="flex" 
+                alignItems="center"
+                p={2}
+                bg="gray.50"
+                borderRadius="md"
+              >
                 <ListIcon as={FaCheck} color="green.500" />
-                <Box flex="1" isTruncated>
+                <Box flex="1" overflow="hidden">
                   {accept.includes("image") ? (
-                    <Image 
-                      src={url} 
-                      alt={`Uploaded ${index}`}
-                      maxH="50px"
-                      maxW="100px"
-                      objectFit="contain"
-                    />
+                    <Flex align="center">
+                      <Image 
+                        src={url} 
+                        alt={`Uploaded ${index}`}
+                        maxH="50px"
+                        maxW="100px"
+                        objectFit="contain"
+                        mr={2}
+                      />
+                      <Text isTruncated>{url.split('/').pop()}</Text>
+                    </Flex>
                   ) : (
                     <Text isTruncated>{url.split('/').pop()}</Text>
                   )}
@@ -205,8 +226,16 @@ const MultiFileUpload = ({
                 />
               </ListItem>
             ))}
-            {uploadingFiles.map((file, index) => (
-              <ListItem key={`uploading-${index}`} display="flex" alignItems="center">
+            
+            {uploadingFiles.map((file) => (
+              <ListItem 
+                key={`uploading-${file.name}`} 
+                display="flex" 
+                alignItems="center"
+                p={2}
+                bg="gray.50"
+                borderRadius="md"
+              >
                 <ListIcon as={Spinner} color="blue.500" />
                 <Text isTruncated flex="1">{file.name}</Text>
               </ListItem>

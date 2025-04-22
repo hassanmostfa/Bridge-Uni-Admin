@@ -57,12 +57,13 @@ const MediaStep = ({
 
           <MultiFileUpload
             label="Gallery Images"
-            files={formData.galleryImages}
+            value={formData.galleryImages}
             setValue={(files) => handleChange("galleryImages", files)}
             accept="image/*"
             uploadFile={uploadGalleryImagesAPI}
             onUploadStart={handleUploadStart}
             onUploadEnd={handleUploadEnd}
+            error={errors.galleryImages}
           />
         </Grid>
       </CardBody>

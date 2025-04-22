@@ -17,14 +17,15 @@ import {
   Image,
   Box,
   Icon,
-  Select,
   Badge,
 } from "@chakra-ui/react";
+import Select from "react-select";
 import { FaTrash, FaPlus, FaUpload } from "react-icons/fa6";
+import { useAddFileMutation } from "api/filesSlice";
 
 const AllAboutStep = ({ formData, handleChange, updateNestedState, errors }) => {
   const availableMajors = ["Engineering", "Medicine", "Business", "Computer Science", "Architecture"];
-
+const [addFile] = useAddFileMutation();
   const addUniversity = () => {
     handleChange("topUniversities", [...formData.topUniversities, { image: null, name: "" }]);
   };
@@ -37,6 +38,24 @@ const AllAboutStep = ({ formData, handleChange, updateNestedState, errors }) => 
     }
   };
 
+  // Convert your majors array to the format react-select expects
+  const majorOptions = availableMajors.map(major => ({
+    value: major,
+    label: major
+  }));
+
+  // Convert your current values to the same format
+  const selectedValues = formData.popularMajors.map(major => ({
+    value: major,
+    label: major
+  }));
+  const handleUploadAttribute = async (file,index) => {
+    const fileFormData = new FormData();
+    fileFormData.append('img', file);
+    // Upload file to API and get URL
+    const fileUrl = await addFile(fileFormData).unwrap();
+    updateNestedState("topUniversities", index, "image", fileUrl?.url)
+  }
   return (
     <Card mb={4}>
       <CardHeader bg="gray.100" p={3}>
@@ -145,7 +164,7 @@ const AllAboutStep = ({ formData, handleChange, updateNestedState, errors }) => 
                   {university.image ? (
                     <>
                       <Image
-                        src={URL.createObjectURL(university.image)}
+                        src={university.image}
                         alt={`University ${index + 1}`}
                         maxH="100px"
                         maxW="150px"
@@ -186,13 +205,13 @@ const AllAboutStep = ({ formData, handleChange, updateNestedState, errors }) => 
                         id={`universityImage-${index}`}
                         hidden
                         accept="image/*"
-                        onChange={(e) => updateNestedState("topUniversities", index, "image", e.target.files[0])}
+                        onChange={(e) => handleUploadAttribute(e.target.files[0],index)}
                       />
                     </>
                   )}
                 </Box>
-                {errors.topUniversities && errors.topUniversities[index]?.image && (
-                  <Text color="red.500" fontSize="sm">{errors.topUniversities[index].image}</Text>
+                {errors.topUniversities && (
+                  <Text color="red.500" fontSize="sm">{errors.topUniversities}</Text>
                 )}
               </FormControl>
             </CardBody>
@@ -202,26 +221,27 @@ const AllAboutStep = ({ formData, handleChange, updateNestedState, errors }) => 
           Add University
         </Button>
 
-        <FormControl isInvalid={errors.popularMajors}>
+        {/* <FormControl isInvalid={errors.popularMajors}>
           <Text fontSize="sm" fontWeight="700">
             Popular Majors <span className="text-danger">*</span>
           </Text>
           <Select
-            placeholder="Select popular majors"
-            value={formData.popularMajors}
-            onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions, option => option.value);
-              handleChange("popularMajors", selected);
+            isMulti
+            name="popularMajors"
+            options={majorOptions}
+            value={selectedValues}
+            onChange={(selectedOptions) => {
+              handleChange(
+                "popularMajors", 
+                selectedOptions.map(option => option.value)
+              );
             }}
-            mt={2}
-            
-          >
-            {availableMajors.map((major) => (
-              <option key={major} value={major}>{major}</option>
-            ))}
-          </Select>
+            placeholder="Select popular majors"
+            className="basic-multi-select"
+            classNamePrefix="select"
+          />
           {errors.popularMajors && <Text color="red.500" fontSize="sm">{errors.popularMajors}</Text>}
-        </FormControl>
+        </FormControl> */}
       </CardBody>
     </Card>
   );

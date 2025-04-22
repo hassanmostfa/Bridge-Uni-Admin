@@ -28,6 +28,7 @@ import VisaStep from "./addSteps/VisaStep";
 import FinancialStep from "./addSteps/FinancialStep";
 import SummaryStep from "./addSteps/SummaryStep";
 import ReviewStep from "./addSteps/ReviewStep";
+import { useAddAbroadCourseMutation } from "api/studyAbroadSlice";
 
 const steps = [
   { title: "Basic Info", description: "Program details" },
@@ -40,7 +41,8 @@ const steps = [
   { title: "Review", description: "Confirm information" },
 ];
 
-const AddProgram = () => {
+const AddProgramForm = () => {
+  const [addCourse] = useAddAbroadCourseMutation();
   const [formData, setFormData] = useState({
     // Basic Information
     titleEn: "",
@@ -50,7 +52,6 @@ const AddProgram = () => {
     innerTitle: "",
     description: "",
     featured: false,
-    soon:false,
     
     // All About Section
     allAboutTitle: "",
@@ -82,11 +83,12 @@ const AddProgram = () => {
   });
 
   const validationSchema = {
-    titleEn: { required: true },
-    titleAr: { required: true },
+    titleEn: { required: true,},
+    titleAr: { required: true, },
     mainImage: { required: true },
-    description: { required: true },
-    innerTitle: { required: true},
+    galleryImages: { required: true },
+    description: { required: true,},
+    innerTitle: { required: true,},
     allAboutTitle: { required: true },
     numUniversities: { required: true, min: 1 },
     numMajors: { required: true, min: 1 },
@@ -131,7 +133,6 @@ const AddProgram = () => {
   };
 
   const updateNestedState = (parentField, index, field, value) => {
-   
     setFormData(prev => {
       const updatedArray = [...prev[parentField]];
       updatedArray[index] = {
@@ -179,12 +180,13 @@ const AddProgram = () => {
       case 0: // Basic Info
         errors.titleEn = validateField('titleEn', formData.titleEn);
         errors.titleAr = validateField('titleAr', formData.titleAr);
-        errors.innerTitle = validateField('innerTitle', formData.innerTitle);
         errors.description = validateField('description', formData.description);
+        errors.innerTitle = validateField('innerTitle', formData.innerTitle);
         break;
         
       case 1: // Media
         errors.mainImage = validateField('mainImage', formData.mainImage);
+        errors.galleryImages = validateField('galleryImages', formData.mainImage);
         break;
         
       case 2: // All About
@@ -192,7 +194,7 @@ const AddProgram = () => {
         errors.numUniversities = validateField('numUniversities', formData.numUniversities);
         errors.numMajors = validateField('numMajors', formData.numMajors);
         errors.topUniversities = validateField('topUniversities', formData.topUniversities);
-        errors.popularMajors = validateField('popularMajors', formData.popularMajors);
+        // errors.popularMajors = validateField('popularMajors', formData.popularMajors);
         break;
         
       case 3: // Proof
@@ -244,50 +246,45 @@ const AddProgram = () => {
       return;
     }
     
-    // Prepare the data for API submission
+    // Prepare the data for API submission in the required format
     const programData = {
       title_en: formData.titleEn,
       title_ar: formData.titleAr,
-      main_image: formData.mainImage,
-      gallery_images: formData.galleryImages,
       inner_title: formData.innerTitle,
+      featured_course: formData.featured || false,
+      coming_soon: formData.soon || false,
       description: formData.description,
-      featured: formData.featured,
-      soon: formData.soon,
-      all_about: {
-        title: formData.allAboutTitle,
-        num_universities: formData.numUniversities,
-        num_majors: formData.numMajors,
-        top_universities: formData.topUniversities,
-        popular_majors: formData.popularMajors
-      },
-      proof: {
-        description: formData.proofDescription,
-        images: formData.proofImages,
-        requirements: formData.requirements
-      },
-      visa: {
-        description: formData.visaDescription,
-        image: formData.visaImage,
-        attributes: formData.visaAttributes
-      },
-      financials: {
-        program_level: formData.programLevel,
-        program_length: formData.programLength,
-        tuition: formData.tuition,
-        cost_of_living: formData.costOfLiving,
-        application_fee: formData.applicationFee
-      },
-      summary: {
-        text: formData.summary,
-        requirements: formData.programRequirements
-      }
+      main_image: formData.mainImage,
+      section_title: formData.titleEn,
+      number_of_universities: parseInt(formData.numUniversities) || 0,
+      number_of_majors: parseInt(formData.numMajors) || 0,
+      proof_description: formData.proofDescription,
+      visa_description: formData.visaDescription,
+      visa_image: formData.visaImage,
+      program_level: formData.programLevel,
+      program_length: parseInt(formData.programLength) || 0,
+      tuition_fees: parseInt(formData.tuition) || 0,
+      cost_of_living: parseInt(formData.costOfLiving) || 0,
+      application_fee: parseInt(formData.applicationFee) || 0,
+      summary_text: formData.summary,
+      gallery_images: formData.galleryImages || [],
+      proof_images: formData.proofImages || [],
+      university: formData.topUniversities?.map(uni => ({
+        image: uni.image || '',
+        name: uni.name || ''
+      })) || [],
+      visa_attribute: formData.visaAttributes?.map(attr => ({
+        image: attr.image || '',
+        name: attr.name || ''
+      })) || [],
+      proof_requirements: formData.requirements || [],
+      program_requirements: formData.programRequirements || []
     };
-
+  
     console.log("Program Data:", programData);
-    // Here you would typically call your API to submit the data
+    
     try {
-      // await submitProgram(programData).unwrap();
+      await addCourse(programData).unwrap();
       toast({
         title: "Program Created",
         description: "The study abroad program has been successfully created",
@@ -388,30 +385,29 @@ const AddProgram = () => {
             Back
           </Button>
         </div>
-       
-          <Stepper index={activeStep} mb={8} orientation="horizontal" size="lg" flexWrap="no-wrap" >
-            {steps.map((step, index) => (
-              <Step key={index} flex="1" minW={{ base: "100px", sm: "120px", md: "150px" }}>
-                <VStack spacing={2} textAlign="center">
-                  <StepIndicator>
-                    <StepStatus
-                      complete={<StepIcon />}
-                      incomplete={<StepNumber />}
-                      active={<StepNumber />}
-                    />
-                  </StepIndicator>
 
-                  <Box>
-                    <StepTitle fontSize="sm">{step.title}</StepTitle>
-                    <StepDescription fontSize="xs">{step.description}</StepDescription>
-                  </Box>
-                </VStack>
+        <Stepper index={activeStep} mb={8} orientation="horizontal" size="lg" flexWrap="no-wrap" overflow={'auto'}>
+          {steps.map((step, index) => (
+            <Step key={index} flex="1" minW={{ base: "100px", sm: "120px", md: "150px" }}>
+              <VStack spacing={2} textAlign="center">
+                <StepIndicator>
+                  <StepStatus
+                    complete={<StepIcon />}
+                    incomplete={<StepNumber />}
+                    active={<StepNumber />}
+                  />
+                </StepIndicator>
 
-                <StepSeparator />
-              </Step>
-            ))}
-          </Stepper>
-       
+                <Box>
+                  <StepTitle fontSize="sm">{step.title}</StepTitle>
+                  <StepDescription fontSize="xs">{step.description}</StepDescription>
+                </Box>
+              </VStack>
+
+              <StepSeparator />
+            </Step>
+          ))}
+        </Stepper>
 
         {renderStep()}
 
@@ -445,4 +441,4 @@ const AddProgram = () => {
   );
 };
 
-export default AddProgram;
+export default AddProgramForm;
