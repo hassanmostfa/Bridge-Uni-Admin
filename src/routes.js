@@ -639,6 +639,14 @@ const routes = [
     component: <UpdateTestimonial />,
     showInSidebar: false,
   },
+  {
+    name: 'Why Unibridge',
+    layout: '/admin', 
+    path: 'cms/edit-why-unibridge/:id',
+    component: <UpdateWhy />,
+    showInSidebar: false,
+  },
+
 ];
 
 export default routes;

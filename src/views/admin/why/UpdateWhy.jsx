@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -10,41 +10,59 @@ import {
   Image,
   Spinner,
   useToast,
-} from "@chakra-ui/react";
-import { FaUpload, FaTrash } from "react-icons/fa6";
-import { IoMdArrowBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
-import { useAddWhyUniBridgeMutation } from "../../../api/why";
-import { useAddFileMutation } from "../../../api/filesSlice";
-import Swal from "sweetalert2";
+} from '@chakra-ui/react';
+import { FaUpload, FaTrash } from 'react-icons/fa6';
+import { IoMdArrowBack } from 'react-icons/io';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useGetWhyUniBridgeByIdQuery, useUpdateWhyUniBridgeMutation } from '../../../api/why';
+import { useAddFileMutation } from '../../../api/filesSlice';
+import Swal from 'sweetalert2';
 
-const AddReason = () => {
+const UpdateWhy = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const toast = useToast();
+
+  // API hooks
+  const { data: whyData, isLoading: isFetching } = useGetWhyUniBridgeByIdQuery(id);
+  const [updateWhyUniBridge] = useUpdateWhyUniBridgeMutation();
+  const [addFile] = useAddFileMutation();
+
+  // State
   const [formData, setFormData] = useState({
-    en_description: "", // Shown as description in UI
-    ar_description: "", // Shown as description in UI
+    title_en: '',
+    title_ar: '',
     image: null,
     imageUrl: null,
   });
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  
-  const textColor = useColorModeValue("secondaryGray.900", "white");
-  const cardBg = useColorModeValue("white", "navy.700");
-  const inputBg = useColorModeValue("gray.100", "gray.700");
-  const navigate = useNavigate();
 
-  const [addFile] = useAddFileMutation();
-  const [addWhyUniBridge] = useAddWhyUniBridgeMutation();
-  const toast = useToast();
+  // Colors
+  const textColor = useColorModeValue('secondaryGray.900', 'white');
+  const cardBg = useColorModeValue('white', 'navy.700');
+  const inputBg = useColorModeValue('gray.100', 'gray.700');
+
+  // Load initial data
+  useEffect(() => {
+    if (whyData?.data) {
+      setFormData({
+        title_en: whyData.data.title_en || '',
+        title_ar: whyData.data.title_ar || '',
+        image: null,
+        imageUrl: whyData.data.image || null,
+      });
+    }
+  }, [whyData]);
 
   const handleImageUpload = async (file) => {
-    if (!file || !file.type.startsWith("image/")) {
+    if (!file || !file.type.startsWith('image/')) {
       Swal.fire({
-        title: "Invalid file",
-        text: "Please upload an image file",
-        icon: "error",
-        confirmButtonColor: "#3085d6",
+        title: 'Invalid file',
+        text: 'Please upload an image file',
+        icon: 'error',
+        confirmButtonColor: '#3085d6',
       });
       return;
     }
@@ -54,30 +72,30 @@ const AddReason = () => {
 
     try {
       const fileFormData = new FormData();
-      fileFormData.append("img", file);
+      fileFormData.append('img', file);
 
       const fileResponse = await addFile(fileFormData).unwrap();
       
       if (!fileResponse.flag) {
-        throw new Error(fileResponse.message || "Failed to upload image");
+        throw new Error(fileResponse.message || 'Failed to upload image');
       }
 
       setFormData(prev => ({ ...prev, imageUrl: fileResponse.url }));
       toast({
-        title: "Image uploaded successfully",
-        status: "success",
+        title: 'Image uploaded successfully',
+        status: 'success',
         duration: 5000,
         isClosable: true,
-        position: "top-right",
+        position: 'top-right',
       });
     } catch (error) {
       Swal.fire({
-        title: "Error!",
-        text: error.message || "Failed to upload image",
-        icon: "error",
-        confirmButtonColor: "#3085d6",
+        title: 'Error!',
+        text: error.message || 'Failed to upload image',
+        icon: 'error',
+        confirmButtonColor: '#3085d6',
       });
-      setFormData(prev => ({ ...prev, image: null, imageUrl: null }));
+      setFormData(prev => ({ ...prev, image: null, imageUrl: prev.imageUrl }));
     } finally {
       setIsUploadingImage(false);
     }
@@ -112,12 +130,12 @@ const AddReason = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.en_description || !formData.ar_description || !formData.imageUrl) {
+    if (!formData.title_en || !formData.title_ar || !formData.imageUrl) {
       Swal.fire({
-        title: "Error!",
-        text: "Please fill all required fields and upload an image",
-        icon: "error",
-        confirmButtonColor: "#3085d6",
+        title: 'Error!',
+        text: 'Please fill all required fields and upload an image',
+        icon: 'error',
+        confirmButtonColor: '#3085d6',
       });
       return;
     }
@@ -125,31 +143,33 @@ const AddReason = () => {
     setIsSubmitting(true);
 
     try {
-      // Map UI description fields to API title fields
-      const response = await addWhyUniBridge({
-        image: formData.imageUrl,
-        title_en: formData.en_description, // Map to title_en
-        title_ar: formData.ar_description  // Map to title_ar
+      const response = await updateWhyUniBridge({
+        id,
+        data: {
+          image: formData.imageUrl,
+          title_en: formData.title_en,
+          title_ar: formData.title_ar
+        }
       }).unwrap();
 
       if (!response.flag) {
-        throw new Error(response.message || "Failed to add reason");
+        throw new Error(response.message || 'Failed to update reason');
       }
 
       await Swal.fire({
-        title: "Success!",
-        text: "Reason added successfully",
-        icon: "success",
-        confirmButtonColor: "#3085d6",
+        title: 'Success!',
+        text: 'Reason updated successfully',
+        icon: 'success',
+        confirmButtonColor: '#3085d6',
       });
 
-      navigate("/admin/undefined/cms/why-uni-bridge");
+      navigate('/admin/undefined/cms/why-uni-bridge');
     } catch (error) {
       Swal.fire({
-        title: "Error!",
-        text: error.message || "Something went wrong",
-        icon: "error",
-        confirmButtonColor: "#3085d6",
+        title: 'Error!',
+        text: error.message || 'Something went wrong',
+        icon: 'error',
+        confirmButtonColor: '#3085d6',
       });
     } finally {
       setIsSubmitting(false);
@@ -158,24 +178,21 @@ const AddReason = () => {
 
   const handleCancel = () => {
     Swal.fire({
-      title: "Are you sure?",
-      text: "You will lose all unsaved changes",
-      icon: "warning",
+      title: 'Are you sure?',
+      text: 'You will lose all unsaved changes',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, cancel it!",
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, cancel it!',
     }).then((result) => {
       if (result.isConfirmed) {
-        setFormData({
-          en_description: "",
-          ar_description: "",
-          image: null,
-          imageUrl: null,
-        });
+        navigate('/admin/cms/why-unibridge');
       }
     });
   };
+
+  if (isFetching) return <div>Loading...</div>;
 
   return (
     <Box w="100%" className="container">
@@ -187,11 +204,11 @@ const AddReason = () => {
             fontWeight="700"
             lineHeight="100%"
           >
-            Add New Reason
+            Update Reason
           </Text>
           <Button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={handleCancel}
             colorScheme="teal"
             size="sm"
             leftIcon={<IoMdArrowBack />}
@@ -201,15 +218,15 @@ const AddReason = () => {
         </Flex>
         
         <Box>
-          {/* English Description Field (shown as description but sent as title_en) */}
+          {/* English Title Field */}
           <Box mb={4}>
             <Text color={textColor} fontSize="sm" fontWeight="700">
-              English Description <Text as="span" color="red.500">*</Text>
+              English Title <Text as="span" color="red.500">*</Text>
             </Text>
             <Textarea
-              name="en_description"
-              placeholder="Enter English description"
-              value={formData.en_description}
+              name="title_en"
+              placeholder="Enter English title"
+              value={formData.title_en}
               onChange={handleInputChange}
               required
               mt={2}
@@ -217,15 +234,15 @@ const AddReason = () => {
             />
           </Box>
 
-          {/* Arabic Description Field (shown as description but sent as title_ar) */}
+          {/* Arabic Title Field */}
           <Box mb={4}>
             <Text color={textColor} fontSize="sm" fontWeight="700">
-              Arabic Description <Text as="span" color="red.500">*</Text>
+              Arabic Title <Text as="span" color="red.500">*</Text>
             </Text>
             <Textarea
-              name="ar_description"
-              placeholder="Enter Arabic description"
-              value={formData.ar_description}
+              name="title_ar"
+              placeholder="Enter Arabic title"
+              value={formData.title_ar}
               onChange={handleInputChange}
               required
               mt={2}
@@ -284,7 +301,7 @@ const AddReason = () => {
                   </Button>
                 </>
               )}
-              {formData.image && !isUploadingImage && (
+              {(formData.image || formData.imageUrl) && !isUploadingImage && (
                 <Box mt={4}>
                   <Image
                     src={formData.imageUrl || URL.createObjectURL(formData.image)}
@@ -294,7 +311,7 @@ const AddReason = () => {
                     borderRadius="8px"
                   />
                   <Text mt={2} fontSize="sm" color="gray.600">
-                    {formData.image.name}
+                    {formData.image?.name || 'Current Image'}
                   </Text>
                   <Button
                     leftIcon={<FaTrash />}
@@ -337,11 +354,11 @@ const AddReason = () => {
               py="5px"
               onClick={handleSubmit}
               isDisabled={isSubmitting || isUploadingImage || 
-                         !formData.en_description || !formData.ar_description || 
+                         !formData.title_en || !formData.title_ar || 
                          !formData.imageUrl}
               width="120px"
             >
-              {isSubmitting ? <Spinner size="sm" /> : 'Save'}
+              {isSubmitting ? <Spinner size="sm" /> : 'Update'}
             </Button>
           </Flex>
         </Box>
@@ -350,4 +367,4 @@ const AddReason = () => {
   );
 };
 
-export default AddReason;
+export default UpdateWhy;
