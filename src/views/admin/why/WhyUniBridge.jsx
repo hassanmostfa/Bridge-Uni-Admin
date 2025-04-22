@@ -24,36 +24,70 @@ import Card from 'components/card/Card';
 import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
 import { FaEye, FaTrash } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { useGetAllWhyUniBridgeQuery, useDeleteWhyUniBridgeMutation } from '../../../api/why';
 
 const columnHelper = createColumnHelper();
 
 const WhyUniBridge = () => {
-  const [data, setData] = React.useState([
-    {
-      id: 1,
-      image: 'https://th.bing.com/th/id/OIP.2tLY6p_5ubR3VvBlrP4iyAHaE8?w=254&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
-      en_description: 'UniBridge offers seamless integration between universities and students worldwide',
-      ar_description: 'يوفر يوني بريدج تكاملاً سلساً بين الجامعات والطلاب حول العالم',
-    },
-    {
-      id: 2,
-      image: 'https://th.bing.com/th/id/OIP.2tLY6p_5ubR3VvBlrP4iyAHaE8?w=254&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
-      en_description: 'Access to a global network of educational resources and opportunities',
-      ar_description: 'الوصول إلى شبكة عالمية من الموارد والفرص التعليمية',
-    },
-    {
-      id: 3,
-      image: 'https://th.bing.com/th/id/OIP.2tLY6p_5ubR3VvBlrP4iyAHaE8?w=254&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7',
-      en_description: 'Simplified application process for international students',
-      ar_description: 'عملية تقديم مبسطة للطلاب الدوليين',
-    },
-  ]);
-
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
-
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+
+  // API hooks
+  const { data: responseData, isLoading, isError, refetch } = useGetAllWhyUniBridgeQuery();
+  const [deleteWhyUniBridge] = useDeleteWhyUniBridgeMutation();
+
+  // Transform API data to match table structure
+  const tableData = React.useMemo(() => {
+    if (!responseData?.data?.data) return [];
+    return responseData.data.data.map(item => ({
+      id: item.id,
+      image: item.image,
+      title_en: item.title_en, // Changed from en_description
+      title_ar: item.title_ar, // Changed from ar_description
+    }));
+  }, [responseData]);
+
+  const handleDelete = async (id) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      });
+
+      if (result.isConfirmed) {
+        await deleteWhyUniBridge(id).unwrap();
+        await refetch();
+        Swal.fire(
+          'Deleted!',
+          'Your item has been deleted.',
+          'success'
+        );
+      }
+    } catch (error) {
+      console.error('Failed to delete:', error);
+      Swal.fire(
+        'Error!',
+        'Failed to delete the item.',
+        'error'
+      );
+    }
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/admin/cms/edit-why-unibridge/${id}`);
+  };
+
+  const handleView = (id) => {
+    navigate(`/admin/cms/view-why-unibridge/${id}`);
+  };
 
   const columns = [
     columnHelper.accessor('id', {
@@ -76,8 +110,8 @@ const WhyUniBridge = () => {
         </Flex>
       ),
     }),
-    columnHelper.accessor('en_description', {
-      id: 'en_description',
+    columnHelper.accessor('title_en', {
+      id: 'title_en',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -85,7 +119,7 @@ const WhyUniBridge = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-         English Description
+          English Title
         </Text>
       ),
       cell: (info) => (
@@ -94,8 +128,8 @@ const WhyUniBridge = () => {
         </Text>
       ),
     }),
-    columnHelper.accessor('ar_description', {
-      id: 'ar_description',
+    columnHelper.accessor('title_ar', {
+      id: 'title_ar',
       header: () => (
         <Text
           justifyContent="space-between"
@@ -103,7 +137,7 @@ const WhyUniBridge = () => {
           fontSize={{ sm: '10px', lg: '12px' }}
           color="gray.400"
         >
-         Arabic Description
+          Arabic Title
         </Text>
       ),
       cell: (info) => (
@@ -125,7 +159,17 @@ const WhyUniBridge = () => {
         </Text>
       ),
       cell: (info) => (
-        <img src={info.getValue()} alt="Why UniBridge" width={70} height={70} style={{ borderRadius: '8px' }} />
+        <img 
+          src={info.getValue()} 
+          alt="Why UniBridge" 
+          width={70} 
+          height={70} 
+          style={{ borderRadius: '8px' }} 
+          onError={(e) => {
+            e.target.onerror = null; 
+            e.target.src = 'https://via.placeholder.com/70';
+          }}
+        />
       ),
     }),
     columnHelper.accessor('actions', {
@@ -149,6 +193,7 @@ const WhyUniBridge = () => {
             color="red.500"
             as={FaTrash}
             cursor="pointer"
+            onClick={() => handleDelete(info.row.original.id)}
           />
           <Icon
             w="18px"
@@ -157,14 +202,7 @@ const WhyUniBridge = () => {
             color="green.500"
             as={EditIcon}
             cursor="pointer"
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="blue.500"
-            as={FaEye}
-            cursor="pointer"
+            onClick={() => handleEdit(info.row.original.id)}
           />
         </Flex>
       ),
@@ -172,7 +210,7 @@ const WhyUniBridge = () => {
   ];
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     state: {
       sorting,
@@ -182,6 +220,9 @@ const WhyUniBridge = () => {
     getSortedRowModel: getSortedRowModel(),
     debugTable: true,
   });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error loading data</div>;
 
   return (
     <div className="container">
@@ -252,10 +293,8 @@ const WhyUniBridge = () => {
               ))}
             </Thead>
             <Tbody>
-              {table
-                .getRowModel()
-                .rows.slice(0, 11)
-                .map((row) => {
+              {table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.slice(0, 11).map((row) => {
                   return (
                     <Tr key={row.id}>
                       {row.getVisibleCells().map((cell) => {
@@ -275,7 +314,14 @@ const WhyUniBridge = () => {
                       })}
                     </Tr>
                   );
-                })}
+                })
+              ) : (
+                <Tr>
+                  <Td colSpan={columns.length} textAlign="center">
+                    <Text color={textColor}>No data available</Text>
+                  </Td>
+                </Tr>
+              )}
             </Tbody>
           </Table>
         </Box>

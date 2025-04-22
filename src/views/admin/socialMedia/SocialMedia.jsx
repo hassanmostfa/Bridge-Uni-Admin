@@ -1,333 +1,182 @@
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
   Flex,
-  Icon,
-  Table,
-  Tbody,
-  Td,
+  Input,
   Text,
-  Th,
-  Thead,
-  Tr,
   useColorModeValue,
-} from '@chakra-ui/react';
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
-import * as React from 'react';
-import Card from 'components/card/Card';
-import { EditIcon, PlusSquareIcon } from '@chakra-ui/icons';
-import { FaTrash } from 'react-icons/fa6';
-import { useNavigate } from 'react-router-dom';
-import { FaInstagram, FaFacebook, FaLinkedin, FaTwitter } from 'react-icons/fa';
-import Swal from 'sweetalert2';
-
-const columnHelper = createColumnHelper();
+  Icon,
+  FormControl,
+  FormLabel,
+} from "@chakra-ui/react";
+import { IoMdArrowBack } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
+import { FaInstagram, FaFacebook, FaLinkedin, FaTwitter } from "react-icons/fa";
+import Swal from "sweetalert2";
+import { useGetAllSocialQuery, useAddSocialMutation } from "../../../api/socials";
 
 const SocialMedia = () => {
-  const [data, setData] = React.useState([
-    {
-      id: 1,
-      instagram: 'instagram.com/company',
-      facebook: 'facebook.com/company',
-      linkedin: 'linkedin.com/company',
-      twitter: 'twitter.com/company',
-    },
-    {
-      id: 2,
-      instagram: 'instagram.com/business',
-      facebook: 'facebook.com/business',
-      linkedin: 'linkedin.com/business',
-      twitter: 'twitter.com/business',
-    },
-  ]);
-
+  const [instagram, setInstagram] = useState("");
+  const [facebook, setFacebook] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const textColor = useColorModeValue("secondaryGray.900", "white");
   const navigate = useNavigate();
-  const [sorting, setSorting] = React.useState([]);
 
-  const textColor = useColorModeValue('secondaryGray.900', 'white');
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+  // Fetch existing social media links
+  const { 
+    data: responseData, 
+    isLoading, 
+    isError 
+  } = useGetAllSocialQuery();
+  
+  const [addSocial, { isLoading: isSaving }] = useAddSocialMutation();
 
-  const handleDelete = async (id) => {
+  // Set initial values if data exists
+  useEffect(() => {
+    if (responseData?.flag && responseData.data?.data?.length > 0) {
+      const socialData = responseData.data.data[0]; // Get the first item from the data array
+      setInstagram(socialData.instagram || "");
+      setFacebook(socialData.facebook || "");
+      setLinkedin(socialData.linked_in || ""); // Note the underscore
+      setTwitter(socialData.twitter || "");
+    }
+  }, [responseData]);
+
+  const handleSubmit = async () => {
+    if (!instagram && !facebook && !linkedin && !twitter) {
+      Swal.fire("Error!", "Please add at least one social media link.", "error");
+      return;
+    }
+
+    const socialData = {
+      instagram,
+      facebook,
+      linked_in: linkedin, // Using snake_case for the API
+      twitter
+    };
+
     try {
-      const result = await Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!',
-      });
-
-      if (result.isConfirmed) {
-        setData(data.filter(item => item.id !== id));
-        Swal.fire('Deleted!', 'The social media link has been deleted.', 'success');
-      }
+      // Call the API to save the social media links
+      await addSocial(socialData).unwrap();
+      Swal.fire("Success!", "Social media links saved successfully.", "success");
+      navigate("/admin/undefined/cms/socials");
     } catch (error) {
-      console.error('Failed to delete:', error);
-      Swal.fire('Error!', 'Failed to delete the social media link.', 'error');
+      console.error("Failed to save social media links:", error);
+      Swal.fire("Error!", "Failed to save social media links.", "error");
     }
   };
 
-  const shortenLink = (link) => {
-    if (link.length > 20) {
-      return link.substring(0, 17) + '...';
-    }
-    return link;
-  };
-
-  const columns = [
-    columnHelper.accessor('id', {
-      id: 'id',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          ID
-        </Text>
-      ),
-      cell: (info) => (
-        <Flex align="center">
-          <Text color={textColor}>{info.getValue()}</Text>
-        </Flex>
-      ),
-    }),
-    columnHelper.accessor('instagram', {
-      id: 'instagram',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Instagram
-        </Text>
-      ),
-      cell: (info) => (
-        <Flex align="center" gap={2}>
-          <Icon as={FaInstagram} color="#E1306C" />
-          <Text color={textColor} title={info.getValue()}>
-            {shortenLink(info.getValue())}
-          </Text>
-        </Flex>
-      ),
-    }),
-    columnHelper.accessor('facebook', {
-      id: 'facebook',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Facebook
-        </Text>
-      ),
-      cell: (info) => (
-        <Flex align="center" gap={2}>
-          <Icon as={FaFacebook} color="#4267B2" />
-          <Text color={textColor} title={info.getValue()}>
-            {shortenLink(info.getValue())}
-          </Text>
-        </Flex>
-      ),
-    }),
-    columnHelper.accessor('linkedin', {
-      id: 'linkedin',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          LinkedIn
-        </Text>
-      ),
-      cell: (info) => (
-        <Flex align="center" gap={2}>
-          <Icon as={FaLinkedin} color="#0077B5" />
-          <Text color={textColor} title={info.getValue()}>
-            {shortenLink(info.getValue())}
-          </Text>
-        </Flex>
-      ),
-    }),
-    columnHelper.accessor('twitter', {
-      id: 'twitter',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Twitter
-        </Text>
-      ),
-      cell: (info) => (
-        <Flex align="center" gap={2}>
-          <Icon as={FaTwitter} color="#1DA1F2" />
-          <Text color={textColor} title={info.getValue()}>
-            {shortenLink(info.getValue())}
-          </Text>
-        </Flex>
-      ),
-    }),
-    columnHelper.accessor('id', {
-      id: 'actions',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Actions
-        </Text>
-      ),
-      cell: (info) => (
-        <Flex align="center">
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="red.500"
-            as={FaTrash}
-            cursor="pointer"
-            onClick={() => handleDelete(info.getValue())}
-          />
-          <Icon
-            w="18px"
-            h="18px"
-            me="10px"
-            color="green.500"
-            as={EditIcon}
-            cursor="pointer"
-            onClick={() => navigate(`/admin/edit-social-media/${info.getValue()}`)}
-          />
-        </Flex>
-      ),
-    }),
-  ];
-
-  const table = useReactTable({
-    data,
-    columns,
-    state: {
-      sorting,
-    },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
-  });
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error loading social media data</div>;
 
   return (
-    <div className="container">
-      <Card
-        flexDirection="column"
-        w="100%"
-        px="0px"
-        overflowX={{ sm: 'scroll', lg: 'hidden' }}
-      >
-        <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
+    <div className="container add-admin-container w-100">
+      <div className="add-admin-card shadow p-4 bg-white w-100">
+        <div className="mb-3 d-flex justify-content-between align-items-center">
           <Text
             color={textColor}
             fontSize="22px"
             fontWeight="700"
+            mb="20px !important"
             lineHeight="100%"
           >
             Social Media Links
           </Text>
-          <Button
-            variant="darkBrand"
-            color="white"
-            fontSize="sm"
-            fontWeight="500"
-            borderRadius="70px"
-            px="24px"
-            py="5px"
-            onClick={() => navigate('/admin/add-social-link')}
-            width={'200px'}
-          >
-            <PlusSquareIcon me="10px" />
-            Add New Links
-          </Button>
-        </Flex>
-        <Box>
-          <Table variant="simple" color="gray.500" mb="24px" mt="12px">
-            <Thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <Tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <Th
-                        key={header.id}
-                        colSpan={header.colSpan}
-                        pe="10px"
-                        borderColor={borderColor}
-                        cursor="pointer"
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        <Flex
-                          justifyContent="space-between"
-                          align="center"
-                          fontSize={{ sm: '10px', lg: '12px' }}
-                          color="gray.400"
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                          {{
-                            asc: ' 🔼',
-                            desc: ' 🔽',
-                          }[header.column.getIsSorted()] ?? null}
-                        </Flex>
-                      </Th>
-                    );
-                  })}
-                </Tr>
-              ))}
-            </Thead>
-            <Tbody>
-              {table.getRowModel().rows.map((row) => {
-                return (
-                  <Tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <Td
-                          key={cell.id}
-                          fontSize={{ sm: '14px' }}
-                          minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                          borderColor="transparent"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </Td>
-                      );
-                    })}
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
-        </Box>
-      </Card>
+        </div>
+        <form>
+          {/* Instagram Field */}
+          <FormControl mb={4}>
+            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
+              <Flex align="center" gap={2}>
+                <Icon as={FaInstagram} color="#E1306C" />
+                Instagram URL
+              </Flex>
+            </FormLabel>
+            <Input
+              type="url"
+              placeholder="https://instagram.com/username"
+              value={instagram}
+              onChange={(e) => setInstagram(e.target.value)}
+            />
+          </FormControl>
+
+          {/* Facebook Field */}
+          <FormControl mb={4}>
+            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
+              <Flex align="center" gap={2}>
+                <Icon as={FaFacebook} color="#4267B2" />
+                Facebook URL
+              </Flex>
+            </FormLabel>
+            <Input
+              type="url"
+              placeholder="https://facebook.com/username"
+              value={facebook}
+              onChange={(e) => setFacebook(e.target.value)}
+            />
+          </FormControl>
+
+          {/* LinkedIn Field */}
+          <FormControl mb={4}>
+            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
+              <Flex align="center" gap={2}>
+                <Icon as={FaLinkedin} color="#0077B5" />
+                LinkedIn URL
+              </Flex>
+            </FormLabel>
+            <Input
+              type="url"
+              placeholder="https://linkedin.com/username"
+              value={linkedin}
+              onChange={(e) => setLinkedin(e.target.value)}
+            />
+          </FormControl>
+
+          {/* Twitter Field */}
+          <FormControl mb={4}>
+            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
+              <Flex align="center" gap={2}>
+                <Icon as={FaTwitter} color="#1DA1F2" />
+                Twitter URL
+              </Flex>
+            </FormLabel>
+            <Input
+              type="url"
+              placeholder="https://twitter.com/username"
+              value={twitter}
+              onChange={(e) => setTwitter(e.target.value)}
+            />
+          </FormControl>
+
+          {/* Action Buttons */}
+          <Flex justify="flex-end" mt={6} gap={4}>
+            <Button 
+              variant="outline" 
+              colorScheme="red" 
+              onClick={() => navigate(-1)}
+              width="120px"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="darkBrand"
+              color="white"
+              fontSize="sm"
+              fontWeight="500"
+              borderRadius="70px"
+              px="24px"
+              py="5px"
+              width="120px"
+              onClick={handleSubmit}
+              isLoading={isSaving}
+            >
+              Save
+            </Button>
+          </Flex>
+        </form>
+      </div>
     </div>
   );
 };

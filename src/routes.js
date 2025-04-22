@@ -86,6 +86,7 @@ import EditOnlineCourse from 'views/admin/courses/EditOnlineCourse';
 import UpdateTestimonial from 'views/admin/student/UpdateTestimonila';
 import ShowShortCourse from 'views/admin/courses/ShowShortCourse';
 import EditShortCourse from 'views/admin/courses/EditShortCourse';
+import UpdateWhy from 'views/admin/why/UpdateWhy';
 
 
 const routes = [
@@ -631,6 +632,14 @@ const routes = [
     component: <UpdateTestimonial />,
     showInSidebar: false,
   },
+  {
+    name: 'Why Unibridge',
+    layout: '/admin', 
+    path: 'cms/edit-why-unibridge/:id',
+    component: <UpdateWhy />,
+    showInSidebar: false,
+  },
+
 ];
 
 export default routes;

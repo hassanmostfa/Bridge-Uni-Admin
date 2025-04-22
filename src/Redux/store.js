@@ -19,6 +19,8 @@ import { onlineCourseApi } from "api/onlineCourseSlice";
 import { blogApi } from "api/blogs";
 import { shortCourseApi } from "api/shortCourcesSlice";
 import { studyAbroadApi } from "api/studyAbroadSlice";
+import { socialApi } from "api/socials";
+import { whyUniBridgeApi } from "api/why";
 // import { userApi, authReducer } from './userSlice';
 
 export const store = configureStore({
@@ -42,6 +44,8 @@ export const store = configureStore({
     [shortCourseApi.reducerPath]:shortCourseApi.reducer,
     [studentTestimonialApi.reducerPath]:studentTestimonialApi.reducer,
     [studyAbroadApi.reducerPath]:studyAbroadApi.reducer,
+    [socialApi.reducerPath]:socialApi.reducer,
+    [whyUniBridgeApi.reducerPath]:whyUniBridgeApi.reducer,
     
   },
   middleware: (getDefaultMiddleware) =>
@@ -65,6 +69,8 @@ export const store = configureStore({
       shortCourseApi.middleware,
       studentTestimonialApi.middleware,
       studyAbroadApi.middleware,
+      socialApi.middleware,
+      whyUniBridgeApi.middleware,
     ),
 });
 
