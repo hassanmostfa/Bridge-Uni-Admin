@@ -87,6 +87,7 @@ import UpdateTestimonial from 'views/admin/student/UpdateTestimonila';
 import ShowShortCourse from 'views/admin/courses/ShowShortCourse';
 import EditShortCourse from 'views/admin/courses/EditShortCourse';
 import ShowAbroadCourse from 'views/admin/studyAbroad/ShowAbroadCourse';
+import UpdateWhy from 'views/admin/why/UpdateWhy';
 
 
 const routes = [
