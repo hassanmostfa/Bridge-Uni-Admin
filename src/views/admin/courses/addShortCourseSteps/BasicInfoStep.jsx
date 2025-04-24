@@ -117,6 +117,7 @@ const BasicInfoStep = ({ formData, handleChange, errors }) => {
               Price (KWD) <span className="text-danger">*</span>
             </Text>
             <NumberInput 
+              mt={2}
               precision={3}
               step={1}
               min={0}

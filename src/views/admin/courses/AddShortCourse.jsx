@@ -337,7 +337,7 @@ const AddShortCourseForm = () => {
           </Button>
         </div>
 
-        <Stepper index={activeStep} mb={8} orientation="horizontal" size="lg" flexWrap="no-wrap">
+        <Stepper index={activeStep} mb={8} orientation="horizontal" size="lg" flexWrap="no-wrap" overflow={'auto'}>
           {steps.map((step, index) => (
             <Step key={index} flex="1" minW={{ base: "100px", sm: "120px", md: "150px" }}>
               <VStack spacing={2} textAlign="center">

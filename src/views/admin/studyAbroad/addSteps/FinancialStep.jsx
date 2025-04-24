@@ -56,12 +56,13 @@ const FinancialStep = ({ formData, handleChange, errors }) => {
             <Text fontSize="sm" fontWeight="700">
               Tuition Fees <span className="text-danger">*</span>
             </Text>
-            <NumberInput precision={2} min={0} mt={2}>
-              <NumberInputField
-                value={formData.tuition}
-                onChange={(e) => handleChange("tuition", e.target.value)}
-                placeholder="Enter tuition fees"
-              />
+            <NumberInput
+              min={0}
+              value={formData.tuition}
+              onChange={(value) => handleChange("tuition", value)}
+              mt={2}
+            >
+              <NumberInputField placeholder="Enter tuition fees" />
               <NumberInputStepper>
                 <NumberIncrementStepper />
                 <NumberDecrementStepper />
@@ -73,12 +74,13 @@ const FinancialStep = ({ formData, handleChange, errors }) => {
             <Text fontSize="sm" fontWeight="700">
               Cost of Living <span className="text-danger">*</span>
             </Text>
-            <NumberInput precision={2} min={0} mt={2}>
-              <NumberInputField
-                value={formData.costOfLiving}
-                onChange={(e) => handleChange("costOfLiving", e.target.value)}
-                placeholder="Enter cost of living"
-              />
+            <NumberInput
+              min={0}
+              value={formData.numMajors}
+              onChange={(value) => handleChange("numMajors", value)}
+              mt={2}
+            >
+              <NumberInputField placeholder="Enter number" />
               <NumberInputStepper>
                 <NumberIncrementStepper />
                 <NumberDecrementStepper />
@@ -90,12 +92,8 @@ const FinancialStep = ({ formData, handleChange, errors }) => {
             <Text fontSize="sm" fontWeight="700">
               Application Fee <span className="text-danger">*</span>
             </Text>
-            <NumberInput precision={2} min={0} mt={2}>
-              <NumberInputField
-                value={formData.applicationFee}
-                onChange={(e) => handleChange("applicationFee", e.target.value)}
-                placeholder="Enter application fee"
-              />
+            <NumberInput min={0} value={formData.applicationFee} onChange={(value) => handleChange("applicationFee", value)} mt={2}>
+              <NumberInputField placeholder="Enter application fee" />
               <NumberInputStepper>
                 <NumberIncrementStepper />
                 <NumberDecrementStepper />
