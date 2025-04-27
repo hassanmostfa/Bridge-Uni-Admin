@@ -18,23 +18,31 @@ import {
   MdOutlineHelpCenter,
   MdOutlineAccountBalance,
 } from "react-icons/md";
+import { useGetAdminDashboardQuery } from "api/userSlice";
+import { useEffect } from "react";
 
 export default function UserReports() {
   const brandColor = useColorModeValue("brand.500", "white");
   const boxBg = useColorModeValue("secondaryGray.300", "whiteAlpha.100");
+  const {data:statics,refetch} = useGetAdminDashboardQuery();
+  const data = statics?.data || {};
+  
+  useEffect(()=>{
+    refetch();
+  },[]);
 
   const cardData = [
-    { name: "Total Applications", value: "3,540", icon: MdOutlineAssignment },
-    { name: "Online Course Applications", value: "1,240", icon: MdOutlineComputer },
-    { name: "Study Abroad Applications", value: "820", icon: MdOutlineFlightTakeoff },
-    { name: "Total Online Courses", value: "460", icon: MdOutlineLibraryBooks },
-    { name: "Total Short Courses", value: "320", icon: MdOutlineListAlt },
-    { name: "Total Study Abroad", value: "220", icon: MdOutlineFlightTakeoff },
-    { name: "Total Majors", value: "85", icon: MdOutlineSchool },
-    { name: "Join Us Requests", value: "120", icon: MdOutlinePersonAdd },
-    { name: "Total Inquiries", value: "675", icon: MdOutlineHelpCenter },
-    { name: "Total Providers", value: "34", icon: MdOutlineAccountBalance },
-    { name: "Total Admins", value: "12", icon: MdOutlineAdminPanelSettings },
+    { name: "Total Applications", value: data?.totalApplications, icon: MdOutlineAssignment },
+    { name: "Online Course Applications", value: data?.onlineCourseApplications, icon: MdOutlineComputer },
+    { name: "Study Abroad Applications", value: data?.studyAbroadApplications, icon: MdOutlineFlightTakeoff },
+    { name: "Total Online Courses", value: data?.totalOnlineCourse, icon: MdOutlineLibraryBooks },
+    { name: "Total Short Courses", value: data?.totalShortCourse, icon: MdOutlineListAlt },
+    { name: "Total Study Abroad", value: data?.totalStudyAbroad, icon: MdOutlineFlightTakeoff },
+    { name: "Total Majors", value: data?.totalMajors, icon: MdOutlineSchool },
+    { name: "Join Us Requests", value: data?.joinUsRequests, icon: MdOutlinePersonAdd },
+    { name: "Total Inquiries", value: data?.totalInquiries, icon: MdOutlineHelpCenter },
+    { name: "Total Providers", value: data?.totalProviders, icon: MdOutlineAccountBalance },
+    { name: "Total Admins", value: data?.totalAdmins, icon: MdOutlineAdminPanelSettings },
   ];
 
   return (
@@ -62,3 +70,4 @@ export default function UserReports() {
     </Box>
   );
 }
+
