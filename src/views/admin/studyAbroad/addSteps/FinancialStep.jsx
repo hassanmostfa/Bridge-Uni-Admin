@@ -101,6 +101,19 @@ const FinancialStep = ({ formData, handleChange, errors }) => {
             </NumberInput>
             {errors.applicationFee && <Text color="red.500" fontSize="sm">{errors.applicationFee}</Text>}
           </FormControl>
+          <FormControl isInvalid={errors.fees}>
+            <Text fontSize="sm" fontWeight="700">
+              Fees <span className="text-danger">*</span>
+            </Text>
+            <NumberInput min={0} value={formData.fees} onChange={(value) => handleChange("fees", value)} mt={2}>
+              <NumberInputField placeholder="Enter application fee" />
+              <NumberInputStepper>
+                <NumberIncrementStepper />
+                <NumberDecrementStepper />
+              </NumberInputStepper>
+            </NumberInput>
+            {errors.fees && <Text color="red.500" fontSize="sm">{errors.fees}</Text>}
+          </FormControl>
         </SimpleGrid>
       </CardBody>
     </Card>

@@ -170,55 +170,55 @@ const JoinUsRequests = () => {
         </Text>
       ),
     }),
-    columnHelper.accessor('cv', {
-      id: 'cv',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          CV
-        </Text>
-      ),
-      cell: (info) => (
-        <Flex align="center">
-          <Icon as={FaFilePdf} color="red.500" mr={2} />
-          <Link 
-            color="blue.500" 
-            fontSize="sm"
-            href={info.getValue()} 
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View CV
-          </Link>
-        </Flex>
-      ),
-    }),
-    columnHelper.accessor('actions', {
-      id: 'actions',
-      header: () => (
-        <Text
-          justifyContent="space-between"
-          align="center"
-          fontSize={{ sm: '10px', lg: '12px' }}
-          color="gray.400"
-        >
-          Actions
-        </Text>
-      ),
-      cell: (info) => (
-        <IconButton
-          aria-label="Download CV"
-          icon={<FaDownload />}
-          colorScheme="green"
-          size="sm"
-          onClick={() => handleDownload(info.row.original.cv)}
-        />
-      ),
-    }),
+    // columnHelper.accessor('cv', {
+    //   id: 'cv',
+    //   header: () => (
+    //     <Text
+    //       justifyContent="space-between"
+    //       align="center"
+    //       fontSize={{ sm: '10px', lg: '12px' }}
+    //       color="gray.400"
+    //     >
+    //       CV
+    //     </Text>
+    //   ),
+      // cell: (info) => (
+      //   <Flex align="center">
+      //     <Icon as={FaFilePdf} color="red.500" mr={2} />
+      //     <Link 
+      //       color="blue.500" 
+      //       fontSize="sm"
+      //       href={info.getValue()} 
+      //       target="_blank"
+      //       rel="noopener noreferrer"
+      //     >
+      //       View CV
+      //     </Link>
+      //   </Flex>
+      // ),
+    // }),
+    // columnHelper.accessor('actions', {
+    //   id: 'actions',
+    //   header: () => (
+    //     <Text
+    //       justifyContent="space-between"
+    //       align="center"
+    //       fontSize={{ sm: '10px', lg: '12px' }}
+    //       color="gray.400"
+    //     >
+    //       Actions
+    //     </Text>
+    //   ),
+    //   cell: (info) => (
+    //     <IconButton
+    //       aria-label="Download CV"
+    //       icon={<FaDownload />}
+    //       colorScheme="green"
+    //       size="sm"
+    //       onClick={() => handleDownload(info.row.original.cv)}
+    //     />
+    //   ),
+    // }),
   ];
 
   const table = useReactTable({

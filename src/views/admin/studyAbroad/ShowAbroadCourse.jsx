@@ -133,6 +133,13 @@ const ShowAbroadCourse = () => {
                 </Box>
               </Flex>
               <Flex align="center">
+                <Icon as={FaMoneyBillWave} color={accentColor} mr={2} boxSize={5} />
+                <Box>
+                  <Text fontSize="sm" color="gray.500">Fees</Text>
+                  <Text fontWeight="bold">${course.fees}</Text>
+                </Box>
+              </Flex>
+              <Flex align="center">
                 <Icon as={FaGlobeAmericas} color={accentColor} mr={2} boxSize={5} />
                 <Box>
                   <Text fontSize="sm" color="gray.500">Program Level</Text>

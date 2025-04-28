@@ -69,6 +69,22 @@ const BasicInfoStep = ({ formData, handleChange, errors }) => {
               </Text>
             )}
           </FormControl>
+          <FormControl isInvalid={errors.sectionTitle}>
+            <Text fontSize="sm" fontWeight="700">
+              Section Title
+            </Text>
+            <Input
+              value={formData.sectionTitle}
+              onChange={(e) => handleChange('sectionTitle', e.target.value)}
+              placeholder="Enter inner title"
+              mt={2}
+            />
+            {errors.sectionTitle && (
+              <Text color="red.500" fontSize="sm">
+                {errors.sectionTitle}
+              </Text>
+            )}
+          </FormControl>
         </SimpleGrid>
         <FormControl mt={4} isInvalid={errors.description}>
           <Text fontSize="sm" fontWeight="700">

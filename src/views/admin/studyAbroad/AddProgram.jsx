@@ -50,6 +50,7 @@ const AddProgramForm = () => {
     mainImage: null,
     galleryImages: [],
     innerTitle: "",
+    sectionTitle:"",
     description: "",
     featured: false,
     
@@ -75,6 +76,7 @@ const AddProgramForm = () => {
     programLength: "",
     tuition: "",
     costOfLiving: "",
+    fees: "",
     applicationFee: "",
     
     // Summary Section
@@ -89,6 +91,7 @@ const AddProgramForm = () => {
     galleryImages: { required: true },
     description: { required: true,},
     innerTitle: { required: true,},
+    sectionTitle: { required: true,},
     allAboutTitle: { required: true },
     numUniversities: { required: true, min: 1 },
     numMajors: { required: true, min: 1 },
@@ -114,6 +117,7 @@ const AddProgramForm = () => {
     programLength: { required: true },
     tuition: { required: true, min: 0 },
     costOfLiving: { required: true, min: 0 },
+    fees: { required: true, min: 0 },
     applicationFee: { required: true, min: 0 },
     summary: { required: true },
     programRequirements: {
@@ -182,6 +186,7 @@ const AddProgramForm = () => {
         errors.titleAr = validateField('titleAr', formData.titleAr);
         errors.description = validateField('description', formData.description);
         errors.innerTitle = validateField('innerTitle', formData.innerTitle);
+        errors.sectionTitle = validateField('sectionTitle', formData.sectionTitle);
         break;
         
       case 1: // Media
@@ -214,6 +219,7 @@ const AddProgramForm = () => {
         errors.programLength = validateField('programLength', formData.programLength);
         errors.tuition = validateField('tuition', formData.tuition);
         errors.costOfLiving = validateField('costOfLiving', formData.costOfLiving);
+        errors.fees = validateField('fees', formData.fees);
         errors.applicationFee = validateField('applicationFee', formData.applicationFee);
         break;
         
@@ -255,7 +261,7 @@ const AddProgramForm = () => {
       coming_soon: formData.soon || false,
       description: formData.description,
       main_image: formData.mainImage,
-      section_title: formData.titleEn,
+      section_title: formData.sectionTitle,
       number_of_universities: parseInt(formData.numUniversities) || 0,
       number_of_majors: parseInt(formData.numMajors) || 0,
       proof_description: formData.proofDescription,
@@ -265,6 +271,7 @@ const AddProgramForm = () => {
       program_length: parseInt(formData.programLength) || 0,
       tuition_fees: parseInt(formData.tuition) || 0,
       cost_of_living: parseInt(formData.costOfLiving) || 0,
+      fees: parseInt(formData.fees) || 0,
       application_fee: parseInt(formData.applicationFee) || 0,
       summary_text: formData.summary,
       gallery_images: formData.galleryImages || [],

@@ -22,10 +22,15 @@ import {
 import Select from "react-select";
 import { FaTrash, FaPlus, FaUpload } from "react-icons/fa6";
 import { useAddFileMutation } from "api/filesSlice";
+import { useGetAllMajorsQuery } from "api/popularMajors";
 
 const AllAboutStep = ({ formData, handleChange, updateNestedState, errors }) => {
+
+  const {data:majorsResponce} = useGetAllMajorsQuery();
+  // console.log(majorsResponce);
+  const majorsData = majorsResponce?.data?.data ?? [];
   const availableMajors = ["Engineering", "Medicine", "Business", "Computer Science", "Architecture"];
-const [addFile] = useAddFileMutation();
+  const [addFile] = useAddFileMutation();
   const addUniversity = () => {
     handleChange("topUniversities", [...formData.topUniversities, { image: null, name: "" }]);
   };
@@ -39,16 +44,21 @@ const [addFile] = useAddFileMutation();
   };
 
   // Convert your majors array to the format react-select expects
-  const majorOptions = availableMajors.map(major => ({
-    value: major,
-    label: major
+  const majorOptions = majorsData?.map(major => ({
+    value: major.id,
+    label: major.title
   }));
 
   // Convert your current values to the same format
-  const selectedValues = formData.popularMajors.map(major => ({
-    value: major,
-    label: major
-  }));
+  const selectedValues = formData.popularMajors.map(majorId => {
+    // Find the major in majorsData that matches this ID
+    const foundMajor = majorsData?.find(major => major.id === majorId);
+    
+    return {
+      value: majorId, // Keep the ID as value
+      label: foundMajor?.title || majorId // Use the title if found, otherwise fallback to ID
+    };
+  });
   const handleUploadAttribute = async (file,index) => {
     const fileFormData = new FormData();
     fileFormData.append('img', file);
@@ -221,7 +231,7 @@ const [addFile] = useAddFileMutation();
           Add University
         </Button>
 
-        {/* <FormControl isInvalid={errors.popularMajors}>
+        <FormControl isInvalid={errors.popularMajors}>
           <Text fontSize="sm" fontWeight="700">
             Popular Majors <span className="text-danger">*</span>
           </Text>
@@ -241,7 +251,7 @@ const [addFile] = useAddFileMutation();
             classNamePrefix="select"
           />
           {errors.popularMajors && <Text color="red.500" fontSize="sm">{errors.popularMajors}</Text>}
-        </FormControl> */}
+        </FormControl>
       </CardBody>
     </Card>
   );
