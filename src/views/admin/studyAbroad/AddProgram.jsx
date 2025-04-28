@@ -199,7 +199,7 @@ const AddProgramForm = () => {
         errors.numUniversities = validateField('numUniversities', formData.numUniversities);
         errors.numMajors = validateField('numMajors', formData.numMajors);
         errors.topUniversities = validateField('topUniversities', formData.topUniversities);
-        // errors.popularMajors = validateField('popularMajors', formData.popularMajors);
+        errors.popularMajors = validateField('popularMajors', formData.popularMajors);
         break;
         
       case 3: // Proof
@@ -285,7 +285,8 @@ const AddProgramForm = () => {
         name: attr.name || ''
       })) || [],
       proof_requirements: formData.requirements || [],
-      program_requirements: formData.programRequirements || []
+      program_requirements: formData.programRequirements || [],
+      major_id: formData.popularMajors || [],  
     };
   
     console.log("Program Data:", programData);
