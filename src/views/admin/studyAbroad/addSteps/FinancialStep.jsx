@@ -77,7 +77,7 @@ const FinancialStep = ({ formData, handleChange, errors }) => {
             <NumberInput
               min={0}
               value={formData.numMajors}
-              onChange={(value) => handleChange("numMajors", value)}
+              onChange={(value) => handleChange("costOfLiving", value)}
               mt={2}
             >
               <NumberInputField placeholder="Enter number" />
