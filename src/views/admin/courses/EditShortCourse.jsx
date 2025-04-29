@@ -260,11 +260,13 @@ const EditShortCourse = () => {
           image: benefit.image,
           title: benefit.title
         })),
-      course_structure: formData.structures.map(structure => ({
-        name: structure.name,
-        text: structure.text,
-        image: structure.image
-      })),
+      course_structure: formData.structures
+        .filter(structure => structure.name || structure.text || structure.image)
+        .map(structure => ({
+          name: structure.name,
+          text: structure.text,
+          image: structure.image
+        })),
       course_tutors: formData.tutors.map(tutor => ({
         Description: tutor.description,
         total_students: parseInt(tutor.students),
