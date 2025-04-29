@@ -27,10 +27,11 @@ import { useGetAllMajorsQuery } from "api/popularMajors";
 const AllAboutStep = ({ formData, handleChange, updateNestedState, errors }) => {
 
   const {data:majorsResponce} = useGetAllMajorsQuery();
-  // console.log(majorsResponce);
+
   const majorsData = majorsResponce?.data?.data ?? [];
   const availableMajors = ["Engineering", "Medicine", "Business", "Computer Science", "Architecture"];
   const [addFile] = useAddFileMutation();
+  
   const addUniversity = () => {
     handleChange("topUniversities", [...formData.topUniversities, { image: null, name: "" }]);
   };
@@ -49,6 +50,8 @@ const AllAboutStep = ({ formData, handleChange, updateNestedState, errors }) => 
     label: major.title
   }));
 
+  
+  
   // Convert your current values to the same format
   const selectedValues = formData.popularMajors.map(majorId => {
     // Find the major in majorsData that matches this ID
@@ -59,6 +62,7 @@ const AllAboutStep = ({ formData, handleChange, updateNestedState, errors }) => 
       label: foundMajor?.title || majorId // Use the title if found, otherwise fallback to ID
     };
   });
+  
   const handleUploadAttribute = async (file,index) => {
     const fileFormData = new FormData();
     fileFormData.append('img', file);
