@@ -114,7 +114,7 @@ const EditProgram = () => {
           name: uni.name,
           image: uni.image
         })) || [{ image: null, name: "" }],
-        popularMajors: course.popular_majors || [],
+        popularMajors: course.study_abroad_majors?.map(major => major.id) || [],
         
         // Proof Section
         proofDescription: course.proof_description,

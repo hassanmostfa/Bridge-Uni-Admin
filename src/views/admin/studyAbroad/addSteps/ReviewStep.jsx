@@ -34,6 +34,7 @@ import {
   FaImages,
   FaInfoCircle,
 } from "react-icons/fa";
+import { useGetAllMajorsQuery } from "api/popularMajors";
 
 const ReviewStep = ({ formData }) => {
   const cardBg = useColorModeValue("white", "gray.700");
@@ -69,6 +70,21 @@ const ReviewStep = ({ formData }) => {
       <Text color="gray.500">Image ready for upload</Text>
     );
   };
+  const {data:majorsResponce} = useGetAllMajorsQuery();
+  
+  const majorsData = majorsResponce?.data?.data ?? [];
+    // Convert your current values to the same format
+const selectedValues = formData.popularMajors.map(majorId => {
+  // Find the major in majorsData that matches this ID
+  const foundMajor = majorsData?.find(major => major.id === majorId);
+  
+  return {
+    value: majorId, // Keep the ID as value
+    label: foundMajor?.title || majorId // Use the title if found, otherwise fallback to ID
+  };
+});
+
+
 
   return (
     <Card bg={cardBg} border="1px solid" borderColor={borderColor} mb={6}>
@@ -166,12 +182,12 @@ const ReviewStep = ({ formData }) => {
 
         <Box mb={6}>
           <Text fontWeight="bold" color="gray.500">Popular Majors</Text>
-          {formData.popularMajors.length > 0 ? (
+          {formData.popularMajors?.length > 0 ? (
             <Wrap spacing={2} mt={2}>
-              {formData.popularMajors.map((major, index) => (
+              {selectedValues?.map((major, index) => (
                 <WrapItem key={index}>
                   <Tag colorScheme="purple" size="md">
-                    <TagLabel>{major}</TagLabel>
+                    <TagLabel>{major.label}</TagLabel>
                   </Tag>
                 </WrapItem>
               ))}

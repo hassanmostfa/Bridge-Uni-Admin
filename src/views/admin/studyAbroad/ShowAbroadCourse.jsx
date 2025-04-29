@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 import {
   Card,
   CardHeader,
@@ -32,13 +32,18 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-} from "@chakra-ui/react";
-import { useParams } from "react-router-dom";
+} from '@chakra-ui/react';
+import { useParams } from 'react-router-dom';
 
-import { FiDownload, FiExternalLink } from "react-icons/fi";
-import { StarIcon, TimeIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import { FaUniversity, FaGraduationCap, FaMoneyBillWave, FaGlobeAmericas } from "react-icons/fa";
-import { useGetAbroadCourseQuery } from "api/studyAbroadSlice";
+import { FiDownload, FiExternalLink } from 'react-icons/fi';
+import { StarIcon, TimeIcon, ChevronRightIcon } from '@chakra-ui/icons';
+import {
+  FaUniversity,
+  FaGraduationCap,
+  FaMoneyBillWave,
+  FaGlobeAmericas,
+} from 'react-icons/fa';
+import { useGetAbroadCourseQuery } from 'api/studyAbroadSlice';
 
 const ShowAbroadCourse = () => {
   const { id } = useParams();
@@ -46,17 +51,17 @@ const ShowAbroadCourse = () => {
   const { data, isLoading, isError, refetch } = useGetAbroadCourseQuery(id);
   const course = data?.data;
 
-  const cardBg = useColorModeValue("white", "gray.700");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const accentColor = useColorModeValue("blue.500", "blue.300");
-  const highlightBg = useColorModeValue("blue.50", "blue.900");
+  const cardBg = useColorModeValue('white', 'gray.700');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const accentColor = useColorModeValue('blue.500', 'blue.300');
+  const highlightBg = useColorModeValue('blue.50', 'blue.900');
 
   useEffect(() => {
     if (isError) {
       toast({
-        title: "Error loading program",
-        description: "Failed to fetch study abroad program details",
-        status: "error",
+        title: 'Error loading program',
+        description: 'Failed to fetch study abroad program details',
+        status: 'error',
         duration: 5000,
         isClosable: true,
       });
@@ -80,17 +85,28 @@ const ShowAbroadCourse = () => {
   }
 
   return (
-    <Box maxW="1200px" mx="auto" mt={8} style={{ marginTop:"60px" }} p={4}>
+    <Box maxW="1200px" mx="auto" mt={8} style={{ marginTop: '60px' }} p={4}>
       {/* Hero Section */}
-      <Card bg={cardBg} mb={6} overflow="hidden" border="1px solid" borderColor={borderColor}>
-        <Flex direction={{ base: "column", md: "row" }}>
+      <Card
+        bg={cardBg}
+        mb={6}
+        overflow="hidden"
+        border="1px solid"
+        borderColor={borderColor}
+      >
+        <Flex direction={{ base: 'column', md: 'row' }}>
           <Box flex={1} p={6}>
             <Flex justify="space-between" align="flex-start" mb={4}>
               <VStack align="flex-start" spacing={1}>
                 <Heading as="h1" size="xl" color={accentColor}>
                   {course.title_en}
                 </Heading>
-                <Text fontSize="lg" color="gray.500" fontFamily="Tahoma" dir="rtl">
+                <Text
+                  fontSize="lg"
+                  color="gray.500"
+                  fontFamily="Tahoma"
+                  dir="rtl"
+                >
                   {course.title_ar}
                 </Text>
               </VStack>
@@ -108,45 +124,104 @@ const ShowAbroadCourse = () => {
               </Flex>
             </Flex>
 
-            <Text fontSize="lg" mb={6}>{course.description}</Text>
+            <Text fontSize="lg" mb={6}>
+              {course.description}
+            </Text>
 
-            <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} spacing={4} mb={6} mt={4}>
+            <SimpleGrid
+              columns={{ base: 1, sm: 2, md: 4 }}
+              spacing={4}
+              mb={6}
+              mt={4}
+            >
               <Flex align="center">
-                <Icon as={FaUniversity} color={accentColor} mr={2} boxSize={5} />
+                <Icon
+                  as={FaUniversity}
+                  color={accentColor}
+                  mr={2}
+                  boxSize={5}
+                />
                 <Box>
-                  <Text fontSize="sm" color="gray.500">Universities</Text>
+                  <Text fontSize="sm" color="gray.500">
+                    Universities
+                  </Text>
                   <Text fontWeight="bold">{course.number_of_universities}</Text>
                 </Box>
               </Flex>
               <Flex align="center">
-                <Icon as={FaGraduationCap} color={accentColor} mr={2} boxSize={5} />
+                <Icon
+                  as={FaGraduationCap}
+                  color={accentColor}
+                  mr={2}
+                  boxSize={5}
+                />
                 <Box>
-                  <Text fontSize="sm" color="gray.500">Majors</Text>
+                  <Text fontSize="sm" color="gray.500">
+                    Majors
+                  </Text>
                   <Text fontWeight="bold">{course.number_of_majors}</Text>
                 </Box>
               </Flex>
               <Flex align="center">
-                <Icon as={FaMoneyBillWave} color={accentColor} mr={2} boxSize={5} />
+                <Icon
+                  as={FaMoneyBillWave}
+                  color={accentColor}
+                  mr={2}
+                  boxSize={5}
+                />
                 <Box>
-                  <Text fontSize="sm" color="gray.500">Tuition Fees</Text>
+                  <Text fontSize="sm" color="gray.500">
+                    Tuition Fees
+                  </Text>
                   <Text fontWeight="bold">${course.tuition_fees}</Text>
                 </Box>
               </Flex>
               <Flex align="center">
-                <Icon as={FaMoneyBillWave} color={accentColor} mr={2} boxSize={5} />
+                <Icon
+                  as={FaMoneyBillWave}
+                  color={accentColor}
+                  mr={2}
+                  boxSize={5}
+                />
                 <Box>
-                  <Text fontSize="sm" color="gray.500">Fees</Text>
+                  <Text fontSize="sm" color="gray.500">
+                    Fees
+                  </Text>
                   <Text fontWeight="bold">${course.fees}</Text>
                 </Box>
               </Flex>
               <Flex align="center">
-                <Icon as={FaGlobeAmericas} color={accentColor} mr={2} boxSize={5} />
+                <Icon
+                  as={FaGlobeAmericas}
+                  color={accentColor}
+                  mr={2}
+                  boxSize={5}
+                />
                 <Box>
-                  <Text fontSize="sm" color="gray.500">Program Level</Text>
+                  <Text fontSize="sm" color="gray.500">
+                    Program Level
+                  </Text>
                   <Text fontWeight="bold">{course.program_level}</Text>
                 </Box>
               </Flex>
+            
             </SimpleGrid>
+              <Text fontSize="sm" color="gray.500">
+                    Popular majors
+                  </Text>
+                  {course?.study_abroad_majors?.length > 0 ? (
+                    <Wrap spacing={2} mt={2}>
+                      {course.study_abroad_majors.map(({ id, popular_major }) => (
+                        <WrapItem key={id}>
+                          <Tag colorScheme="purple" size="md">
+                            <TagLabel>{popular_major.title}</TagLabel>
+                          </Tag>
+                        </WrapItem>
+                      ))}
+                    </Wrap>
+                  ) : (
+                    <Text color="gray.500">No popular majors added</Text>
+                  )}
           </Box>
 
           <Box flex={1} maxH="400px" overflow="hidden">
@@ -156,7 +231,7 @@ const ShowAbroadCourse = () => {
               w="100%"
               h="100%"
               objectFit="cover"
-              fallbackSrc="https://via.placeholder.com/600x400?text=No+Image"
+              // fallbackSrc="https://via.placeholder.com/600x400?text=No+Image"
             />
           </Box>
         </Flex>
@@ -177,44 +252,60 @@ const ShowAbroadCourse = () => {
             <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
               {/* Program Details */}
               <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-                <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+                <CardHeader
+                  bg={highlightBg}
+                  borderBottom="1px solid"
+                  borderColor={borderColor}
+                >
                   <Heading size="md">Program Details</Heading>
                 </CardHeader>
                 <CardBody>
                   <List spacing={3}>
                     <ListItem>
                       <Flex>
-                        <Text fontWeight="bold" minW="180px">Program Length:</Text>
+                        <Text fontWeight="bold" minW="180px">
+                          Program Length:
+                        </Text>
                         <Text>{course.program_length} months</Text>
                       </Flex>
                     </ListItem>
                     <ListItem>
                       <Flex>
-                        <Text fontWeight="bold" minW="180px">Tuition Fees:</Text>
+                        <Text fontWeight="bold" minW="180px">
+                          Tuition Fees:
+                        </Text>
                         <Text>${course.tuition_fees}</Text>
                       </Flex>
                     </ListItem>
                     <ListItem>
                       <Flex>
-                        <Text fontWeight="bold" minW="180px">Cost of Living:</Text>
+                        <Text fontWeight="bold" minW="180px">
+                          Cost of Living:
+                        </Text>
                         <Text>${course.cost_of_living}</Text>
                       </Flex>
                     </ListItem>
                     <ListItem>
                       <Flex>
-                        <Text fontWeight="bold" minW="180px">Application Fee:</Text>
+                        <Text fontWeight="bold" minW="180px">
+                          Application Fee:
+                        </Text>
                         <Text>${course.application_fee}</Text>
                       </Flex>
                     </ListItem>
                     <ListItem>
                       <Flex>
-                        <Text fontWeight="bold" minW="180px">Section Title:</Text>
+                        <Text fontWeight="bold" minW="180px">
+                          Section Title:
+                        </Text>
                         <Text>{course.section_title}</Text>
                       </Flex>
                     </ListItem>
                     <ListItem>
                       <Flex>
-                        <Text fontWeight="bold" minW="180px">Inner Title:</Text>
+                        <Text fontWeight="bold" minW="180px">
+                          Inner Title:
+                        </Text>
                         <Text>{course.inner_title}</Text>
                       </Flex>
                     </ListItem>
@@ -224,14 +315,22 @@ const ShowAbroadCourse = () => {
 
               {/* Program Requirements */}
               <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-                <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+                <CardHeader
+                  bg={highlightBg}
+                  borderBottom="1px solid"
+                  borderColor={borderColor}
+                >
                   <Heading size="md">Program Requirements</Heading>
                 </CardHeader>
                 <CardBody>
                   {course.program_requirements?.length > 0 ? (
                     <List spacing={3}>
                       {course.program_requirements.map((req, index) => (
-                        <ListItem key={index} display="flex" alignItems="center">
+                        <ListItem
+                          key={index}
+                          display="flex"
+                          alignItems="center"
+                        >
                           <ListIcon as={ChevronRightIcon} color={accentColor} />
                           <Text>{req.name}</Text>
                         </ListItem>
@@ -244,8 +343,17 @@ const ShowAbroadCourse = () => {
               </Card>
 
               {/* Summary */}
-              <Card bg={cardBg} border="1px solid" borderColor={borderColor} gridColumn={{ lg: "1 / -1" }}>
-                <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+              <Card
+                bg={cardBg}
+                border="1px solid"
+                borderColor={borderColor}
+                gridColumn={{ lg: '1 / -1' }}
+              >
+                <CardHeader
+                  bg={highlightBg}
+                  borderBottom="1px solid"
+                  borderColor={borderColor}
+                >
                   <Heading size="md">Summary</Heading>
                 </CardHeader>
                 <CardBody>
@@ -258,14 +366,22 @@ const ShowAbroadCourse = () => {
           {/* Universities Tab */}
           <TabPanel p={0} pt={4}>
             <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-              <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+              <CardHeader
+                bg={highlightBg}
+                borderBottom="1px solid"
+                borderColor={borderColor}
+              >
                 <Heading size="md">Partner Universities</Heading>
               </CardHeader>
               <CardBody>
                 {course.universities?.length > 0 ? (
                   <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
                     {course.universities.map((uni, index) => (
-                      <Card key={index} border="1px solid" borderColor={borderColor}>
+                      <Card
+                        key={index}
+                        border="1px solid"
+                        borderColor={borderColor}
+                      >
                         <Image
                           src={uni.image}
                           alt={uni.name}
@@ -275,7 +391,9 @@ const ShowAbroadCourse = () => {
                           fallbackSrc="https://via.placeholder.com/300x120?text=University"
                         />
                         <Box p={4}>
-                          <Heading size="md" mb={2}>{uni.name}</Heading>
+                          <Heading size="md" mb={2}>
+                            {uni.name}
+                          </Heading>
                         </Box>
                       </Card>
                     ))}
@@ -291,7 +409,11 @@ const ShowAbroadCourse = () => {
           <TabPanel p={0} pt={4}>
             <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
               <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-                <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+                <CardHeader
+                  bg={highlightBg}
+                  borderBottom="1px solid"
+                  borderColor={borderColor}
+                >
                   <Heading size="md">Visa Description</Heading>
                 </CardHeader>
                 <CardBody>
@@ -300,7 +422,11 @@ const ShowAbroadCourse = () => {
               </Card>
 
               <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-                <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+                <CardHeader
+                  bg={highlightBg}
+                  borderBottom="1px solid"
+                  borderColor={borderColor}
+                >
                   <Heading size="md">Visa Image</Heading>
                 </CardHeader>
                 <CardBody>
@@ -315,14 +441,30 @@ const ShowAbroadCourse = () => {
               </Card>
 
               {course.visa_attributes?.length > 0 && (
-                <Card bg={cardBg} border="1px solid" borderColor={borderColor} gridColumn={{ lg: "1 / -1" }}>
-                  <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+                <Card
+                  bg={cardBg}
+                  border="1px solid"
+                  borderColor={borderColor}
+                  gridColumn={{ lg: '1 / -1' }}
+                >
+                  <CardHeader
+                    bg={highlightBg}
+                    borderBottom="1px solid"
+                    borderColor={borderColor}
+                  >
                     <Heading size="md">Visa Attributes</Heading>
                   </CardHeader>
                   <CardBody>
                     <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
                       {course.visa_attributes.map((attr, index) => (
-                        <Flex key={index} align="center" p={4} border="1px solid" borderColor={borderColor} borderRadius="md">
+                        <Flex
+                          key={index}
+                          align="center"
+                          p={4}
+                          border="1px solid"
+                          borderColor={borderColor}
+                          borderRadius="md"
+                        >
                           {attr.image && (
                             <Image
                               src={attr.image}
@@ -347,7 +489,11 @@ const ShowAbroadCourse = () => {
           <TabPanel p={0} pt={4}>
             <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
               <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-                <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+                <CardHeader
+                  bg={highlightBg}
+                  borderBottom="1px solid"
+                  borderColor={borderColor}
+                >
                   <Heading size="md">Proof Description</Heading>
                 </CardHeader>
                 <CardBody>
@@ -357,7 +503,11 @@ const ShowAbroadCourse = () => {
 
               {course.proof_images?.length > 0 && (
                 <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-                  <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+                  <CardHeader
+                    bg={highlightBg}
+                    borderBottom="1px solid"
+                    borderColor={borderColor}
+                  >
                     <Heading size="md">Proof Images</Heading>
                   </CardHeader>
                   <CardBody>
@@ -379,14 +529,27 @@ const ShowAbroadCourse = () => {
               )}
 
               {course.proof_requirements?.length > 0 && (
-                <Card bg={cardBg} border="1px solid" borderColor={borderColor} gridColumn={{ lg: "1 / -1" }}>
-                  <CardHeader bg={highlightBg} borderBottom="1px solid" borderColor={borderColor}>
+                <Card
+                  bg={cardBg}
+                  border="1px solid"
+                  borderColor={borderColor}
+                  gridColumn={{ lg: '1 / -1' }}
+                >
+                  <CardHeader
+                    bg={highlightBg}
+                    borderBottom="1px solid"
+                    borderColor={borderColor}
+                  >
                     <Heading size="md">Proof Requirements</Heading>
                   </CardHeader>
                   <CardBody>
                     <List spacing={3}>
                       {course.proof_requirements.map((req, index) => (
-                        <ListItem key={index} display="flex" alignItems="center">
+                        <ListItem
+                          key={index}
+                          display="flex"
+                          alignItems="center"
+                        >
                           <ListIcon as={ChevronRightIcon} color={accentColor} />
                           <Text>{req.name}</Text>
                         </ListItem>
@@ -401,9 +564,18 @@ const ShowAbroadCourse = () => {
           {/* Gallery Tab */}
           <TabPanel p={0} pt={4}>
             {course.gallery_images?.length > 0 ? (
-              <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing={4}>
+              <SimpleGrid
+                columns={{ base: 1, sm: 2, md: 3, lg: 4 }}
+                spacing={4}
+              >
                 {course.gallery_images.map((img, index) => (
-                  <Box key={index} border="1px solid" borderColor={borderColor} borderRadius="md" overflow="hidden">
+                  <Box
+                    key={index}
+                    border="1px solid"
+                    borderColor={borderColor}
+                    borderRadius="md"
+                    overflow="hidden"
+                  >
                     <Image
                       src={img.url}
                       alt={`Gallery ${index + 1}`}

@@ -8,8 +8,12 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react";
+import { useGetAllMajorsQuery } from "api/popularMajors";
 
-const OverviewStep = ({ formData, handleChange,errors }) => (
+const OverviewStep = ({ formData, handleChange,errors }) =>{
+
+  
+  return (
   <Card mb={4}>
     <CardHeader bg="gray.100" p={3}>
       <Text fontWeight="bold">Course Overview</Text>
@@ -134,5 +138,6 @@ const OverviewStep = ({ formData, handleChange,errors }) => (
     </CardBody>
   </Card>
 );
+};
 
 export default OverviewStep;
