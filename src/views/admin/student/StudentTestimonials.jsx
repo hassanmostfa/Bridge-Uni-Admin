@@ -331,8 +331,8 @@ const StudentTestimonials = () => {
             borderRadius="70px"
             px="24px"
             py="5px"
-            onClick={() => navigate('/admin/add-testimonial')}
             width={'200px'}
+            onClick={() => navigate('/admin/add-testimonial')}
           >
             <PlusSquareIcon me="10px" />
             Add Testimonial

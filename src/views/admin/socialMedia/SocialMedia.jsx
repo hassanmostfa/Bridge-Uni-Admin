@@ -9,18 +9,41 @@ import {
   Icon,
   FormControl,
   FormLabel,
+  SimpleGrid,
 } from "@chakra-ui/react";
 import { IoMdArrowBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
-import { FaInstagram, FaFacebook, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { 
+  FaInstagram, 
+  FaFacebook, 
+  FaLinkedin, 
+  FaTwitter,
+  FaWhatsapp,
+  FaTelegram,
+  FaSnapchatGhost,
+  FaTiktok,
+  FaPhone,
+  FaGooglePlay,
+  FaAppStore
+} from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useGetAllSocialQuery, useAddSocialMutation } from "../../../api/socials";
 
 const SocialMedia = () => {
-  const [instagram, setInstagram] = useState("");
-  const [facebook, setFacebook] = useState("");
-  const [linkedin, setLinkedin] = useState("");
-  const [twitter, setTwitter] = useState("");
+  const [socialData, setSocialData] = useState({
+    facebook: "",
+    instagram: "",
+    linked_in: "",
+    twitter: "",
+    whatsapp: "",
+    telegram: "",
+    snapchat: "",
+    tiktok: "",
+    call_us: "",
+    play_store: "",
+    app_store: ""
+  });
+  
   const textColor = useColorModeValue("secondaryGray.900", "white");
   const navigate = useNavigate();
 
@@ -28,39 +51,36 @@ const SocialMedia = () => {
   const { 
     data: responseData, 
     isLoading, 
-    isError 
+    isError,
+    refetch
   } = useGetAllSocialQuery();
   
   const [addSocial, { isLoading: isSaving }] = useAddSocialMutation();
 
-  // Set initial values if data exists
+  // Set initial values from API response
   useEffect(() => {
-    if (responseData?.flag && responseData.data?.data?.length > 0) {
-      const socialData = responseData.data.data[0]; // Get the first item from the data array
-      setInstagram(socialData.instagram || "");
-      setFacebook(socialData.facebook || "");
-      setLinkedin(socialData.linked_in || ""); // Note the underscore
-      setTwitter(socialData.twitter || "");
+    if (responseData?.flag && responseData.data) {
+      setSocialData({
+        facebook: responseData.data.facebook || "",
+        instagram: responseData.data.instagram || "",
+        linked_in: responseData.data.linked_in || "",
+        twitter: responseData.data.twitter || "",
+      });
     }
   }, [responseData]);
 
+  const handleChange = (field, value) => {
+    setSocialData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const handleSubmit = async () => {
-    if (!instagram && !facebook && !linkedin && !twitter) {
-      Swal.fire("Error!", "Please add at least one social media link.", "error");
-      return;
-    }
-
-    const socialData = {
-      instagram,
-      facebook,
-      linked_in: linkedin, // Using snake_case for the API
-      twitter
-    };
-
     try {
-      // Call the API to save the social media links
       await addSocial(socialData).unwrap();
       Swal.fire("Success!", "Social media links saved successfully.", "success");
+      refetch();
       navigate("/admin/undefined/cms/socials");
     } catch (error) {
       console.error("Failed to save social media links:", error);
@@ -86,69 +106,71 @@ const SocialMedia = () => {
           </Text>
         </div>
         <form>
-          {/* Instagram Field */}
-          <FormControl mb={4}>
-            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
-              <Flex align="center" gap={2}>
-                <Icon as={FaInstagram} color="#E1306C" />
-                Instagram URL
-              </Flex>
-            </FormLabel>
-            <Input
-              type="url"
-              placeholder="https://instagram.com/username"
-              value={instagram}
-              onChange={(e) => setInstagram(e.target.value)}
-            />
-          </FormControl>
+          <SimpleGrid columns={{ base: 1, md: 1 }} spacing={4}>
+            {/* Facebook */}
+            <FormControl mb={4}>
+              <FormLabel color={textColor} fontSize="sm" fontWeight="700">
+                <Flex align="center" gap={2}>
+                  <Icon as={FaFacebook} color="#4267B2" />
+                  Facebook URL
+                </Flex>
+              </FormLabel>
+              <Input
+                type="url"
+                placeholder="https://facebook.com/username"
+                value={socialData.facebook}
+                onChange={(e) => handleChange('facebook', e.target.value)}
+              />
+            </FormControl>
 
-          {/* Facebook Field */}
-          <FormControl mb={4}>
-            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
-              <Flex align="center" gap={2}>
-                <Icon as={FaFacebook} color="#4267B2" />
-                Facebook URL
-              </Flex>
-            </FormLabel>
-            <Input
-              type="url"
-              placeholder="https://facebook.com/username"
-              value={facebook}
-              onChange={(e) => setFacebook(e.target.value)}
-            />
-          </FormControl>
+            {/* Instagram */}
+            <FormControl mb={4}>
+              <FormLabel color={textColor} fontSize="sm" fontWeight="700">
+                <Flex align="center" gap={2}>
+                  <Icon as={FaInstagram} color="#E1306C" />
+                  Instagram URL
+                </Flex>
+              </FormLabel>
+              <Input
+                type="url"
+                placeholder="https://instagram.com/username"
+                value={socialData.instagram}
+                onChange={(e) => handleChange('instagram', e.target.value)}
+              />
+            </FormControl>
 
-          {/* LinkedIn Field */}
-          <FormControl mb={4}>
-            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
-              <Flex align="center" gap={2}>
-                <Icon as={FaLinkedin} color="#0077B5" />
-                LinkedIn URL
-              </Flex>
-            </FormLabel>
-            <Input
-              type="url"
-              placeholder="https://linkedin.com/username"
-              value={linkedin}
-              onChange={(e) => setLinkedin(e.target.value)}
-            />
-          </FormControl>
+            {/* LinkedIn */}
+            <FormControl mb={4}>
+              <FormLabel color={textColor} fontSize="sm" fontWeight="700">
+                <Flex align="center" gap={2}>
+                  <Icon as={FaLinkedin} color="#0077B5" />
+                  LinkedIn URL
+                </Flex>
+              </FormLabel>
+              <Input
+                type="url"
+                placeholder="https://linkedin.com/username"
+                value={socialData.linked_in}
+                onChange={(e) => handleChange('linked_in', e.target.value)}
+              />
+            </FormControl>
 
-          {/* Twitter Field */}
-          <FormControl mb={4}>
-            <FormLabel color={textColor} fontSize="sm" fontWeight="700">
-              <Flex align="center" gap={2}>
-                <Icon as={FaTwitter} color="#1DA1F2" />
-                Twitter URL
-              </Flex>
-            </FormLabel>
-            <Input
-              type="url"
-              placeholder="https://twitter.com/username"
-              value={twitter}
-              onChange={(e) => setTwitter(e.target.value)}
-            />
-          </FormControl>
+            {/* Twitter */}
+            <FormControl mb={4}>
+              <FormLabel color={textColor} fontSize="sm" fontWeight="700">
+                <Flex align="center" gap={2}>
+                  <Icon as={FaTwitter} color="#1DA1F2" />
+                  Twitter URL
+                </Flex>
+              </FormLabel>
+              <Input
+                type="url"
+                placeholder="https://twitter.com/username"
+                value={socialData.twitter}
+                onChange={(e) => handleChange('twitter', e.target.value)}
+              />
+            </FormControl>
+          </SimpleGrid>
 
           {/* Action Buttons */}
           <Flex justify="flex-end" mt={6} gap={4}>

@@ -25,14 +25,16 @@ import {
 } from '@tanstack/react-table';
 import * as React from 'react';
 import Card from 'components/card/Card';
-import { FaFilePdf, FaDownload } from 'react-icons/fa';
+import { FaFilePdf, FaDownload, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useGetAllJoinUsRequestsQuery } from "../../../api/joinUs";
+import { useGetAllJoinUsRequestsQuery, useDeleteJoinUsRequestMutation } from "../../../api/joinUs";
+import Swal from 'sweetalert2';
 
 const columnHelper = createColumnHelper();
 
 const JoinUsRequests = () => {
-  const { data: apiResponse, isLoading, error } = useGetAllJoinUsRequestsQuery();
+  const { data: apiResponse, isLoading, error, refetch } = useGetAllJoinUsRequestsQuery();
+  const [deleteJoinUsRequest] = useDeleteJoinUsRequestMutation();
   const [tableData, setTableData] = React.useState([]);
   const navigate = useNavigate();
   const [sorting, setSorting] = React.useState([]);
@@ -77,6 +79,36 @@ const JoinUsRequests = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteJoinUsRequest(id).unwrap();
+        Swal.fire(
+          'Deleted!',
+          'The request has been deleted.',
+          'success'
+        );
+        refetch(); // Refresh the data after deletion
+      } catch (err) {
+        Swal.fire(
+          'Error!',
+          'Failed to delete the request.',
+          'error'
+        );
+      }
+    }
   };
 
   const columns = [
@@ -170,55 +202,28 @@ const JoinUsRequests = () => {
         </Text>
       ),
     }),
-    // columnHelper.accessor('cv', {
-    //   id: 'cv',
-    //   header: () => (
-    //     <Text
-    //       justifyContent="space-between"
-    //       align="center"
-    //       fontSize={{ sm: '10px', lg: '12px' }}
-    //       color="gray.400"
-    //     >
-    //       CV
-    //     </Text>
-    //   ),
-      // cell: (info) => (
-      //   <Flex align="center">
-      //     <Icon as={FaFilePdf} color="red.500" mr={2} />
-      //     <Link 
-      //       color="blue.500" 
-      //       fontSize="sm"
-      //       href={info.getValue()} 
-      //       target="_blank"
-      //       rel="noopener noreferrer"
-      //     >
-      //       View CV
-      //     </Link>
-      //   </Flex>
-      // ),
-    // }),
-    // columnHelper.accessor('actions', {
-    //   id: 'actions',
-    //   header: () => (
-    //     <Text
-    //       justifyContent="space-between"
-    //       align="center"
-    //       fontSize={{ sm: '10px', lg: '12px' }}
-    //       color="gray.400"
-    //     >
-    //       Actions
-    //     </Text>
-    //   ),
-    //   cell: (info) => (
-    //     <IconButton
-    //       aria-label="Download CV"
-    //       icon={<FaDownload />}
-    //       colorScheme="green"
-    //       size="sm"
-    //       onClick={() => handleDownload(info.row.original.cv)}
-    //     />
-    //   ),
-    // }),
+    columnHelper.accessor('id', {
+      id: 'actions',
+      header: () => (
+        <Text
+          justifyContent="space-between"
+          align="center"
+          fontSize={{ sm: '10px', lg: '12px' }}
+          color="gray.400"
+        >
+          Actions
+        </Text>
+      ),
+      cell: (info) => (
+        <IconButton
+          icon={<FaTrash />}
+          colorScheme="red"
+          size="sm"
+          onClick={() => handleDelete(info.getValue())}
+          aria-label="Delete request"
+        />
+      ),
+    }),
   ];
 
   const table = useReactTable({

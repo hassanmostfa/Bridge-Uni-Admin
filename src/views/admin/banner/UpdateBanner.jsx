@@ -132,7 +132,7 @@ const UpdateBanner = () => {
         confirmButtonText: 'OK'
       });
 
-      navigate('/admin/cms/banners');
+      navigate('/admin/undefined/cms/banners');
     } catch (error) {
       toast({
         title: 'Error',

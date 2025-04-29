@@ -22,6 +22,7 @@ import { studyAbroadApi } from "api/studyAbroadSlice";
 import { socialApi } from "api/socials";
 import { whyUniBridgeApi } from "api/why";
 import { requestApi } from "api/requestSlice";
+import { CoursesInquiresApi } from "api/coursesInquires";
 // import { userApi, authReducer } from './userSlice';
 
 export const store = configureStore({
@@ -48,6 +49,7 @@ export const store = configureStore({
     [socialApi.reducerPath]:socialApi.reducer,
     [whyUniBridgeApi.reducerPath]:whyUniBridgeApi.reducer,
     [requestApi.reducerPath]:requestApi.reducer,
+    [CoursesInquiresApi.reducerPath]:CoursesInquiresApi.reducer
     
   },
   middleware: (getDefaultMiddleware) =>
@@ -74,6 +76,7 @@ export const store = configureStore({
       socialApi.middleware,
       whyUniBridgeApi.middleware,
       requestApi.middleware,
+      CoursesInquiresApi.middleware
     ),
 });
 
