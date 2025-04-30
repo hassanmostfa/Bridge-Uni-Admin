@@ -279,10 +279,15 @@ const StudyAbroad = () => {
             Study Abroad Programs
           </Text>
           <Button
-            colorScheme="blue"
-            leftIcon={<AddIcon />}
+            variant="darkBrand"
+            color="white"
+            fontSize="sm"
+            fontWeight="500"
+            borderRadius="70px"
+            px="24px"
+            py="5px"
+            width={'200px'}
             onClick={() => navigate("/admin/add-study-abroad")}
-            width="200px"
           >
             Add Program
           </Button>

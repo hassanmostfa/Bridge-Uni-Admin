@@ -252,7 +252,7 @@ const columns = React.useMemo(() => [
       <Card flexDirection="column" w="100%" px="0px" overflowX="auto">
         <Flex px="25px" mb="8px" justifyContent="space-between" align="center">
           <Text color={textColor} fontSize="22px" fontWeight="700">
-            Online Courses
+            Online Degrees
           </Text>
           <Button
             variant="darkBrand"

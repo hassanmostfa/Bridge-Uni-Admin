@@ -89,6 +89,7 @@ import EditShortCourse from 'views/admin/courses/EditShortCourse';
 import ShowAbroadCourse from 'views/admin/studyAbroad/ShowAbroadCourse';
 import UpdateWhy from 'views/admin/why/UpdateWhy';
 import EditProgram from 'views/admin/studyAbroad/EditProgram';
+import CoursesInquires from 'views/admin/coursesInquires/CoursesInquires';
 
 const routes = [
   {
@@ -200,6 +201,13 @@ const routes = [
         path: '/inquires',
         icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
         component: <Inquires />,
+        showInSidebar: true,
+      },
+      {
+        name: 'Courses Inquiers',
+        path: '/courses-inquires',
+        icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
+        component: <CoursesInquires />,
         showInSidebar: true,
       },
       {
@@ -384,7 +392,7 @@ const routes = [
       
   /* Start Online Courses Routes */
   {
-    name: 'Online Courses',
+    name: 'Online Degrees',
     layout: '/admin',
     path: '/online-courses',
     icon: <Icon as={FaWifi} width="20px" height="20px" color="inherit" />,
@@ -505,7 +513,7 @@ const routes = [
     showInSidebar: true,
     subRoutes: [
       {
-        name: 'Online Courses',
+        name: 'Online Degrees',
         path: '/online/apps',
         icon: <Icon as={TiMinus} width="20px" height="20px" color="inherit" />,
         component: <OnlineApps />,

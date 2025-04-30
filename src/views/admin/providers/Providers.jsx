@@ -249,7 +249,7 @@ const Providers = () => {
 
   return (
     <Box p={{ base: 4, md: 6 }} className='container'>
-      <Card bg={cardBg} borderRadius="lg" boxShadow="sm" overflow="hidden">
+      <Card bg={cardBg} borderRadius="30px" boxShadow="sm" overflow="hidden">
         <Flex
           p={4}
           borderBottomWidth="1px"
