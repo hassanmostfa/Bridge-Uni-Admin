@@ -36,10 +36,14 @@ const EditAdmin = () => {
   const inputBorder = useColorModeValue("gray.300", "gray.600");
 
   // Fetch data
-  const { data: adminsResponse, isLoading: isAdminsLoading } = useGetAdminsQuery();
+  const { data: adminsResponse, isLoading: isAdminsLoading,refetch } = useGetAdminsQuery();
   const { data: rolesResponse, isLoading: isRolesLoading } = useGetRolesQuery();
   const [updateAdmin, { isLoading: isUpdating }] = useUpdateUserMutation();
 
+  useEffect(() => {
+    refetch();
+  },[]);
+  
   // State management
   const [formData, setFormData] = useState({
     username: '',
@@ -104,8 +108,11 @@ const EditAdmin = () => {
         phone: formData.phone,
         email: formData.email,
         role_id: formData.role_id,
-        password: formData.password,
       };
+
+      if (formData.password) {
+        dataToSend.password = formData.password;
+      }
 
       const response = await updateAdmin({ 
         id, 

@@ -42,10 +42,13 @@ const steps = [
 
 const EditOnlineCourse = () => {
   const { id } = useParams();
-  const { data: courseData, isLoading, isError } = useGetCourseQuery(id);
+  const { data: courseData, isLoading, isError,refetch } = useGetCourseQuery(id);
   const [editCourse] = useUpdateCourseMutation();
   const navigate = useNavigate();
   const toast = useToast();
+  useEffect(() => {
+    refetch();
+  },[]);
 
   // Initialize form data with default values
   const [formData, setFormData] = useState({

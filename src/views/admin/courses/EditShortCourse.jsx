@@ -40,11 +40,14 @@ const steps = [
 
 const EditShortCourse = () => {
   const { id } = useParams();
-  const { data: courseData, isLoading } = useGetShortCourseQuery(id);
+  const { data: courseData, isLoading,refetch } = useGetShortCourseQuery(id);
   const [updateCourse] = useUpdateShortCourseMutation();
   const navigate = useNavigate();
   const toast = useToast();
 
+  useEffect(() => {
+    refetch();
+  },[]);
   // Initialize form data with empty values
   const [formData, setFormData] = useState({
     // Course Basic Information
